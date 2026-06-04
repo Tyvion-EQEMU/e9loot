@@ -11,6 +11,21 @@ local _setup     = nil   -- ui/setup module ref
 local _editor    = nil   -- ui/editor module ref
 local _framework = nil
 
+-- Weapon mode combo state
+local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
+local WEAPONMODE_LABELS = {
+    DW       = 'Dual Wield',
+    ['2H']   = 'Two-Handed',
+    SNB      = 'Sword and Board',
+    ANY      = 'Any / No Restriction',
+}
+local _wmIdx = 1
+
+local function wmIndexOf(val)
+    for i, v in ipairs(WEAPONMODES) do if v == val then return i end end
+    return 1
+end
+
 -- History window state
 local _histOpen     = false
 local _histFilter   = ''
@@ -80,6 +95,7 @@ function Panel.Init(config, loot, setup, editor, framework)
     _editor    = editor
     _framework = framework
     _histOpen  = config:Get('HistoryOpen')
+    _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
 end
 
 function Panel.Render()
@@ -107,6 +123,24 @@ function Panel.Render()
     local fw = _config:Get('Framework')
     local ch = _config:Get('Channel')
     imgui.TextDisabled(string.format('[%s/%s]', fw, ch))
+
+    imgui.Spacing()
+    imgui.Separator()
+    imgui.Spacing()
+
+    -- Weapon mode combo
+    imgui.Text('Weapon Mode:')
+    imgui.SameLine()
+    imgui.SetNextItemWidth(160)
+    local wmLabels = {}
+    for _, key in ipairs(WEAPONMODES) do
+        table.insert(wmLabels, WEAPONMODE_LABELS[key])
+    end
+    local newWmIdx, wmChanged = imgui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
+    if wmChanged then
+        _wmIdx = newWmIdx
+        _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
+    end
 
     imgui.Spacing()
     imgui.Separator()

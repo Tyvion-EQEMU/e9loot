@@ -1,4 +1,4 @@
--- First-launch ImGui setup dialog: auto-detects frameworks, lets user pick framework/channel, saves to config
+-- First-launch ImGui setup dialog: auto-detects frameworks, lets user pick framework/channel/weaponmode, saves to config
 
 local mq    = require('mq')
 local imgui = require('ImGui')
@@ -8,11 +8,12 @@ local Setup = {}
 -- Framework and channel options in display order
 local FRAMEWORKS = { 'none', 'rgmercs', 'e3', 'kissassist' }
 local CHANNELS   = { 'none', 'dannet', 'eqbc' }
+local WEAPONMODES = { 'DW', '2H', 'SNB', 'ANY' }
 
 local FRAMEWORK_LABELS = {
-    none      = 'None (standalone)',
-    rgmercs   = 'RGMercs',
-    e3        = 'E3Next',
+    none       = 'None (standalone)',
+    rgmercs    = 'RGMercs',
+    e3         = 'E3Next',
     kissassist = 'KISSAssist',
 }
 local CHANNEL_LABELS = {
@@ -20,12 +21,19 @@ local CHANNEL_LABELS = {
     dannet = 'DanNet',
     eqbc   = 'EQBC',
 }
+local WEAPONMODE_LABELS = {
+    DW  = 'Dual Wield',
+    ['2H'] = 'Two-Handed',
+    SNB = 'Sword and Board',
+    ANY = 'Any / No Restriction',
+}
 
 -- State
 local _open          = false
 local _config        = nil
 local _adapters      = nil  -- { rgmercs=adapter, e3=adapter, kissassist=adapter }
 local _fwIdx         = 1    -- selected framework combo index (1-based)
+local _wmIdx         = 1    -- selected weapon mode combo index (1-based)
 local _chIdx         = 1    -- selected channel combo index (1-based)
 local _detected      = {}   -- [name] = true for auto-detected frameworks
 
@@ -50,10 +58,11 @@ function Setup.Open(cfg, adapters)
     _open     = true
     detect()
 
-    -- Pre-select the first detected framework, or the saved one
+    -- Pre-select from saved config (defaults to index 1 = DW if not found)
     local saved = cfg:Get('Framework')
-    _fwIdx = indexOf(FRAMEWORKS, saved)
-    _chIdx = indexOf(CHANNELS,   cfg:Get('Channel'))
+    _fwIdx = indexOf(FRAMEWORKS,   saved)
+    _wmIdx = indexOf(WEAPONMODES,  cfg:Get('WeaponMode'))
+    _chIdx = indexOf(CHANNELS,     cfg:Get('Channel'))
 
     -- If nothing saved and something detected, auto-select it
     if saved == 'none' then
@@ -79,14 +88,14 @@ function Setup.Render()
         return
     end
 
-    imgui.TextWrapped('Welcome to e9loot! Choose your combat framework and communication channel.')
+    imgui.TextWrapped('Welcome to e9loot! Choose your combat framework, weapon mode, and communication channel.')
     imgui.Separator()
     imgui.Spacing()
 
     -- Framework picker
     imgui.Text('Combat Framework:')
     imgui.SameLine()
-    imgui.SetNextItemWidth(180)
+    imgui.SetNextItemWidth(200)
     local fwLabels = {}
     for _, name in ipairs(FRAMEWORKS) do
         local label = FRAMEWORK_LABELS[name]
@@ -98,10 +107,22 @@ function Setup.Render()
 
     imgui.Spacing()
 
+    -- Weapon mode picker
+    imgui.Text('Weapon Mode:     ')
+    imgui.SameLine()
+    imgui.SetNextItemWidth(200)
+    local wmLabels = {}
+    for _, key in ipairs(WEAPONMODES) do
+        table.insert(wmLabels, WEAPONMODE_LABELS[key])
+    end
+    _wmIdx, changed = imgui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
+
+    imgui.Spacing()
+
     -- Channel picker
     imgui.Text('Group Channel:   ')
     imgui.SameLine()
-    imgui.SetNextItemWidth(180)
+    imgui.SetNextItemWidth(200)
     local chLabels = {}
     for _, name in ipairs(CHANNELS) do
         table.insert(chLabels, CHANNEL_LABELS[name])
@@ -133,11 +154,10 @@ function Setup.Render()
 
     -- Save button
     if imgui.Button('Save & Start', 120, 0) then
-        local fw = FRAMEWORKS[_fwIdx]
-        local ch = CHANNELS[_chIdx]
-        _config:Set('Framework', fw)
-        _config:Set('Channel',   ch)
-        _config:Set('SetupDone', true)
+        _config:Set('Framework',  FRAMEWORKS[_fwIdx])
+        _config:Set('WeaponMode', WEAPONMODES[_wmIdx])
+        _config:Set('Channel',    CHANNELS[_chIdx])
+        _config:Set('SetupDone',  true)
         _config:Save()
         _open = false
     end
