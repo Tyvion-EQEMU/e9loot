@@ -16,7 +16,7 @@ Config.Defaults = {
     Channel      = 'none',   -- dannet | eqbc | none
 
     -- Loot behaviour
-    WeaponMode   = 'upgrade', -- upgrade | always | never
+    WeaponMode   = 'DW',      -- DW | 2H | SNB | ANY | always | never
     WarpDist     = 100,       -- max distance before warping to corpse (0 = warp always)
     TrashPrice   = 0,         -- sell anything ≥ this value (pp); 0 = sell nothing
 

@@ -59,15 +59,67 @@ local function isUpgrade(newItem, slotName)
     end
 end
 
+-- item.Type() values for weapon classification (lowercased for comparison)
+-- 2H types: "two hand slash", "two hand blunt", "two hand pierce"
+-- 1H types: "one hand slash", "one hand blunt", "piercing", "hand to hand"
+-- Shield types: "shield", "large shield", "medium shield", "small shield"
+local function itemType(item)
+    return (item.Type() or ''):lower()
+end
+
+local function is2H(t)
+    return t:find('two hand') ~= nil
+end
+
+local function is1H(t)
+    return t:find('one hand') ~= nil or t == 'piercing' or t == 'hand to hand'
+end
+
+local function isShield(t)
+    return t:find('shield') ~= nil
+end
+
+-- Returns false when weaponMode forbids this weapon/shield category, true otherwise.
+-- Non-weapon items (armor) are always allowed through.
+local function allowedByMode(item, weaponMode)
+    -- Only gate items that occupy a weapon slot
+    local fitsWeapon = item.WornSlot('Primary')() == true
+                    or item.WornSlot('Secondary')() == true
+
+    if not fitsWeapon then return true end  -- armor: no restriction
+
+    local t = itemType(item)
+
+    -- Shields are not weapons; gate them per mode
+    if isShield(t) then
+        -- DW and 2H modes don't want shields; SNB and ANY do
+        if weaponMode == 'DW' or weaponMode == '2H' then return false end
+        return true
+    end
+
+    if weaponMode == 'DW' then
+        return not is2H(t)      -- reject 2H weapons
+    elseif weaponMode == '2H' then
+        return not is1H(t)      -- reject 1H weapons
+    elseif weaponMode == 'SNB' then
+        return not is2H(t)      -- reject 2H weapons; shields ok
+    end
+    -- ANY: no restriction
+    return true
+end
+
 -- Public API: given a cursor item TLO, return true if it's worth keeping as an upgrade.
--- weaponMode: 'upgrade' = compare; 'always' = keep all; 'never' = keep none
+-- weaponMode: 'DW' | '2H' | 'SNB' | 'ANY' | 'always' | 'never'
 function Upgrade.ShouldKeep(item, weaponMode)
     if not item or not item.ID() or item.ID() == 0 then return false end
 
-    weaponMode = weaponMode or 'upgrade'
+    weaponMode = weaponMode or 'DW'
 
     if weaponMode == 'always' then return true  end
     if weaponMode == 'never'  then return false end
+
+    -- Weapon mode gate: reject items incompatible with the player's combat style
+    if not allowedByMode(item, weaponMode) then return false end
 
     -- Determine which slot(s) this item fits
     local slotBitmask = item.ItemSlots()
@@ -79,7 +131,6 @@ function Upgrade.ShouldKeep(item, weaponMode)
     for k in pairs(WEAPON_SLOTS) do allSlots[k] = true end
 
     for slotName, _ in pairs(allSlots) do
-        local slotItem = mq.TLO.Me.Inventory(slotName)
         -- item.WornSlot(slotName) returns true when the item fits that slot
         if item.WornSlot(slotName)() == true then
             if isUpgrade(item, slotName) then
