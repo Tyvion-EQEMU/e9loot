@@ -69,7 +69,7 @@ Loot.Init(Config, Lists, framework, channel)
 -- Wire panel (pass lists ref into config for editor access)
 Config._lists = Lists.All()
 
-Panel.Init(Config, Loot, Setup, Editor, framework)
+Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS)
 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)

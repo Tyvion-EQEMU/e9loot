@@ -1,7 +1,8 @@
 -- Main ImGui panel: status bar, enable toggle, Change Setup button, loot history pop-out, editor pop-out launcher
 
-local mq    = require('mq')
-local imgui = require('ImGui')
+local mq     = require('mq')
+local imgui  = require('ImGui')
+local Corpse = require('loot_e9.core.corpse')
 
 local Panel = {}
 
@@ -10,6 +11,7 @@ local _loot      = nil   -- core/loot module ref
 local _setup     = nil   -- ui/setup module ref
 local _editor    = nil   -- ui/editor module ref
 local _framework = nil
+local _adapters  = nil
 
 -- Weapon mode combo state
 local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
@@ -88,12 +90,13 @@ local function renderHistory()
     imgui.End()
 end
 
-function Panel.Init(config, loot, setup, editor, framework)
+function Panel.Init(config, loot, setup, editor, framework, adapters)
     _config    = config
     _loot      = loot
     _setup     = setup
     _editor    = editor
     _framework = framework
+    _adapters  = adapters
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
 end
@@ -148,7 +151,7 @@ function Panel.Render()
 
     -- Action buttons row 1
     if imgui.Button('Change Setup', 110, 0) then
-        _setup.Open(_config, _framework)
+        _setup.Open(_config, _adapters)
     end
 
     imgui.SameLine()
@@ -172,7 +175,7 @@ function Panel.Render()
     imgui.Spacing()
 
     -- Status line
-    local corpses = #require('loot_e9.core.corpse').FindNearby(200)
+    local corpses = #Corpse.FindNearby(200)
     local paused  = _framework and _framework:IsPaused() or false
     local statusTxt = paused and '\arPAUSED' or '\ag'
     imgui.Text(string.format('Nearby corpses: %d  |  %s', corpses,
