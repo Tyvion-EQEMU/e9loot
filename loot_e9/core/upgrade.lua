@@ -4,111 +4,75 @@ local mq = require('mq')
 
 local Upgrade = {}
 
--- Slots we evaluate for upgrades (EQ slot bit values)
--- We compare by primary stat: AC for armor, damage/ratio for weapons
-local ARMOR_SLOTS = {
-    Head=1, Chest=2, Arms=3, Wrists=4, Hands=5,
-    Legs=6, Feet=7, Back=8, Shoulder=9, Waist=10,
-    Neck=11, Ear1=12, Ear2=13, Face=14, Ring1=15, Ring2=16,
-}
+-- Numeric worn-slot IDs (from item.WornSlot(i)) that are weapon or shield slots
+local PRIMARY_SLOT   = 13
+local SECONDARY_SLOT = 14
 
-local WEAPON_SLOTS = {
-    Primary=17, Secondary=18, Range=19,
-}
+-- Slots we skip entirely — non-gear equippables
+local SKIP_SLOTS = { [0]=true, [21]=true, [22]=true }  -- Charm, Powersource, Ammo
 
--- Returns the equipped item in a named slot, or nil
-local function equippedItem(slotName)
-    local item = mq.TLO.Me.Inventory(slotName)
-    if item and item.ID() and item.ID() > 0 then return item end
-    return nil
-end
-
--- Weapon quality metric: lower is better ratio (dmg/dly)
--- We want higher damage-to-delay ratio, so a lower ratio number means faster weapon.
--- For our purposes: score = Damage / Delay * 100 (higher = better)
+-- Weapon quality: higher damage-to-delay ratio is better
 local function weaponScore(item)
-    local dmg = item.Damage() or 0
-    local dly = item.Delay()  or 1
+    local dmg = item.Damage()   or 0
+    local dly = item.ItemDelay() or item.Delay() or 1
     if dly == 0 then dly = 1 end
     return (dmg / dly) * 100
 end
 
--- Armor quality metric: total AC + (heroics and HP weighted)
+-- Armor quality: weighted AC + HP + Mana
 local function armorScore(item)
-    local ac  = item.AC()    or 0
-    local hp  = item.HP()    or 0
-    local mana= item.Mana()  or 0
-    return ac * 3 + hp * 0.5 + mana * 0.3
+    return (item.AC()   or 0) * 3
+         + (item.HP()   or 0) * 0.5
+         + (item.Mana() or 0) * 0.3
 end
 
--- Returns true if newItem is a strict upgrade over what is currently equipped in slot
--- slotName must be a string matching EQ's slot name (e.g. "Primary", "Chest")
-local function isUpgrade(newItem, slotName)
-    local equipped = equippedItem(slotName)
-    if not equipped then return true end -- empty slot: always keep
+-- True if newItem beats whatever is currently in numeric slot slotId
+local function isUpgrade(newItem, slotId)
+    local equipped = mq.TLO.Me.Inventory(slotId)
+    if not equipped or not equipped.ID() or equipped.ID() == 0 then return true end
 
-    local isWeapon = WEAPON_SLOTS[slotName] ~= nil
-    if isWeapon then
-        local newScore = weaponScore(newItem)
-        local oldScore = weaponScore(equipped)
-        return newScore > oldScore
+    if slotId == PRIMARY_SLOT or slotId == SECONDARY_SLOT then
+        return weaponScore(newItem) > weaponScore(equipped)
     else
-        local newScore = armorScore(newItem)
-        local oldScore = armorScore(equipped)
-        return newScore > oldScore
+        return armorScore(newItem) > armorScore(equipped)
     end
 end
 
--- item.Type() values for weapon classification (lowercased for comparison)
--- 2H types: "two hand slash", "two hand blunt", "two hand pierce"
--- 1H types: "one hand slash", "one hand blunt", "piercing", "hand to hand"
--- Shield types: "shield", "large shield", "medium shield", "small shield"
 local function itemType(item)
     return (item.Type() or ''):lower()
 end
 
-local function is2H(t)
-    return t:find('two hand') ~= nil
+local function is2H(t)     return t:find('two hand') ~= nil end
+local function is1H(t)     return t:find('one hand') ~= nil or t == 'piercing' or t == 'hand to hand' end
+local function isShield(t) return t:find('shield') ~= nil end
+
+-- True if the item can go in Primary or Secondary slot
+local function fitsWeaponSlot(item)
+    for i = 1, (item.WornSlots() or 0) do
+        local sid = tonumber(item.WornSlot(i)()) or -1
+        if sid == PRIMARY_SLOT or sid == SECONDARY_SLOT then return true end
+    end
+    return false
 end
 
-local function is1H(t)
-    return t:find('one hand') ~= nil or t == 'piercing' or t == 'hand to hand'
-end
-
-local function isShield(t)
-    return t:find('shield') ~= nil
-end
-
--- Returns false when weaponMode forbids this weapon/shield category, true otherwise.
--- Non-weapon items (armor) are always allowed through.
+-- False when weaponMode forbids this item's weapon category; armor always passes
 local function allowedByMode(item, weaponMode)
-    -- Only gate items that occupy a weapon slot
-    local fitsWeapon = item.WornSlot('Primary')() == true
-                    or item.WornSlot('Secondary')() == true
-
-    if not fitsWeapon then return true end  -- armor: no restriction
+    if not fitsWeaponSlot(item) then return true end
 
     local t = itemType(item)
 
-    -- Shields are not weapons; gate them per mode
     if isShield(t) then
-        -- DW and 2H modes don't want shields; SNB and ANY do
-        if weaponMode == 'DW' or weaponMode == '2H' then return false end
-        return true
+        -- DW and 2H modes don't want shields
+        return weaponMode ~= 'DW' and weaponMode ~= '2H'
     end
 
-    if weaponMode == 'DW' then
-        return not is2H(t)      -- reject 2H weapons
-    elseif weaponMode == '2H' then
-        return not is1H(t)      -- reject 1H weapons
-    elseif weaponMode == 'SNB' then
-        return not is2H(t)      -- reject 2H weapons; shields ok
-    end
-    -- ANY: no restriction
-    return true
+    if weaponMode == 'DW'  then return not is2H(t) end
+    if weaponMode == '2H'  then return not is1H(t) end
+    if weaponMode == 'SNB' then return not is2H(t) end
+    return true  -- ANY
 end
 
--- Public API: given a cursor item TLO, return true if it's worth keeping as an upgrade.
+-- Public API: true if item is worth keeping given current weapon mode.
 -- weaponMode: 'DW' | '2H' | 'SNB' | 'ANY' | 'always' | 'never'
 function Upgrade.ShouldKeep(item, weaponMode)
     if not item or not item.ID() or item.ID() == 0 then return false end
@@ -118,18 +82,15 @@ function Upgrade.ShouldKeep(item, weaponMode)
     if weaponMode == 'always' then return true  end
     if weaponMode == 'never'  then return false end
 
-    -- Weapon mode gate: reject items incompatible with the player's combat style
     if not allowedByMode(item, weaponMode) then return false end
 
-    -- Check each slot the item can go in; keep if it upgrades ANY worn slot
-    local allSlots = {}
-    for k in pairs(ARMOR_SLOTS)  do allSlots[k] = true end
-    for k in pairs(WEAPON_SLOTS) do allSlots[k] = true end
+    local wornCount = item.WornSlots() or 0
+    if wornCount == 0 then return false end
 
-    for slotName, _ in pairs(allSlots) do
-        -- item.WornSlot(slotName) returns true when the item fits that slot
-        if item.WornSlot(slotName)() == true then
-            if isUpgrade(item, slotName) then
+    for i = 1, wornCount do
+        local slotId = tonumber(item.WornSlot(i)()) or -1
+        if slotId >= 0 and not SKIP_SLOTS[slotId] then
+            if isUpgrade(item, slotId) then
                 return true
             end
         end
