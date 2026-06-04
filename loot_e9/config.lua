@@ -2,6 +2,12 @@
 
 local mq = require('mq')
 
+local function fileExists(path)
+    local f = io.open(path, 'r')
+    if f then f:close(); return true end
+    return false
+end
+
 local Config = {}
 
 -- Resolved path: MQ configDir + character name so each toon has its own INI
@@ -58,7 +64,7 @@ function Config:Load()
     end
 
     local ini = iniPath()
-    if not mq.fileExists(ini) then return end
+    if not fileExists(ini) then return end
 
     -- mq.ini read helper: mq.TLO.Ini[section][key][default]
     local function get(key, def)
