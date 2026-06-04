@@ -1,26 +1,25 @@
--- RGMercs adapter: pause via /rglua pause, resume via /rglua resume; detects running rgmercs lua script
+-- RGMercs adapter: pause via /rgl pause, resume via /rgl unpause; detects running rgmercs lua script
 
 local mq = require('mq')
 
 local Adapter = {}
 Adapter.name = 'rgmercs'
 
--- RGMercs exposes its pause state as a TLO via the Lua actor system.
--- We can't write Globals.PauseMain directly from another script's context,
--- so we use the registered /rglua bind which routes to Config:UpdateCommandHandlers().
--- The commands /rglua pause and /rglua resume are the public API.
+-- RGMercs registers the /rgl command when running.
+-- /rgl pause   → pauses RGMercs combat assistance
+-- /rgl unpause → resumes RGMercs combat assistance
 
 function Adapter:Detect()
-    -- rgmercs registers the /rglua command when running
-    return mq.TLO.Alias('/rglua')() ~= nil
+    -- rgmercs registers the /rgl command when running
+    return mq.TLO.Alias('/rgl')() ~= nil
 end
 
 function Adapter:Pause()
-    mq.cmd('/rglua pause')
+    mq.cmd('/rgl pause')
 end
 
 function Adapter:Resume()
-    mq.cmd('/rglua resume')
+    mq.cmd('/rgl unpause')
 end
 
 -- No reliable TLO to query pause state from outside; track it locally
