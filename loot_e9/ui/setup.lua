@@ -1,13 +1,12 @@
 -- First-launch ImGui setup dialog: auto-detects frameworks, lets user pick framework/channel/weaponmode, saves to config
 
-local mq    = require('mq')
-local imgui = require('ImGui')
+local mq = require('mq')
 
 local Setup = {}
 
 -- Framework and channel options in display order
-local FRAMEWORKS = { 'none', 'rgmercs', 'e3', 'kissassist' }
-local CHANNELS   = { 'none', 'dannet', 'eqbc' }
+local FRAMEWORKS  = { 'none', 'rgmercs', 'e3', 'kissassist' }
+local CHANNELS    = { 'none', 'dannet', 'eqbc' }
 local WEAPONMODES = { 'DW', '2H', 'SNB', 'ANY' }
 
 local FRAMEWORK_LABELS = {
@@ -22,27 +21,26 @@ local CHANNEL_LABELS = {
     eqbc   = 'EQBC',
 }
 local WEAPONMODE_LABELS = {
-    DW  = 'Dual Wield',
-    ['2H'] = 'Two-Handed',
-    SNB = 'Sword and Board',
-    ANY = 'Any / No Restriction',
+    DW      = 'Dual Wield',
+    ['2H']  = 'Two-Handed',
+    SNB     = 'Sword and Board',
+    ANY     = 'Any / No Restriction',
 }
 
 -- State
-local _open          = false
-local _config        = nil
-local _adapters      = nil  -- { rgmercs=adapter, e3=adapter, kissassist=adapter }
-local _fwIdx         = 1    -- selected framework combo index (1-based)
-local _wmIdx         = 1    -- selected weapon mode combo index (1-based)
-local _chIdx         = 1    -- selected channel combo index (1-based)
-local _detected      = {}   -- [name] = true for auto-detected frameworks
+local _open     = false
+local _config   = nil
+local _adapters = nil
+local _fwIdx    = 1
+local _wmIdx    = 1
+local _chIdx    = 1
+local _detected = {}
 
 local function indexOf(t, val)
     for i, v in ipairs(t) do if v == val then return i end end
     return 1
 end
 
--- Run detection on all framework adapters and mark which are running
 local function detect()
     _detected = {}
     for name, adapter in pairs(_adapters) do
@@ -58,13 +56,11 @@ function Setup.Open(cfg, adapters)
     _open     = true
     detect()
 
-    -- Pre-select from saved config (defaults to index 1 = DW if not found)
     local saved = cfg:Get('Framework')
-    _fwIdx = indexOf(FRAMEWORKS,   saved)
-    _wmIdx = indexOf(WEAPONMODES,  cfg:Get('WeaponMode'))
-    _chIdx = indexOf(CHANNELS,     cfg:Get('Channel'))
+    _fwIdx = indexOf(FRAMEWORKS,  saved)
+    _wmIdx = indexOf(WEAPONMODES, cfg:Get('WeaponMode'))
+    _chIdx = indexOf(CHANNELS,    cfg:Get('Channel'))
 
-    -- If nothing saved and something detected, auto-select it
     if saved == 'none' then
         for i, name in ipairs(FRAMEWORKS) do
             if _detected[name] then _fwIdx = i; break end
@@ -79,96 +75,93 @@ end
 function Setup.Render()
     if not _open then return end
 
-    imgui.SetNextWindowSize(420, 320, imgui.Cond.FirstUseEver)
-    local show, closeBtn = imgui.Begin('e9loot — First Time Setup', true,
-        imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoResize)
+    ImGui.SetNextWindowSize(ImVec2(440, 340), ImGuiCond.FirstUseEver)
+    local open, shouldDraw = ImGui.Begin('e9loot — First Time Setup', _open,
+        bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.NoResize))
+    _open = open
 
-    if not show or not closeBtn then
-        imgui.End()
-        return
-    end
+    if shouldDraw then
+        ImGui.TextWrapped('Welcome to e9loot! Choose your combat framework, weapon mode, and communication channel.')
+        ImGui.Separator()
+        ImGui.Spacing()
 
-    imgui.TextWrapped('Welcome to e9loot! Choose your combat framework, weapon mode, and communication channel.')
-    imgui.Separator()
-    imgui.Spacing()
-
-    -- Framework picker
-    imgui.Text('Combat Framework:')
-    imgui.SameLine()
-    imgui.SetNextItemWidth(200)
-    local fwLabels = {}
-    for _, name in ipairs(FRAMEWORKS) do
-        local label = FRAMEWORK_LABELS[name]
-        if _detected[name] then label = label .. '  [detected]' end
-        table.insert(fwLabels, label)
-    end
-    local changed
-    _fwIdx, changed = imgui.Combo('##fw', _fwIdx, fwLabels, #fwLabels)
-
-    imgui.Spacing()
-
-    -- Weapon mode picker
-    imgui.Text('Weapon Mode:     ')
-    imgui.SameLine()
-    imgui.SetNextItemWidth(200)
-    local wmLabels = {}
-    for _, key in ipairs(WEAPONMODES) do
-        table.insert(wmLabels, WEAPONMODE_LABELS[key])
-    end
-    _wmIdx, changed = imgui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
-
-    imgui.Spacing()
-
-    -- Channel picker
-    imgui.Text('Group Channel:   ')
-    imgui.SameLine()
-    imgui.SetNextItemWidth(200)
-    local chLabels = {}
-    for _, name in ipairs(CHANNELS) do
-        table.insert(chLabels, CHANNEL_LABELS[name])
-    end
-    _chIdx, changed = imgui.Combo('##ch', _chIdx, chLabels, #chLabels)
-
-    imgui.Spacing()
-    imgui.Separator()
-    imgui.Spacing()
-
-    -- Detection status
-    local anyDetected = false
-    for _, v in pairs(_detected) do if v then anyDetected = true; break end end
-    if anyDetected then
-        imgui.TextColored(0.4, 1.0, 0.4, 1.0, 'Auto-detected: ')
-        for name, v in pairs(_detected) do
-            if v then
-                imgui.SameLine()
-                imgui.TextColored(0.4, 1.0, 0.4, 1.0, FRAMEWORK_LABELS[name])
-            end
+        -- Framework picker
+        ImGui.Text('Combat Framework:')
+        ImGui.SameLine()
+        ImGui.SetNextItemWidth(200)
+        local fwLabels = {}
+        for _, name in ipairs(FRAMEWORKS) do
+            local label = FRAMEWORK_LABELS[name]
+            if _detected[name] then label = label .. '  [detected]' end
+            table.insert(fwLabels, label)
         end
-    else
-        imgui.TextColored(0.8, 0.8, 0.2, 1.0, 'No running framework detected.')
+        local changed
+        _fwIdx, changed = ImGui.Combo('##fw', _fwIdx, fwLabels, #fwLabels)
+
+        ImGui.Spacing()
+
+        -- Weapon mode picker
+        ImGui.Text('Weapon Mode:     ')
+        ImGui.SameLine()
+        ImGui.SetNextItemWidth(200)
+        local wmLabels = {}
+        for _, key in ipairs(WEAPONMODES) do
+            table.insert(wmLabels, WEAPONMODE_LABELS[key])
+        end
+        _wmIdx, changed = ImGui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
+
+        ImGui.Spacing()
+
+        -- Channel picker
+        ImGui.Text('Group Channel:   ')
+        ImGui.SameLine()
+        ImGui.SetNextItemWidth(200)
+        local chLabels = {}
+        for _, name in ipairs(CHANNELS) do
+            table.insert(chLabels, CHANNEL_LABELS[name])
+        end
+        _chIdx, changed = ImGui.Combo('##ch', _chIdx, chLabels, #chLabels)
+
+        ImGui.Spacing()
+        ImGui.Separator()
+        ImGui.Spacing()
+
+        -- Detection status
+        local anyDetected = false
+        for _, v in pairs(_detected) do if v then anyDetected = true; break end end
+        if anyDetected then
+            ImGui.TextColored(0.4, 1.0, 0.4, 1.0, 'Auto-detected: ')
+            for name, v in pairs(_detected) do
+                if v then
+                    ImGui.SameLine()
+                    ImGui.TextColored(0.4, 1.0, 0.4, 1.0, FRAMEWORK_LABELS[name])
+                end
+            end
+        else
+            ImGui.TextColored(0.8, 0.8, 0.2, 1.0, 'No running framework detected.')
+        end
+
+        ImGui.Spacing()
+        ImGui.Separator()
+        ImGui.Spacing()
+
+        if ImGui.Button('Save & Start', 120, 0) then
+            _config:Set('Framework',  FRAMEWORKS[_fwIdx])
+            _config:Set('WeaponMode', WEAPONMODES[_wmIdx])
+            _config:Set('Channel',    CHANNELS[_chIdx])
+            _config:Set('SetupDone',  true)
+            _config:Save()
+            _open = false
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button('Cancel', 80, 0) then
+            _open = false
+        end
     end
 
-    imgui.Spacing()
-    imgui.Separator()
-    imgui.Spacing()
-
-    -- Save button
-    if imgui.Button('Save & Start', 120, 0) then
-        _config:Set('Framework',  FRAMEWORKS[_fwIdx])
-        _config:Set('WeaponMode', WEAPONMODES[_wmIdx])
-        _config:Set('Channel',    CHANNELS[_chIdx])
-        _config:Set('SetupDone',  true)
-        _config:Save()
-        _open = false
-    end
-
-    imgui.SameLine()
-
-    if imgui.Button('Cancel', 80, 0) then
-        _open = false
-    end
-
-    imgui.End()
+    ImGui.End()
 end
 
 return Setup
