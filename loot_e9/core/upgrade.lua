@@ -121,10 +121,6 @@ function Upgrade.ShouldKeep(item, weaponMode)
     -- Weapon mode gate: reject items incompatible with the player's combat style
     if not allowedByMode(item, weaponMode) then return false end
 
-    -- Determine which slot(s) this item fits
-    local slotBitmask = item.ItemSlots()
-    if not slotBitmask then return false end
-
     -- Check each slot the item can go in; keep if it upgrades ANY worn slot
     local allSlots = {}
     for k in pairs(ARMOR_SLOTS)  do allSlots[k] = true end
