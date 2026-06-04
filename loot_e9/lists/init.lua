@@ -1,2 +1,28 @@
-﻿-- Lists bootstrap: loads all list modules, exposes unified lookup API used by core/loot.lua
+-- Lists bootstrap: loads all list modules, exposes unified lookup API used by core/loot.lua
 
+local Lists = {}
+
+local modules = {
+    'currency', 'quest', 'event', 'lore', 'astrial',
+    'tiered', 'beasts', 'deva', 'specials',
+}
+
+for _, m in ipairs(modules) do
+    Lists[m] = require('loot_e9.lists.' .. m)
+end
+
+function Lists.All()
+    local result = {}
+    for _, m in ipairs(modules) do result[m] = Lists[m] end
+    return result
+end
+
+function Lists.LoadAll()
+    for _, m in ipairs(modules) do Lists[m]:Load() end
+end
+
+function Lists.SaveAll()
+    for _, m in ipairs(modules) do Lists[m]:Save() end
+end
+
+return Lists
