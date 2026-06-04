@@ -1,14 +1,13 @@
--- KISSAssist adapter: pause via /posse pause, resume via /posse resume; detects running KISSAssist macro
+-- KISSAssist adapter: pause via /mqp on, resume via /mqp off; detects running KISSAssist macro
 
 local mq = require('mq')
 
 local Adapter = {}
 Adapter.name = 'kissassist'
 
--- KISSAssist is an MQ2 macro. Its pause/resume commands are registered
--- via the /posse command group when the KA macro is active.
--- /posse pause  → halts KISSAssist combat assistance
--- /posse resume → resumes KISSAssist combat assistance
+-- KISSAssist uses the MQ2 macro pause command:
+-- /mqp on  → pauses the running macro (KISSAssist stops acting)
+-- /mqp off → resumes the running macro
 
 function Adapter:Detect()
     -- KISSAssist sets the running macro name; check for it
@@ -18,11 +17,11 @@ function Adapter:Detect()
 end
 
 function Adapter:Pause()
-    mq.cmd('/posse pause')
+    mq.cmd('/mqp on')
 end
 
 function Adapter:Resume()
-    mq.cmd('/posse resume')
+    mq.cmd('/mqp off')
 end
 
 Adapter._paused = false
