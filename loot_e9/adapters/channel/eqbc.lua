@@ -1,0 +1,1 @@
+-- EQBC channel adapter: broadcast/observe loot events via mq.TLO.EQBC and /bccmd; peer status queries

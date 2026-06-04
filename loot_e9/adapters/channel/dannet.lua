@@ -1,0 +1,1 @@
+-- DanNet channel adapter: broadcast/observe loot events via mq.TLO.DanNet; peer status queries

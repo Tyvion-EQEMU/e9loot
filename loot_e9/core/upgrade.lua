@@ -1,0 +1,1 @@
+-- Weapon/armor upgrade evaluation: compares item stats against equipped gear by slot, decides keep-or-destroy

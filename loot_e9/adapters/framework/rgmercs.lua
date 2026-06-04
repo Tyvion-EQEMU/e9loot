@@ -1,0 +1,1 @@
+-- RGMercs adapter: pause via Globals.PauseMain flag injection; detects running rgmercs lua script

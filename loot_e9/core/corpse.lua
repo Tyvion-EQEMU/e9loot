@@ -1,0 +1,1 @@
+-- Corpse management: scan for nearby corpses, approach/warp logic, lock/unlock, safety checks before looting

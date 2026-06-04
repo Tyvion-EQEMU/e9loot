@@ -1,0 +1,1 @@
+-- KISSAssist adapter: pause via /posse pause, resume via /posse resume; detects running KISSAssist macro

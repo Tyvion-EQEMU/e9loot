@@ -1,0 +1,1 @@
+-- First-launch ImGui setup dialog: auto-detects frameworks, lets user pick framework/channel, saves to config

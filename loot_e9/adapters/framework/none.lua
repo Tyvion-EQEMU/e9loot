@@ -1,0 +1,1 @@
+-- Null framework adapter: no-op pause/resume/detect; used when running standalone without a combat framework

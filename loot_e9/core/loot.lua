@@ -1,0 +1,1 @@
+-- Core loot logic: evaluates items against all list types, dispatches loot/sell/destroy decisions, tracks history

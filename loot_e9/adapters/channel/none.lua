@@ -1,0 +1,1 @@
+-- Null channel adapter: no-op broadcast/observe; used when running fully solo with no group communication

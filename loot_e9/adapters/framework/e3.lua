@@ -1,0 +1,1 @@
+-- E3Next adapter: pause via /e3p on, resume via /e3p off; detects E3Next running via MQ2Mono plugin presence

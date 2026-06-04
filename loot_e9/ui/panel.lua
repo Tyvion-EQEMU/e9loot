@@ -1,0 +1,1 @@
+-- Main ImGui panel: status bar, enable toggle, Change Setup button, loot history pop-out, editor pop-out launcher

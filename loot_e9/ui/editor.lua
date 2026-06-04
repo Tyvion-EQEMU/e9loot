@@ -1,0 +1,1 @@
+-- Loot list editor pop-out: tabbed ImGui window per list type, Add-from-Cursor, live filter, Save/Revert per tab

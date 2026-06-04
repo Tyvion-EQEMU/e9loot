@@ -1,0 +1,1 @@
+-- Entry point: wires together config, adapters, core, UI, and lists; drives the main loop via /lua run loot_e9

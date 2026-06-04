@@ -1,0 +1,1 @@
+-- INI-based settings: load/save defaults for framework, channel, weaponmode, warpdist, trashprice, and all user toggles
