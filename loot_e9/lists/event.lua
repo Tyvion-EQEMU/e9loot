@@ -1,11 +1,17 @@
--- Event items list: limited-time or holiday event drops that should always be looted when present
+﻿-- Event items: seasonal or limited-time event drops
 
 local Base = require('loot_e9.lists._base')
 
 return Base.new('event', {
-    { name='Evergreen Wreath' },
-    { name='Pumpkin Treat' },
-    { name='Festival Token' },
-    { name='Haunted Idol' },
-    { name='Winter Ward Amulet' },
+    { name="Life's Rememberance" },
+    { name='Blackdot Longsword Ornament' },
+    { name='Halloween Sceptre Ornament' },
+    { name='Khat Longsword Ornament' },
+    { name='Gaie Flower Power Ornament' },
+    { name='Eggnog' },
+    { name='Wizard fire hat Ornament' },
+    { name='Wizards Hat Ornament' },
+    { name='Wizard pointy skull Ornament' },
+    { name='Jack-o-lantern Ornament' },
+    { name='Skeleton Head Ornament' },
 })

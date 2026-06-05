@@ -1,10 +1,41 @@
--- Quest items list: items needed for active or anticipated quests; always looted, never destroyed
+﻿-- Quest items: server-specific quest turn-ins and no-drop quest pieces
 
 local Base = require('loot_e9.lists._base')
 
 return Base.new('quest', {
-    -- Populate via the editor; seeds are intentionally sparse
-    { name='Relic Fragment' },
-    { name='Ancient Tablet' },
-    { name='Sigil of the Fallen' },
+    { name='Minor Dragon Spirit' },
+    { name='Tome of Power: Veeshan' },
+    { name='Tome of Power: Riftseekers' },
+    { name='Tome of Power: Najena' },
+    { name='Tome of Power: Hole' },
+    { name='Tome of Power: MPG' },
+    { name='Tome of Power: Kael' },
+    { name='Tome of Power: Anguish' },
+    { name='Tome of Power: Sleepers' },
+    { name='Tome of Power: Xorbb' },
+    { name='Fallen Star' },
+    { name='Astrial Mist' },
+    { name='Ancient Runes' },
+    { name='celestial temper' },
+    { name='celestial ingot' },
+    { name='Hermits lost anvil' },
+    { name='Hermits lost chisel' },
+    { name='Hermits lost forging hammer' },
+    { name='Elemental Infused Elixir' },
+    { name='Green Kromrif Champions Medal' },
+    { name='Red Kromrif Champions Medal' },
+    { name='Blue Kromrif Champions Medal' },
+    { name='Token of Loyalty to the Overlord' },
+    { name='Terror of the Asylum' },
+    { name='Frightening Doll of Anguish' },
+    { name='Ancient Prismatic Stone' },
+    { name='Warders Guise' },
+    { name='Sample of Water from the Prison' },
+    { name="Death's Soul" },
+    { name="Ancient Life's Stone" },
+    { name='Planar Goo' },
+    { name='Planar Energy Shard' },
+    { name='Prowler Tooth' },
+    { name='Shard of Blinding Light' },
+    { name='Amulet of Necropotence' },
 })
