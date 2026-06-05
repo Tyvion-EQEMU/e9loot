@@ -62,7 +62,6 @@ local function announceKeep(name, reason, toon)
     if mq.TLO.Me.Grouped() then
         mq.cmdf('/g %s', msg)
     else
-        -- Solo: no group to /g, fall back to a local MQ echo
         printf('\age9loot\aw | \a-w[%s]\aw %-7s | %s \a-w(%s)\aw', toon, 'KEEP', name, reason)
     end
 end
@@ -78,7 +77,11 @@ local function evaluateItem(item)
     local name = item.Name() or ''
     local id   = item.ID()
 
-    -- Explicit lists take priority over upgrade math
+    -- User override lists take absolute priority over all automated logic
+    if _lists.skip    and _lists.skip:Has(name, id)    then return DECISION.SKIP,    'skip-list'    end
+    if _lists.destroy and _lists.destroy:Has(name, id) then return DECISION.DESTROY, 'destroy-list' end
+
+    -- Explicit KEEP lists
     if _lists.currency:Has(name, id)  then return DECISION.KEEP, 'currency'  end
     if _lists.quest:Has(name, id)     then return DECISION.KEEP, 'quest'     end
     if _lists.event:Has(name, id)     then return DECISION.KEEP, 'event'     end
@@ -138,13 +141,14 @@ local function lootSlot(slotIndex)
     local isNoDrop                     = item.NoDrop() == true
     local decision, reason, equipSlot  = evaluateItem(item)
     local myToon                       = mq.TLO.Me.CleanName()
+    local id                           = item.ID()
 
     if decision == DECISION.IGNORE then return end
 
     -- SKIP: leave on corpse, history + log only, no chat echo
     if decision == DECISION.SKIP then
-        pushHistory({ time=os.date('%H:%M:%S'), name=name, decision='skip', reason=reason, toon=myToon })
-        _channel:Broadcast({ type='loot_event', name=name, decision='skip', reason=reason,
+        pushHistory({ time=os.date('%H:%M:%S'), name=name, id=id, decision='skip', reason=reason, toon=myToon })
+        _channel:Broadcast({ type='loot_event', name=name, id=id, decision='skip', reason=reason,
                               time=os.date('%H:%M:%S'), toon=myToon })
         return
     end
@@ -184,7 +188,6 @@ local function lootSlot(slotIndex)
             mq.cmd('/autoinventory')
             mq.delay(200)
         end
-        -- KEEP: announce to in-game group channel (all group members see it)
         announceKeep(name, reason, myToon)
     elseif decision == DECISION.SELL then
         mq.cmd('/autoinventory')
@@ -195,10 +198,11 @@ local function lootSlot(slotIndex)
     end
 
     -- History + log (all decisions); broadcast for shared history panel on other toons
-    pushHistory({ time=os.date('%H:%M:%S'), name=name, decision=decision, reason=reason, toon=myToon })
+    pushHistory({ time=os.date('%H:%M:%S'), name=name, id=id, decision=decision, reason=reason, toon=myToon })
     _channel:Broadcast({
         type     = 'loot_event',
         name     = name,
+        id       = id,
         decision = decision,
         reason   = reason,
         time     = os.date('%H:%M:%S'),
@@ -228,6 +232,7 @@ function Loot.LootCorpse(corpseId, useWarp)
 
     Corpse.CloseCorpse()
     Corpse.MarkDone(corpseId)
+    mq.cmd('/hidecorpse looted')
     return true
 end
 
@@ -237,10 +242,16 @@ function Loot.LootNearby()
     local useWarp = _config:Get('UseWarp')
     local corpses = Corpse.FindNearby(200)
 
+    if #corpses == 0 then return end
+
     for _, c in ipairs(corpses) do
         if not Corpse.SafeToLoot() then break end
         Loot.LootCorpse(c.id, useWarp)
         mq.delay(250)
+    end
+
+    if mq.TLO.Me.Grouped() then
+        mq.cmd('/g Done Looting')
     end
 end
 
@@ -263,6 +274,7 @@ function Loot.Init(cfg, lists, framework, channel)
         pushHistory({
             time     = payload.time or os.date('%H:%M:%S'),
             name     = payload.name,
+            id       = payload.id or 0,
             decision = payload.decision,
             reason   = payload.reason,
             toon     = payload.toon or payload.from,

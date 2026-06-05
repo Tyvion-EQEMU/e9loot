@@ -1,4 +1,4 @@
--- Main ImGui panel: status bar, enable toggle, Change Setup button, loot history pop-out, editor pop-out launcher
+-- Main ImGui panel: status bar, pause/resume, weapon mode, history table, editor/setup launchers
 
 local mq     = require('mq')
 local Corpse = require('loot_e9.core.corpse')
@@ -35,12 +35,13 @@ local DECISION_COLORS = {
     keep    = { 0.3, 1.0, 0.3, 1.0 },
     sell    = { 1.0, 0.8, 0.2, 1.0 },
     destroy = { 0.6, 0.6, 0.6, 1.0 },
+    skip    = { 0.5, 0.5, 0.5, 0.7 },
 }
 
 local function renderHistory()
     if not _histOpen then return end
 
-    ImGui.SetNextWindowSize(ImVec2(480, 360), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(660, 400), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot — Loot History', _histOpen,
         ImGuiWindowFlags.NoCollapse)
     _histOpen = open
@@ -56,26 +57,59 @@ local function renderHistory()
 
         ImGui.Separator()
 
-        ImGui.BeginChild('##hist', ImVec2(0, -40), ImGuiChildFlags.None)
         local history = _loot.GetHistory()
         local kept, sold, destroyed = 0, 0, 0
 
-        for _, entry in ipairs(history) do
-            local toonLow = (entry.toon or ''):lower()
-            if filterLow == '' or entry.name:lower():find(filterLow, 1, true) or toonLow:find(filterLow, 1, true) then
-                local col = DECISION_COLORS[entry.decision] or { 1, 1, 1, 1 }
-                ImGui.TextColored(col[1], col[2], col[3], col[4],
-                    string.format('[%s] %-12s %-8s %s (%s)',
-                        entry.time, entry.toon or '?', entry.decision:upper(), entry.name, entry.reason))
-            end
-            if     entry.decision == 'keep'    then kept      = kept    + 1
-            elseif entry.decision == 'sell'    then sold      = sold    + 1
-            elseif entry.decision == 'destroy' then destroyed = destroyed + 1
-            end
-        end
-        ImGui.EndChild()
+        if ImGui.BeginTable('##histtbl', 5,
+            bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
+                      ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
+            ImVec2(0, -22)) then
 
-        ImGui.Separator()
+            ImGui.TableSetupScrollFreeze(0, 1)
+            ImGui.TableSetupColumn('Time',   ImGuiTableColumnFlags.WidthFixed,  55)
+            ImGui.TableSetupColumn('Toon',   ImGuiTableColumnFlags.WidthFixed,  75)
+            ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed,  60)
+            ImGui.TableSetupColumn('Item',   ImGuiTableColumnFlags.WidthStretch)
+            ImGui.TableSetupColumn('Reason', ImGuiTableColumnFlags.WidthFixed, 120)
+            ImGui.TableHeadersRow()
+
+            for i, entry in ipairs(history) do
+                if     entry.decision == 'keep'    then kept      = kept    + 1
+                elseif entry.decision == 'sell'    then sold      = sold    + 1
+                elseif entry.decision == 'destroy' then destroyed = destroyed + 1
+                end
+
+                local toonLow = (entry.toon or ''):lower()
+                if filterLow == '' or entry.name:lower():find(filterLow, 1, true) or toonLow:find(filterLow, 1, true) then
+                    local col = DECISION_COLORS[entry.decision] or { 1, 1, 1, 1 }
+
+                    ImGui.TableNextRow()
+
+                    ImGui.TableNextColumn()
+                    ImGui.TextDisabled(entry.time or '')
+
+                    ImGui.TableNextColumn()
+                    ImGui.Text(entry.toon or '?')
+
+                    ImGui.TableNextColumn()
+                    ImGui.TextColored(col[1], col[2], col[3], col[4], (entry.decision or ''):upper())
+
+                    ImGui.TableNextColumn()
+                    ImGui.PushStyleColor(ImGuiCol.Text, col[1], col[2], col[3], col[4])
+                    local _, nameClicked = ImGui.Selectable(entry.name .. '##h' .. i, false)
+                    ImGui.PopStyleColor()
+                    if nameClicked and entry.name then
+                        mq.cmdf('/itemdisplay "%s"', entry.name)
+                    end
+
+                    ImGui.TableNextColumn()
+                    ImGui.TextDisabled(entry.reason or '')
+                end
+            end
+
+            ImGui.EndTable()
+        end
+
         ImGui.TextDisabled(string.format(
             'Session: %d kept  |  %d sold  |  %d destroyed', kept, sold, destroyed))
     end
@@ -97,17 +131,36 @@ end
 function Panel.Render()
     if not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(340, 200), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(340, 210), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot', true,
         bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.NoScrollbar))
 
     if shouldDraw then
-        -- Enable/disable toggle
         local enabled = _config:Get('LootEnabled')
-        local newEnabled, _ = ImGui.Checkbox('Loot Enabled', enabled)
-        if newEnabled ~= enabled then
-            _config:SetAndSave('LootEnabled', newEnabled)
+
+        -- Pause button: bright red when running (actionable), dim when already paused
+        ImGui.PushStyleColor(ImGuiCol.Button,
+            enabled and 0.72 or 0.28,
+            enabled and 0.22 or 0.12,
+            enabled and 0.12 or 0.08,
+            1.0)
+        if ImGui.Button('Pause', 100, 0) then
+            _config:SetAndSave('LootEnabled', false)
         end
+        ImGui.PopStyleColor()
+
+        ImGui.SameLine()
+
+        -- Resume button: bright green when paused (actionable), dim when already running
+        ImGui.PushStyleColor(ImGuiCol.Button,
+            enabled and 0.12 or 0.15,
+            enabled and 0.28 or 0.60,
+            enabled and 0.10 or 0.12,
+            1.0)
+        if ImGui.Button('Resume', 100, 0) then
+            _config:SetAndSave('LootEnabled', true)
+        end
+        ImGui.PopStyleColor()
 
         ImGui.SameLine()
 

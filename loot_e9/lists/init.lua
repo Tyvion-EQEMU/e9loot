@@ -5,6 +5,7 @@ local Lists = {}
 local modules = {
     'currency', 'quest', 'event', 'lore', 'astrial',
     'tiered', 'beasts', 'deva', 'specials',
+    'destroy', 'skip',   -- explicit user override lists (highest eval priority)
 }
 
 for _, m in ipairs(modules) do

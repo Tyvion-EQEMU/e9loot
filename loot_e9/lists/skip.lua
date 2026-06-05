@@ -1,0 +1,2 @@
+local Base = require('loot_e9.lists._base')
+return Base.new('skip')

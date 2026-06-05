@@ -11,6 +11,7 @@ local _filter = {}
 local TAB_ORDER = {
     'currency', 'quest', 'event', 'lore', 'astrial',
     'tiered', 'beasts', 'deva', 'specials',
+    'destroy', 'skip',
 }
 local TAB_LABELS = {
     currency = 'Currency',
@@ -22,6 +23,8 @@ local TAB_LABELS = {
     beasts   = 'Beasts',
     deva     = 'Deva',
     specials = 'Specials',
+    destroy  = 'Force Destroy',
+    skip     = 'Force Skip',
 }
 
 local _working = {}
@@ -99,25 +102,47 @@ local function renderTab(listName)
 
     ImGui.BeginChild('##list_' .. listName, ImVec2(0, -30), ImGuiChildFlags.None)
 
-    local toRemove = nil
-    for i, entry in ipairs(work) do
-        if filterLow == '' or entry.name:lower():find(filterLow, 1, true) then
-            ImGui.Text(string.format('%d.', i))
-            ImGui.SameLine()
-            ImGui.Text(entry.name)
-            if entry.id and entry.id > 0 then
-                ImGui.SameLine()
-                ImGui.TextDisabled(string.format('[%d]', entry.id))
-            end
-            ImGui.SameLine()
-            if ImGui.SmallButton('X##' .. listName .. i) then
-                toRemove = i
+    if ImGui.BeginTable('##tbl_' .. listName, 4,
+        bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
+                  ImGuiTableFlags.SizingStretchProp)) then
+
+        ImGui.TableSetupColumn('#',    ImGuiTableColumnFlags.WidthFixed,  30)
+        ImGui.TableSetupColumn('Item', ImGuiTableColumnFlags.WidthStretch)
+        ImGui.TableSetupColumn('ID',   ImGuiTableColumnFlags.WidthFixed,  65)
+        ImGui.TableSetupColumn('',     ImGuiTableColumnFlags.WidthFixed,  22)
+        ImGui.TableHeadersRow()
+
+        local toRemove = nil
+        for i, entry in ipairs(work) do
+            if filterLow == '' or entry.name:lower():find(filterLow, 1, true) then
+                ImGui.TableNextRow()
+
+                ImGui.TableNextColumn()
+                ImGui.TextDisabled(tostring(i))
+
+                ImGui.TableNextColumn()
+                local _, nameClicked = ImGui.Selectable(entry.name .. '##e' .. i, false)
+                if nameClicked then
+                    mq.cmdf('/itemdisplay "%s"', entry.name)
+                end
+
+                ImGui.TableNextColumn()
+                if entry.id and entry.id > 0 then
+                    ImGui.TextDisabled(tostring(entry.id))
+                end
+
+                ImGui.TableNextColumn()
+                if ImGui.SmallButton('X##' .. listName .. i) then
+                    toRemove = i
+                end
             end
         end
-    end
 
-    if toRemove then
-        table.remove(work, toRemove)
+        if toRemove then
+            table.remove(work, toRemove)
+        end
+
+        ImGui.EndTable()
     end
 
     ImGui.EndChild()
