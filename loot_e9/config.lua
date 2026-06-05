@@ -1,4 +1,11 @@
 -- INI-based settings: load/save defaults for framework, channel, weaponmode, warpdist, trashprice, and all user toggles
+--
+-- Two INI files are used:
+--   e9loot_shared.ini   — group-wide settings; written by any toon, read by all at startup
+--   <Name>_e9loot.ini   — per-character overrides (WeaponMode, UI state, LootEnabled)
+--
+-- Load order: defaults → shared INI → per-character INI (later layers win).
+-- Save: shared keys write to both files; per-character keys write only to per-char file.
 
 local mq = require('mq')
 
@@ -10,9 +17,12 @@ end
 
 local Config = {}
 
--- Resolved path: MQ configDir + character name so each toon has its own INI
 local function iniPath()
     return string.format('%s/%s_e9loot.ini', mq.configDir, mq.TLO.Me.CleanName())
+end
+
+local function sharedIniPath()
+    return string.format('%s/e9loot_shared.ini', mq.configDir)
 end
 
 -- Default values — all settings live here; add new keys here first
@@ -25,7 +35,7 @@ Config.Defaults = {
     WeaponMode   = 'DW',      -- DW | 2H | SNB | ANY | always | never
     WarpDist     = 100,       -- max distance before warping to corpse (0 = warp always)
     UseWarp      = true,      -- true = /warp target, false = /nav to corpse
-    TrashPrice   = 0,         -- sell anything ≥ this value (pp); 0 = sell nothing
+    TrashPrice   = 0,         -- sell anything >= this value (pp); 0 = sell nothing
 
     -- Feature toggles
     LootEnabled  = true,
@@ -39,6 +49,20 @@ Config.Defaults = {
     PanelOpen    = true,
     HistoryOpen  = false,
     EditorOpen   = false,
+}
+
+-- Keys written to the shared INI so all toons inherit them on startup.
+-- Per-character keys (WeaponMode, LootEnabled, UI state) are intentionally excluded.
+local SHARED_KEYS = {
+    Framework     = true,
+    Channel       = true,
+    UseWarp       = true,
+    WarpDist      = true,
+    TrashPrice    = true,
+    LootCorpses   = true,
+    LootPets      = true,
+    LootGroup     = true,
+    AnnounceGroup = true,
 }
 
 -- Live config table — starts as a copy of defaults, then overwritten by INI
@@ -58,31 +82,35 @@ local function coerce(default, raw)
     return tostring(raw)
 end
 
+local function readIni(iniFile, settings, defaults)
+    if not fileExists(iniFile) then return end
+    for k, default in pairs(defaults) do
+        local raw = mq.TLO.Ini(iniFile, 'e9loot', k, tostring(default))()
+        settings[k] = coerce(default, raw)
+    end
+end
+
 function Config:Load()
-    -- Start from defaults
+    -- Layer 1: defaults
     for k, v in pairs(self.Defaults) do
         self.Settings[k] = v
     end
 
-    local ini = iniPath()
-    if not fileExists(ini) then return end
+    -- Layer 2: shared INI (group-wide settings)
+    readIni(sharedIniPath(), self.Settings, self.Defaults)
 
-    -- mq.ini read helper: mq.TLO.Ini[section][key][default]
-    local function get(key, def)
-        local val = mq.TLO.Ini(ini, 'e9loot', key, tostring(def))()
-        return val
-    end
-
-    for k, default in pairs(self.Defaults) do
-        local raw = get(k, default)
-        self.Settings[k] = coerce(default, raw)
-    end
+    -- Layer 3: per-character INI (class-specific / individual overrides)
+    readIni(iniPath(), self.Settings, self.Defaults)
 end
 
 function Config:Save()
-    local ini = iniPath()
+    local ini    = iniPath()
+    local shared = sharedIniPath()
     for k, v in pairs(self.Settings) do
         mq.cmdf('/ini "%s" "e9loot" "%s" "%s"', ini, k, tostring(v))
+        if SHARED_KEYS[k] then
+            mq.cmdf('/ini "%s" "e9loot" "%s" "%s"', shared, k, tostring(v))
+        end
     end
 end
 
