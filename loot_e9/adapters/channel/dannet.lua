@@ -60,9 +60,9 @@ function Adapter:Broadcast(payload)
         end
     end
     local encoded = '{' .. table.concat(parts, ',') .. '}'
-    -- /dgge = DanNet group echo; first arg is the message, not a channel name.
-    -- (/dge requires an explicit channel arg first, which caused "channel not found" errors)
-    mq.cmdf('/dgge %s%s', PREFIX, encoded)
+    -- /squelch suppresses DanNet output on the sender side.
+    -- /dgge = group echo; message is first arg (no channel name needed).
+    mq.cmdf('/squelch /dgge %s%s', PREFIX, encoded)
 end
 
 function Adapter:Observe(cb)

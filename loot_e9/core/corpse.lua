@@ -39,20 +39,23 @@ function Corpse.SafeToLoot()
     return true
 end
 
--- Navigate to a corpse. useWarp=true => /warp target, useWarp=false => /nav always.
--- warpDist is ignored when useWarp=false.
-function Corpse.ApproachCorpse(corpseId, warpDist, useWarp)
+-- Navigate to a corpse.
+-- useWarp=true  => /warp target (fires whenever corpse is > 15 units away)
+-- useWarp=false => /nav id (walks to corpse, waits up to 10 s)
+function Corpse.ApproachCorpse(corpseId, useWarp)
     local sp = mq.TLO.Spawn(string.format('id %d', corpseId))
     if not sp or not sp.ID() or sp.ID() == 0 then return false end
 
     local dist = sp.Distance3D() or 999
 
-    if useWarp and (warpDist == 0 or dist > warpDist) then
+    if dist <= 15 then
+        -- already adjacent, no movement needed
+    elseif useWarp then
         mq.cmdf('/tgt id %d', corpseId)
         mq.delay(200)
         mq.cmd('/warp target')
         mq.delay(500)
-    elseif dist > 15 then
+    else
         mq.cmdf('/nav id %d', corpseId)
         -- Wait until adjacent or stuck for max 10 s
         local deadline = os.clock() + 10
