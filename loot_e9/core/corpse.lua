@@ -51,8 +51,14 @@ function Corpse.ApproachCorpse(corpseId, useWarp)
     if dist <= 15 then
         -- already adjacent, no movement needed
     elseif useWarp then
-        mq.cmdf('/tgt id %d', corpseId)
-        mq.delay(200)
+        mq.cmdf('/target id %d', corpseId)
+        -- wait until target is confirmed or bail out
+        local tgtDeadline = os.clock() + 1
+        while os.clock() < tgtDeadline do
+            mq.delay(50)
+            if mq.TLO.Target.ID() == corpseId then break end
+        end
+        if mq.TLO.Target.ID() ~= corpseId then return false end
         mq.cmd('/warp target')
         mq.delay(500)
     else
