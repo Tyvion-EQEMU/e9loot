@@ -145,6 +145,12 @@ while true do
         lastZone = curZone
     end
 
+    -- Auto-pause when combat starts
+    if Config:Get('LootEnabled') and mq.TLO.Me.Combat() then
+        Config:SetAndSave('LootEnabled', false)
+        printf('\are9loot: combat detected — looting paused')
+    end
+
     -- Periodic auto-loot
     local now = mq.gettime()
     if Config:Get('LootEnabled') and (now - lastLootTime) >= LOOT_INTERVAL then
