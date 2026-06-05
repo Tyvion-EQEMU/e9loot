@@ -61,11 +61,12 @@ local function renderHistory()
         local kept, sold, destroyed = 0, 0, 0
 
         for _, entry in ipairs(history) do
-            if filterLow == '' or entry.name:lower():find(filterLow, 1, true) then
+            local toonLow = (entry.toon or ''):lower()
+            if filterLow == '' or entry.name:lower():find(filterLow, 1, true) or toonLow:find(filterLow, 1, true) then
                 local col = DECISION_COLORS[entry.decision] or { 1, 1, 1, 1 }
                 ImGui.TextColored(col[1], col[2], col[3], col[4],
-                    string.format('[%s] %-8s %s (%s)',
-                        entry.time, entry.decision:upper(), entry.name, entry.reason))
+                    string.format('[%s] %-12s %-8s %s (%s)',
+                        entry.time, entry.toon or '?', entry.decision:upper(), entry.name, entry.reason))
             end
             if     entry.decision == 'keep'    then kept      = kept    + 1
             elseif entry.decision == 'sell'    then sold      = sold    + 1

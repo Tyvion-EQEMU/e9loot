@@ -37,9 +37,10 @@ local function pushHistory(entry)
     end
 end
 
-local function announce(name, decision, reason)
-    local col = COLOR[decision] or '\aw'
-    printf('%se9loot\aw | %-7s | %s \a-w(%s)\aw', col, decision:upper(), name, reason)
+local function announce(name, decision, reason, toon)
+    local col  = COLOR[decision] or '\aw'
+    local who  = toon and ('\a-w[' .. toon .. ']\aw ') or ''
+    printf('%se9loot\aw | %s%-7s | %s \a-w(%s)\aw', col, who, decision:upper(), name, reason)
 end
 
 local function evaluateItem(item)
@@ -164,12 +165,26 @@ local function lootSlot(slotIndex)
         mq.delay(200)
     end
 
-    announce(name, decision, reason)
-    pushHistory({ time=os.date('%H:%M:%S'), name=name, decision=decision, reason=reason })
+    local myToon = mq.TLO.Me.CleanName()
 
-    if _config:Get('AnnounceGroup') and decision == DECISION.KEEP then
-        _channel:Broadcast({ type='loot', name=name, decision=decision })
+    -- Non-KEEP decisions echo locally only; KEEP is broadcast to all toons' chat
+    if decision ~= DECISION.KEEP then
+        announce(name, decision, reason)
+    else
+        announce(name, decision, reason, myToon)
     end
+
+    pushHistory({ time=os.date('%H:%M:%S'), name=name, decision=decision, reason=reason, toon=myToon })
+
+    -- Broadcast every event: all toons share history; KEEP events also echo to their chat
+    _channel:Broadcast({
+        type     = 'loot_event',
+        name     = name,
+        decision = decision,
+        reason   = reason,
+        time     = os.date('%H:%M:%S'),
+        toon     = myToon,
+    })
 end
 
 local function lootOpenCorpse()
@@ -220,6 +235,23 @@ function Loot.Init(cfg, lists, framework, channel)
     _lists     = lists
     _framework = framework
     _channel   = channel
+
+    -- Receive loot events from other toons:
+    --   KEEP  → echo to local chat so every toon sees group upgrades
+    --   all   → push into shared history panel
+    channel:Observe(function(payload)
+        if payload.type ~= 'loot_event' then return end
+        if payload.decision == DECISION.KEEP then
+            announce(payload.name, payload.decision, payload.reason, payload.toon)
+        end
+        pushHistory({
+            time     = payload.time or os.date('%H:%M:%S'),
+            name     = payload.name,
+            decision = payload.decision,
+            reason   = payload.reason,
+            toon     = payload.toon or payload.from,
+        })
+    end)
 end
 
 return Loot
