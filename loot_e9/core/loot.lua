@@ -72,8 +72,12 @@ local function evaluateItem(item)
         return DECISION.DESTROY, 'worthless-stack'
     end
 
-    if Upgrade.ShouldKeep(item, weaponMode) then
-        return DECISION.KEEP, 'upgrade'
+    local upgradeSlot = Upgrade.FindUpgradeSlot(item, weaponMode)
+    if upgradeSlot ~= nil then
+        return DECISION.KEEP, 'upgrade', upgradeSlot
+    end
+    if weaponMode == 'always' and item.WornSlots() and item.WornSlots() > 0 then
+        return DECISION.KEEP, 'upgrade', nil
     end
 
     -- Not an upgrade: no-drop items can't be picked up to destroy, so leave them
@@ -103,9 +107,9 @@ local function lootSlot(slotIndex)
     local item = mq.TLO.Corpse.Item(slotIndex)
     if not item or not item.ID() or item.ID() == 0 then return end
 
-    local name            = item.Name() or '(unknown)'
-    local isNoDrop        = item.NoDrop() == true
-    local decision, reason = evaluateItem(item)
+    local name                      = item.Name() or '(unknown)'
+    local isNoDrop                  = item.NoDrop() == true
+    local decision, reason, equipSlot = evaluateItem(item)
 
     if decision == DECISION.IGNORE then return end
 
@@ -133,8 +137,25 @@ local function lootSlot(slotIndex)
     if not cursor or not cursor.ID() or cursor.ID() == 0 then return end
 
     if decision == DECISION.KEEP then
-        mq.cmd('/autoinventory')
-        mq.delay(200)
+        if equipSlot then
+            -- Swap new item into the worn slot; old item comes to cursor
+            mq.cmdf('/itemnotify %d leftmouseup', equipSlot)
+            mq.delay(500)
+            -- Handle any confirm dialog (rare on equip, but be safe)
+            if mq.TLO.Window('ConfirmationDialogBox').Open() then
+                mq.cmdf('/notify ConfirmationDialogBox CD_Yes_Button leftmouseup')
+                mq.delay(200)
+            end
+            -- Old displaced item (or new item if swap failed) → inventory
+            if mq.TLO.Cursor.ID() and mq.TLO.Cursor.ID() > 0 then
+                mq.cmd('/autoinventory')
+                mq.delay(200)
+            end
+            reason = 'upgrade-equipped'
+        else
+            mq.cmd('/autoinventory')
+            mq.delay(200)
+        end
     elseif decision == DECISION.SELL then
         mq.cmd('/autoinventory')
         mq.delay(200)

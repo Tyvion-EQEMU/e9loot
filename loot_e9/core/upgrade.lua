@@ -72,31 +72,36 @@ local function allowedByMode(item, weaponMode)
     return true  -- ANY
 end
 
--- Public API: true if item is worth keeping given current weapon mode.
--- weaponMode: 'DW' | '2H' | 'SNB' | 'ANY' | 'always' | 'never'
-function Upgrade.ShouldKeep(item, weaponMode)
-    if not item or not item.ID() or item.ID() == 0 then return false end
-
+-- Returns the first worn slotId where item beats what is currently equipped, or nil.
+-- Respects weapon mode filtering. Returns nil for 'always'/'never' modes.
+function Upgrade.FindUpgradeSlot(item, weaponMode)
+    if not item or not item.ID() or item.ID() == 0 then return nil end
     weaponMode = weaponMode or 'DW'
-
-    if weaponMode == 'always' then return true  end
-    if weaponMode == 'never'  then return false end
-
-    if not allowedByMode(item, weaponMode) then return false end
+    if weaponMode == 'always' or weaponMode == 'never' then return nil end
+    if not allowedByMode(item, weaponMode) then return nil end
 
     local wornCount = item.WornSlots() or 0
-    if wornCount == 0 then return false end
+    if wornCount == 0 then return nil end
 
     for i = 1, wornCount do
         local slotId = tonumber(item.WornSlot(i)()) or -1
         if slotId >= 0 and not SKIP_SLOTS[slotId] then
             if isUpgrade(item, slotId) then
-                return true
+                return slotId
             end
         end
     end
+    return nil
+end
 
-    return false
+-- Public API: true if item is worth keeping given current weapon mode.
+-- weaponMode: 'DW' | '2H' | 'SNB' | 'ANY' | 'always' | 'never'
+function Upgrade.ShouldKeep(item, weaponMode)
+    if not item or not item.ID() or item.ID() == 0 then return false end
+    weaponMode = weaponMode or 'DW'
+    if weaponMode == 'always' then return true  end
+    if weaponMode == 'never'  then return false end
+    return Upgrade.FindUpgradeSlot(item, weaponMode) ~= nil
 end
 
 return Upgrade
