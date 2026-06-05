@@ -242,7 +242,7 @@ function Loot.LootNearby()
     if _looting then return end
 
     local useWarp = _config:Get('UseWarp')
-    local corpses = Corpse.FindNearby(200)
+    local corpses = Corpse.FindNearby(_config:Get('LootRange'))
     if #corpses == 0 then return end
 
     _looting = true
@@ -254,7 +254,7 @@ function Loot.LootNearby()
     _looting = false
 
     -- Announce done only when the sweep leaves no corpses remaining
-    if #Corpse.FindNearby(200) == 0 and mq.TLO.Me.Grouped() and _config:Get('AnnounceDone') then
+    if #Corpse.FindNearby(_config:Get('LootRange')) == 0 and mq.TLO.Me.Grouped() and _config:Get('AnnounceDone') then
         mq.cmd('/g Done Looting')
     end
 end

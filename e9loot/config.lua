@@ -33,6 +33,7 @@ Config.Defaults = {
 
     -- Loot behaviour
     WeaponMode   = 'DW',      -- DW | 2H | SNB | ANY | always | never
+    LootRange    = 200,       -- radius in units to scan for corpses
     WarpDist     = 100,       -- max distance before warping to corpse (0 = warp always)
     UseWarp      = true,      -- true = /warp target, false = /nav to corpse
     TrashPrice   = 0,         -- sell anything >= this value (pp); 0 = sell nothing
@@ -58,6 +59,7 @@ local SHARED_KEYS = {
     Framework     = true,
     Channel       = true,
     UseWarp       = true,
+    LootRange     = true,
     WarpDist      = true,
     TrashPrice    = true,
     LootCorpses   = true,

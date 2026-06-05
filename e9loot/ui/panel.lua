@@ -215,6 +215,16 @@ function Panel.Render()
             _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
         end
 
+        -- Loot range slider
+        ImGui.Text('Loot Range: ')
+        ImGui.SameLine()
+        ImGui.SetNextItemWidth(160)
+        local curRange = _config:Get('LootRange')
+        local newRange, rangeChanged = ImGui.SliderInt('##lootrange', curRange, 50, 600)
+        if rangeChanged then
+            _config:SetAndSave('LootRange', newRange)
+        end
+
         ImGui.Spacing()
         ImGui.Separator()
         ImGui.Spacing()
@@ -259,7 +269,7 @@ function Panel.Render()
 
         ImGui.Spacing()
 
-        local corpses = #Corpse.FindNearby(200)
+        local corpses = #Corpse.FindNearby(_config:Get('LootRange'))
         local paused  = _framework and _framework:IsPaused() or false
         ImGui.Text(string.format('Nearby corpses: %d  |  %s', corpses,
             paused and 'Framework PAUSED' or 'Running'))
