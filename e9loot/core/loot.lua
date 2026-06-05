@@ -285,6 +285,10 @@ function Loot.Init(cfg, lists, framework, channel)
             if type(payload.value) == 'boolean' then
                 _config:SetAndSave('LootEnabled', payload.value)
             end
+        elseif payload.type == 'set_announcedone' then
+            if type(payload.value) == 'boolean' then
+                _config:SetAndSave('AnnounceDone', payload.value)
+            end
         end
     end)
 end

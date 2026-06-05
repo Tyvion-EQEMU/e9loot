@@ -107,8 +107,13 @@ mq.bind('/e9loot', function(subcmd, ...)
         else
             printf('\aye9loot set <setting> <value>  (e.g. /e9loot set usewarp false)')
         end
+    elseif subcmd == 'toggledone' then
+        local newVal = not Config:Get('AnnounceDone')
+        Config:SetAndSave('AnnounceDone', newVal)
+        channel:Broadcast({ type='set_announcedone', value=newVal })
+        printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | setup | editor | enable | disable | reload | set <setting> <value>')
+        printf('\aye9loot commands: loot | setup | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
