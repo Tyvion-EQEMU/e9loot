@@ -167,10 +167,9 @@ local function lootSlot(slotIndex)
 
     local myToon = mq.TLO.Me.CleanName()
 
-    -- Non-KEEP decisions echo locally only; KEEP is broadcast to all toons' chat
-    if decision ~= DECISION.KEEP then
-        announce(name, decision, reason)
-    else
+    -- Only KEEP echoes to MQ chat (locally on sender; broadcast delivers it to all other toons).
+    -- Skip/destroy/sell are silent — visible only in the History panel.
+    if decision == DECISION.KEEP then
         announce(name, decision, reason, myToon)
     end
 

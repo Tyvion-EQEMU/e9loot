@@ -60,9 +60,9 @@ function Adapter:Broadcast(payload)
         end
     end
     local encoded = '{' .. table.concat(parts, ',') .. '}'
-    -- /dge sends to all DanNet peers without echoing back to self;
-    -- use /dgge if self-echo is needed for testing
-    mq.cmdf('/dge %s%s', PREFIX, encoded)
+    -- /dgge = DanNet group echo; first arg is the message, not a channel name.
+    -- (/dge requires an explicit channel arg first, which caused "channel not found" errors)
+    mq.cmdf('/dgge %s%s', PREFIX, encoded)
 end
 
 function Adapter:Observe(cb)
