@@ -61,17 +61,18 @@ local function renderHistory()
         local history = _loot.GetHistory()
         local kept, sold, destroyed = 0, 0, 0
 
-        if ImGui.BeginTable('##histtbl', 5,
+        if ImGui.BeginTable('##histtbl', 6,
             bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                       ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
             ImVec2(0, -22)) then
 
             ImGui.TableSetupScrollFreeze(0, 1)
-            ImGui.TableSetupColumn('Time',   ImGuiTableColumnFlags.WidthFixed,  55)
+            ImGui.TableSetupColumn('Date',   ImGuiTableColumnFlags.WidthFixed,  42)
+            ImGui.TableSetupColumn('Time',   ImGuiTableColumnFlags.WidthFixed,  50)
             ImGui.TableSetupColumn('Toon',   ImGuiTableColumnFlags.WidthFixed,  75)
-            ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed,  60)
+            ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed,  55)
             ImGui.TableSetupColumn('Item',   ImGuiTableColumnFlags.WidthStretch)
-            ImGui.TableSetupColumn('Reason', ImGuiTableColumnFlags.WidthFixed, 120)
+            ImGui.TableSetupColumn('Reason', ImGuiTableColumnFlags.WidthFixed, 100)
             ImGui.TableHeadersRow()
 
             for i, entry in ipairs(history) do
@@ -85,6 +86,9 @@ local function renderHistory()
                     local col = DECISION_COLORS[entry.decision] or { 1, 1, 1, 1 }
 
                     ImGui.TableNextRow()
+
+                    ImGui.TableNextColumn()
+                    ImGui.TextDisabled(entry.date or '')
 
                     ImGui.TableNextColumn()
                     ImGui.TextDisabled(entry.time or '')

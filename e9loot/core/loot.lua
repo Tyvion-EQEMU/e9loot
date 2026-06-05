@@ -148,9 +148,9 @@ local function lootSlot(slotIndex)
 
     -- SKIP: leave on corpse, history + log only, no chat echo
     if decision == DECISION.SKIP then
-        pushHistory({ time=os.date('%H:%M:%S'), name=name, id=id, decision='skip', reason=reason, toon=myToon })
+        pushHistory({ date=os.date('%m/%d'), time=os.date('%H:%M:%S'), name=name, id=id, decision='skip', reason=reason, toon=myToon })
         _channel:Broadcast({ type='loot_event', name=name, id=id, decision='skip', reason=reason,
-                              time=os.date('%H:%M:%S'), toon=myToon })
+                              date=os.date('%m/%d'), time=os.date('%H:%M:%S'), toon=myToon })
         return
     end
 
@@ -199,13 +199,14 @@ local function lootSlot(slotIndex)
     end
 
     -- History + log (all decisions); broadcast for shared history panel on other toons
-    pushHistory({ time=os.date('%H:%M:%S'), name=name, id=id, decision=decision, reason=reason, toon=myToon })
+    pushHistory({ date=os.date('%m/%d'), time=os.date('%H:%M:%S'), name=name, id=id, decision=decision, reason=reason, toon=myToon })
     _channel:Broadcast({
         type     = 'loot_event',
         name     = name,
         id       = id,
         decision = decision,
         reason   = reason,
+        date     = os.date('%m/%d'),
         time     = os.date('%H:%M:%S'),
         toon     = myToon,
     })
@@ -274,6 +275,7 @@ function Loot.Init(cfg, lists, framework, channel)
     channel:Observe(function(payload)
         if payload.type == 'loot_event' then
             pushHistory({
+                date     = payload.date or os.date('%m/%d'),
                 time     = payload.time or os.date('%H:%M:%S'),
                 name     = payload.name,
                 id       = payload.id or 0,
