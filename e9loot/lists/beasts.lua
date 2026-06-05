@@ -1,6 +1,6 @@
 ﻿-- Beasts tier: Beast Lord and pet-class progression gear
 
-local Base = require('loot_e9.lists._base')
+local Base = require('e9loot.lists._base')
 
 return Base.new('beasts', {
     { name='Primal Core of Gelid Creation' },

@@ -8,7 +8,7 @@
 
 param(
     [string]$ConfigDir = 'C:\games\mq-rekka\config',
-    [string]$ListsDir  = "$PSScriptRoot\loot_e9\lists"
+    [string]$ListsDir  = "$PSScriptRoot\e9loot\lists"
 )
 
 $HEADERS = [ordered]@{

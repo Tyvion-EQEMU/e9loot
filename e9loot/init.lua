@@ -1,29 +1,29 @@
--- Entry point: wires together config, adapters, core, UI, and lists; drives the main loop via /lua run loot_e9
+﻿-- Entry point: wires together config, adapters, core, UI, and lists; drives the main loop via /lua run loot_e9
 
 local mq     = require('mq')
 local imgui  = require('ImGui')
 
-local Config  = require('loot_e9.config')
-local Lists   = require('loot_e9.lists.init')
-local Loot    = require('loot_e9.core.loot')
-local Corpse  = require('loot_e9.core.corpse')
-local Setup   = require('loot_e9.ui.setup')
-local Editor  = require('loot_e9.ui.editor')
-local Panel   = require('loot_e9.ui.panel')
+local Config  = require('e9loot.config')
+local Lists   = require('e9loot.lists.init')
+local Loot    = require('e9loot.core.loot')
+local Corpse  = require('e9loot.core.corpse')
+local Setup   = require('e9loot.ui.setup')
+local Editor  = require('e9loot.ui.editor')
+local Panel   = require('e9loot.ui.panel')
 
 -- Framework adapter map
 local FRAMEWORK_ADAPTERS = {
-    none       = require('loot_e9.adapters.framework.none'),
-    rgmercs    = require('loot_e9.adapters.framework.rgmercs'),
-    e3         = require('loot_e9.adapters.framework.e3'),
-    kissassist = require('loot_e9.adapters.framework.kissassist'),
+    none       = require('e9loot.adapters.framework.none'),
+    rgmercs    = require('e9loot.adapters.framework.rgmercs'),
+    e3         = require('e9loot.adapters.framework.e3'),
+    kissassist = require('e9loot.adapters.framework.kissassist'),
 }
 
 -- Channel adapter map
 local CHANNEL_ADAPTERS = {
-    none   = require('loot_e9.adapters.channel.none'),
-    dannet = require('loot_e9.adapters.channel.dannet'),
-    eqbc   = require('loot_e9.adapters.channel.eqbc'),
+    none   = require('e9loot.adapters.channel.none'),
+    dannet = require('e9loot.adapters.channel.dannet'),
+    eqbc   = require('e9loot.adapters.channel.eqbc'),
 }
 
 -----------------------------------------------------------------------

@@ -1,6 +1,6 @@
 ﻿-- Event items: seasonal or limited-time event drops
 
-local Base = require('loot_e9.lists._base')
+local Base = require('e9loot.lists._base')
 
 return Base.new('event', {
     { name="Life's Rememberance" },

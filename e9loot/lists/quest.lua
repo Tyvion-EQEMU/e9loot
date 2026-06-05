@@ -1,6 +1,6 @@
 ﻿-- Quest items: server-specific quest turn-ins and no-drop quest pieces
 
-local Base = require('loot_e9.lists._base')
+local Base = require('e9loot.lists._base')
 
 return Base.new('quest', {
     { name='Minor Dragon Spirit' },

@@ -1,4 +1,4 @@
--- Lists bootstrap: loads all list modules, exposes unified lookup API used by core/loot.lua
+﻿-- Lists bootstrap: loads all list modules, exposes unified lookup API used by core/loot.lua
 
 local Lists = {}
 
@@ -9,7 +9,7 @@ local modules = {
 }
 
 for _, m in ipairs(modules) do
-    Lists[m] = require('loot_e9.lists.' .. m)
+    Lists[m] = require('e9loot.lists.' .. m)
 end
 
 function Lists.All()

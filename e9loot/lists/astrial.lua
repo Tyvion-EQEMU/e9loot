@@ -1,6 +1,6 @@
 ﻿-- Astrial tier: Astrial progression gear and tokens
 
-local Base = require('loot_e9.lists._base')
+local Base = require('e9loot.lists._base')
 
 return Base.new('astrial', {
     { name='Book of Astrial-1' },

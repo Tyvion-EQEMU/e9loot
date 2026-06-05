@@ -1,6 +1,6 @@
 ﻿-- Lore items: Lore-tagged gear worth keeping
 
-local Base = require('loot_e9.lists._base')
+local Base = require('e9loot.lists._base')
 
 return Base.new('lore', {
     { name='Blessing of Shifting Smoke' },

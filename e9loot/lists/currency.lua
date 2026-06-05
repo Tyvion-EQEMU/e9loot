@@ -1,6 +1,6 @@
 ﻿-- Currency list: coins, tokens, and tradeable monetary items that are always looted regardless of other rules
 
-local Base = require('loot_e9.lists._base')
+local Base = require('e9loot.lists._base')
 
 return Base.new('currency', {
     { name='Green Stone of Minor Advancement' },

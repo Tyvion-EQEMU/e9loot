@@ -1,7 +1,7 @@
--- Main ImGui panel: status bar, pause/resume, weapon mode, history table, editor/setup launchers
+﻿-- Main ImGui panel: status bar, pause/resume, weapon mode, history table, editor/setup launchers
 
 local mq     = require('mq')
-local Corpse = require('loot_e9.core.corpse')
+local Corpse = require('e9loot.core.corpse')
 
 local Panel = {}
 

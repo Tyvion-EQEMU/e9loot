@@ -1,8 +1,8 @@
--- Core loot logic: evaluates items against all list types, dispatches loot/sell/destroy decisions, tracks history
+﻿-- Core loot logic: evaluates items against all list types, dispatches loot/sell/destroy decisions, tracks history
 
 local mq      = require('mq')
-local Corpse  = require('loot_e9.core.corpse')
-local Upgrade = require('loot_e9.core.upgrade')
+local Corpse  = require('e9loot.core.corpse')
+local Upgrade = require('e9loot.core.upgrade')
 
 local Loot = {}
 
@@ -14,6 +14,7 @@ local _lists
 local _framework
 local _channel
 local _logFile  = nil
+local _looting  = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
 
 local DECISION = {
     KEEP    = 'keep',
@@ -238,19 +239,22 @@ end
 
 function Loot.LootNearby()
     if not _config:Get('LootEnabled') then return end
+    if _looting then return end
 
     local useWarp = _config:Get('UseWarp')
     local corpses = Corpse.FindNearby(200)
-
     if #corpses == 0 then return end
 
+    _looting = true
     for _, c in ipairs(corpses) do
         if not Corpse.SafeToLoot() then break end
         Loot.LootCorpse(c.id, useWarp)
         mq.delay(250)
     end
+    _looting = false
 
-    if mq.TLO.Me.Grouped() then
+    -- Announce done only when the sweep leaves no corpses remaining
+    if #Corpse.FindNearby(200) == 0 and mq.TLO.Me.Grouped() then
         mq.cmd('/g Done Looting')
     end
 end
