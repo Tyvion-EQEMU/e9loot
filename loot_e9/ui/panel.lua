@@ -136,6 +136,17 @@ function Panel.Render()
         ImGui.Separator()
         ImGui.Spacing()
 
+        -- Navigation mode toggle
+        local useWarp = _config:Get('UseWarp')
+        local newUseWarp, _ = ImGui.Checkbox('Use /warp (uncheck for /nav)', useWarp)
+        if newUseWarp ~= useWarp then
+            _config:SetAndSave('UseWarp', newUseWarp)
+        end
+
+        ImGui.Spacing()
+        ImGui.Separator()
+        ImGui.Spacing()
+
         -- Action buttons
         if ImGui.Button('Change Setup', 110, 0) then
             _setup.Open(_config, _adapters)

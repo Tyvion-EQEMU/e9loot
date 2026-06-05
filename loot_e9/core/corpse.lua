@@ -39,15 +39,15 @@ function Corpse.SafeToLoot()
     return true
 end
 
--- Navigate to a corpse. Uses warp if dist > warpDist and warpDist > 0,
--- otherwise walks via /nav or /moveto.
-function Corpse.ApproachCorpse(corpseId, warpDist)
+-- Navigate to a corpse. useWarp=true => /warp target, useWarp=false => /nav always.
+-- warpDist is ignored when useWarp=false.
+function Corpse.ApproachCorpse(corpseId, warpDist, useWarp)
     local sp = mq.TLO.Spawn(string.format('id %d', corpseId))
     if not sp or not sp.ID() or sp.ID() == 0 then return false end
 
     local dist = sp.Distance3D() or 999
 
-    if warpDist > 0 and dist > warpDist then
+    if useWarp and (warpDist == 0 or dist > warpDist) then
         mq.cmdf('/tgt id %d', corpseId)
         mq.delay(200)
         mq.cmd('/warp target')

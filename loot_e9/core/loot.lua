@@ -160,10 +160,10 @@ local function lootOpenCorpse()
     end
 end
 
-function Loot.LootCorpse(corpseId, warpDist)
+function Loot.LootCorpse(corpseId, warpDist, useWarp)
     if not Corpse.SafeToLoot() then return false end
 
-    local reached = Corpse.ApproachCorpse(corpseId, warpDist)
+    local reached = Corpse.ApproachCorpse(corpseId, warpDist, useWarp)
     if not reached then return false end
 
     if not Corpse.OpenCorpse(corpseId) then return false end
@@ -180,11 +180,12 @@ function Loot.LootNearby()
     if not _config:Get('LootEnabled') then return end
 
     local warpDist = _config:Get('WarpDist') or 100
+    local useWarp  = _config:Get('UseWarp')
     local corpses  = Corpse.FindNearby(200)
 
     for _, c in ipairs(corpses) do
         if not Corpse.SafeToLoot() then break end
-        Loot.LootCorpse(c.id, warpDist)
+        Loot.LootCorpse(c.id, warpDist, useWarp)
         mq.delay(250)
     end
 end
