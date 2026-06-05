@@ -89,8 +89,26 @@ mq.bind('/e9loot', function(subcmd, ...)
     elseif subcmd == 'reload' then
         Lists.LoadAll()
         printf('\age9loot: lists reloaded')
+    elseif subcmd == 'set' then
+        local args   = { ... }
+        local rawKey = args[1]
+        local value  = args[2]
+        if rawKey and value then
+            local key = nil
+            for k in pairs(Config.Defaults) do
+                if k:lower() == rawKey:lower() then key = k; break end
+            end
+            if key then
+                Config:SetAndSave(key, value)
+                printf('\age9loot: %s = %s', key, tostring(Config:Get(key)))
+            else
+                printf('\are9loot: unknown setting "%s"', rawKey)
+            end
+        else
+            printf('\aye9loot set <setting> <value>  (e.g. /e9loot set usewarp false)')
+        end
     else
-        printf('\aye9loot commands: loot | setup | editor | enable | disable | reload')
+        printf('\aye9loot commands: loot | setup | editor | enable | disable | reload | set <setting> <value>')
     end
 end)
 
