@@ -38,6 +38,19 @@ local function isUpgrade(newItem, slotId)
     end
 end
 
+-- True if this character's class can equip the item.
+-- Items with 0 classes or all 16 classes have no restriction.
+local function classCanUse(item)
+    local classCount = item.Classes() or 0
+    if classCount == 0 or classCount >= 16 then return true end
+    local myClass = mq.TLO.Me.Class.Name() or ''
+    for i = 1, classCount do
+        local cls = item.Class(i)
+        if cls and cls.Name() == myClass then return true end
+    end
+    return false
+end
+
 local function itemType(item)
     return (item.Type() or ''):lower()
 end
@@ -79,6 +92,7 @@ function Upgrade.FindUpgradeSlot(item, weaponMode)
     if not item or not item.ID() or item.ID() == 0 then return nil end
     weaponMode = weaponMode or 'DW'
     if weaponMode == 'always' or weaponMode == 'never' then return nil end
+    if not classCanUse(item)        then return nil end
     if not allowedByMode(item, weaponMode) then return nil end
 
     local wornCount = item.WornSlots() or 0
