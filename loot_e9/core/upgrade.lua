@@ -42,8 +42,9 @@ local function itemType(item)
     return (item.Type() or ''):lower()
 end
 
-local function is2H(t)     return t:find('two hand') ~= nil end
-local function is1H(t)     return t:find('one hand') ~= nil or t == 'piercing' or t == 'hand to hand' end
+-- EQ reports types as '2h slashing', '2h blunt', '2h piercing', '1h slashing', etc.
+local function is2H(t)     return t:sub(1,2) == '2h' end
+local function is1H(t)     return t:sub(1,2) == '1h' or t == 'piercing' or t == 'hand to hand' or t == 'martial' end
 local function isShield(t) return t:find('shield') ~= nil end
 
 -- True if the item can go in Primary or Secondary slot
