@@ -226,6 +226,12 @@ function Panel.Render()
             _config:SetAndSave('UseWarp', newUseWarp)
         end
 
+        local announceDone = _config:Get('AnnounceDone')
+        local newAnnounceDone, _ = ImGui.Checkbox('/g Done Looting when sweep clears', announceDone)
+        if newAnnounceDone ~= announceDone then
+            _config:SetAndSave('AnnounceDone', newAnnounceDone)
+        end
+
         ImGui.Spacing()
         ImGui.Separator()
         ImGui.Spacing()

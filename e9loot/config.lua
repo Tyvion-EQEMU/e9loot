@@ -38,11 +38,12 @@ Config.Defaults = {
     TrashPrice   = 0,         -- sell anything >= this value (pp); 0 = sell nothing
 
     -- Feature toggles
-    LootEnabled  = true,
-    LootCorpses  = true,
-    LootPets     = false,
-    LootGroup    = false,     -- loot group members' nearby corpses
+    LootEnabled   = true,
+    LootCorpses   = true,
+    LootPets      = false,
+    LootGroup     = false,    -- loot group members' nearby corpses
     AnnounceGroup = false,    -- broadcast loot events to group channel
+    AnnounceDone  = true,     -- send /g Done Looting after a sweep clears all corpses
 
     -- UI state (not shown in setup dialog)
     SetupDone    = false,     -- true after first-launch setup is saved
@@ -63,6 +64,7 @@ local SHARED_KEYS = {
     LootPets      = true,
     LootGroup     = true,
     AnnounceGroup = true,
+    AnnounceDone  = true,
 }
 
 -- Live config table — starts as a copy of defaults, then overwritten by INI

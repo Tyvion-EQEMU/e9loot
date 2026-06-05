@@ -254,7 +254,7 @@ function Loot.LootNearby()
     _looting = false
 
     -- Announce done only when the sweep leaves no corpses remaining
-    if #Corpse.FindNearby(200) == 0 and mq.TLO.Me.Grouped() then
+    if #Corpse.FindNearby(200) == 0 and mq.TLO.Me.Grouped() and _config:Get('AnnounceDone') then
         mq.cmd('/g Done Looting')
     end
 end
