@@ -1,16 +1,13 @@
--- DanNet channel adapter: broadcast loot events via /dge, receive via mq.event()
+-- DanNet channel adapter: broadcast loot events via /dgge, receive via a registered slash command
 
 local mq = require('mq')
-
--- Prefix tags our messages so the event handler ignores unrelated DanNet traffic
-local PREFIX = '#e9loot#'
 
 local Adapter    = {}
 Adapter.name     = 'dannet'
 
-local _observers       = {}
-local _seq             = 0
-local _eventRegistered = false
+local _observers      = {}
+local _seq            = 0
+local _bindRegistered = false
 
 local function myName()
     return mq.TLO.Me.CleanName()
@@ -20,37 +17,33 @@ local function dannetAvailable()
     return mq.TLO.Plugin('MQ2DanNet').IsLoaded() == true
 end
 
-local function onMessage(line)
-    local msg = line:match(PREFIX .. '(.*)')
-    if not msg then return end
-    local ok, payload = pcall(function() return load('return ' .. msg)() end)
-    if not ok or type(payload) ~= 'table' then return end
-    if payload.from == myName() then return end  -- ignore self-echo from /dgge
-    for _, cb in ipairs(_observers) do
-        cb(payload)
-    end
-end
-
 function Adapter:Init()
     if not dannetAvailable() then
         printf('\arDanNet not loaded — channel adapter disabled')
         return
     end
 
-    if not _eventRegistered then
-        -- DanNet group echo messages arrive in chat; catch any line containing our prefix
-        mq.event('e9loot_dannet', '*' .. PREFIX .. '*', onMessage)
-        _eventRegistered = true
+    if not _bindRegistered then
+        -- Peers call /e9loot_recv {lua-table} via /dgge — no chat output, fully silent.
+        mq.bind('/e9loot_recv', function(data)
+            if not data or data == '' then return end
+            local ok, payload = pcall(function() return load('return ' .. data)() end)
+            if not ok or type(payload) ~= 'table' then return end
+            for _, cb in ipairs(_observers) do
+                cb(payload)
+            end
+        end)
+        _bindRegistered = true
     end
 end
 
--- Broadcast a table payload to all DanNet peers via group echo
+-- Broadcast a table payload to all group peers via /dgge (executes on peers, excludes self).
+-- Sender records its own events locally via pushHistory(), so self-exclusion is correct.
 function Adapter:Broadcast(payload)
     if not dannetAvailable() then return end
     _seq         = _seq + 1
     payload.seq  = _seq
     payload.from = myName()
-    -- Serialize as a Lua table literal (no JSON dependency needed)
     local parts = {}
     for k, v in pairs(payload) do
         if type(v) == 'string' then
@@ -60,17 +53,14 @@ function Adapter:Broadcast(payload)
         end
     end
     local encoded = '{' .. table.concat(parts, ',') .. '}'
-    -- /dgge executes the argument as a command on all group peers except self.
-    -- Sender already records its own events via pushHistory(), so self-exclusion is fine.
-    -- Wrap in /echo so peers receive it as chat text for the event handler to catch.
-    mq.cmdf('/squelch /dgge /echo %s%s', PREFIX, encoded)
+    mq.cmdf('/squelch /dgge /e9loot_recv %s', encoded)
 end
 
 function Adapter:Observe(cb)
     table.insert(_observers, cb)
 end
 
--- Events are processed by mq.doevents() in the main loop
+-- mq.doevents() in the main loop is sufficient; no per-tick DanNet polling needed
 function Adapter:Tick()
     mq.doevents()
 end
