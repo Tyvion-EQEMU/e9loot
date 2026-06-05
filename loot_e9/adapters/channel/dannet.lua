@@ -60,8 +60,9 @@ function Adapter:Broadcast(payload)
         end
     end
     local encoded = '{' .. table.concat(parts, ',') .. '}'
-    -- /dgge on this EMU build executes the argument as a command on all peers.
-    -- Wrap in /echo so peers output it as chat text instead of trying to run it.
+    -- /dgge executes the argument as a command on all group peers except self.
+    -- Sender already records its own events via pushHistory(), so self-exclusion is fine.
+    -- Wrap in /echo so peers receive it as chat text for the event handler to catch.
     mq.cmdf('/squelch /dgge /echo %s%s', PREFIX, encoded)
 end
 
