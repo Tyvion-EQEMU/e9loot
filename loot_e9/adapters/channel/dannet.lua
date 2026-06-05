@@ -60,9 +60,9 @@ function Adapter:Broadcast(payload)
         end
     end
     local encoded = '{' .. table.concat(parts, ',') .. '}'
-    -- /squelch suppresses DanNet output on the sender side.
-    -- /dgge = group echo; message is first arg (no channel name needed).
-    mq.cmdf('/squelch /dgge %s%s', PREFIX, encoded)
+    -- /dgge on this EMU build executes the argument as a command on all peers.
+    -- Wrap in /echo so peers output it as chat text instead of trying to run it.
+    mq.cmdf('/squelch /dgge /echo %s%s', PREFIX, encoded)
 end
 
 function Adapter:Observe(cb)
