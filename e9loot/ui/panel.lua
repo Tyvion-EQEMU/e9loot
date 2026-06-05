@@ -11,6 +11,7 @@ local _setup     = nil
 local _editor    = nil
 local _framework = nil
 local _adapters  = nil
+local _channel   = nil
 
 -- Weapon mode combo state
 local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
@@ -117,13 +118,14 @@ local function renderHistory()
     ImGui.End()
 end
 
-function Panel.Init(config, loot, setup, editor, framework, adapters)
+function Panel.Init(config, loot, setup, editor, framework, adapters, channel)
     _config    = config
     _loot      = loot
     _setup     = setup
     _editor    = editor
     _framework = framework
     _adapters  = adapters
+    _channel   = channel
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
 end
@@ -167,6 +169,33 @@ function Panel.Render()
         local fw = _config:Get('Framework')
         local ch = _config:Get('Channel')
         ImGui.TextDisabled(string.format('[%s/%s]', fw, ch))
+
+        -- Group pause/resume: broadcast to all group members + apply to self
+        if _channel and mq.TLO.Me.Grouped() then
+            ImGui.PushStyleColor(ImGuiCol.Button,
+                enabled and 0.60 or 0.22,
+                enabled and 0.18 or 0.10,
+                enabled and 0.10 or 0.06,
+                1.0)
+            if ImGui.Button('Pause All', 100, 0) then
+                _channel:Broadcast({ type='set_enabled', value=false })
+                _config:SetAndSave('LootEnabled', false)
+            end
+            ImGui.PopStyleColor()
+
+            ImGui.SameLine()
+
+            ImGui.PushStyleColor(ImGuiCol.Button,
+                enabled and 0.10 or 0.12,
+                enabled and 0.22 or 0.50,
+                enabled and 0.08 or 0.10,
+                1.0)
+            if ImGui.Button('Resume All', 100, 0) then
+                _channel:Broadcast({ type='set_enabled', value=true })
+                _config:SetAndSave('LootEnabled', true)
+            end
+            ImGui.PopStyleColor()
+        end
 
         ImGui.Spacing()
         ImGui.Separator()

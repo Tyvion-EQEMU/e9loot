@@ -101,7 +101,7 @@ local function evaluateItem(item)
     if item.Stackable() or item.Tradeskills() then
         if trashPrice > 0 and val >= trashPrice then return DECISION.SELL, 'trash-sell' end
         if isNoDrop then return DECISION.SKIP, 'nodrop-worthless' end
-        return DECISION.DESTROY, 'worthless-stack'
+        return DECISION.SKIP, 'worthless-stack'
     end
 
     local upgradeSlot = Upgrade.FindUpgradeSlot(item, weaponMode)
@@ -117,7 +117,7 @@ local function evaluateItem(item)
 
     if trashPrice > 0 and val >= trashPrice then return DECISION.SELL, 'sell-value' end
 
-    return DECISION.DESTROY, 'no-match'
+    return DECISION.SKIP, 'no-match'
 end
 
 -- Handle the no-drop confirmation dialog that EQ shows when looting a no-drop item.
@@ -271,18 +271,21 @@ function Loot.Init(cfg, lists, framework, channel)
 
     openLog()
 
-    -- Receive loot events from other toons → history + log only.
-    -- KEEP chat is handled by /g on the looting toon; no echo needed here.
     channel:Observe(function(payload)
-        if payload.type ~= 'loot_event' then return end
-        pushHistory({
-            time     = payload.time or os.date('%H:%M:%S'),
-            name     = payload.name,
-            id       = payload.id or 0,
-            decision = payload.decision,
-            reason   = payload.reason,
-            toon     = payload.toon or payload.from,
-        })
+        if payload.type == 'loot_event' then
+            pushHistory({
+                time     = payload.time or os.date('%H:%M:%S'),
+                name     = payload.name,
+                id       = payload.id or 0,
+                decision = payload.decision,
+                reason   = payload.reason,
+                toon     = payload.toon or payload.from,
+            })
+        elseif payload.type == 'set_enabled' then
+            if type(payload.value) == 'boolean' then
+                _config:SetAndSave('LootEnabled', payload.value)
+            end
+        end
     end)
 end
 

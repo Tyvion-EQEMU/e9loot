@@ -1,4 +1,4 @@
-﻿-- Entry point: wires together config, adapters, core, UI, and lists; drives the main loop via /lua run loot_e9
+﻿-- Entry point: wires together config, adapters, core, UI, and lists; drives the main loop via /lua run e9loot
 
 local mq     = require('mq')
 local imgui  = require('ImGui')
@@ -69,7 +69,7 @@ Loot.Init(Config, Lists, framework, channel)
 -- Wire panel (pass lists ref into config for editor access)
 Config._lists = Lists.All()
 
-Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS)
+Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS, channel)
 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)
