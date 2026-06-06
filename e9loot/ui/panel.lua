@@ -234,6 +234,7 @@ function Panel.Render()
     -- Mini mode: show compact overlay, hide main window
     if _miniMode then
         Mini.Render(function() _miniMode = false end)
+        renderHistory()
         _editor.Render()
         _setup.Render()
         return
