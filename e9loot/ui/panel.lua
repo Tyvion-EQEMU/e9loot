@@ -244,10 +244,10 @@ function Panel.Render()
     _panelOpen = open
 
     if shouldDraw then
-        -- Minimize button — top right corner, same pattern as RGMercs RenderWindowControls
+        -- Minimize button — top right, y aligned to content start, FA_COMPRESS (core glyph range)
         local _savedPos = ImGui.GetCursorPosVec()
-        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 26, 0))
-        if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
+        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 26, _savedPos.y))
+        if ImGui.SmallButton(Icons.FA_COMPRESS) then
             _miniMode = true
         end
         if ImGui.IsItemHovered() then
