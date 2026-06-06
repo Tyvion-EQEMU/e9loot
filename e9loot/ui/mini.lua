@@ -82,7 +82,7 @@ function Mini.Render(onClose)
     end
 
     ImGui.SameLine()
-    ImGui.BeginGroup()
+    ImGui.Text('E9 Loot')
 
     local enabled = _config:Get('LootEnabled')
     renderToggle(enabled)
@@ -93,8 +93,6 @@ function Mini.Render(onClose)
     else
         ImGui.TextColored(1.0, 0.4, 0.4, 1.0, 'Paused')
     end
-
-    ImGui.EndGroup()
     ImGui.End()
 end
 
