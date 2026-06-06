@@ -40,6 +40,9 @@ local function indexOfStr(tbl, val)
     return 1
 end
 
+-- Panel open state (tracks X button)
+local _panelOpen = true
+
 -- History state
 local _histOpen           = false
 local _histFilter         = ''
@@ -220,6 +223,11 @@ function Panel.ToggleMini()
     _miniMode = not _miniMode
 end
 
+function Panel.Show()
+    _panelOpen = true
+    _miniMode  = false
+end
+
 function Panel.Render()
     if not _config then return end
 
@@ -232,12 +240,13 @@ function Panel.Render()
     end
 
     ImGui.SetNextWindowSize(ImVec2(340, 380), ImGuiCond.FirstUseEver)
-    local shouldDraw = ImGui.Begin('e9loot', nil, ImGuiWindowFlags.NoScrollbar)
+    local open, shouldDraw = ImGui.Begin('e9loot', _panelOpen, ImGuiWindowFlags.NoScrollbar)
+    _panelOpen = open
 
     if shouldDraw then
-        -- Minimize button — top right corner, preserves cursor for layout below
-        local _savedPos = ImGui.GetCursorPosVec()
-        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 22, 4))
+        -- Minimize button — top right corner, save/restore cursor with two-value form
+        local _sx, _sy = ImGui.GetCursorPos()
+        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 28, 2))
         if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
             _miniMode = true
         end
@@ -246,7 +255,7 @@ function Panel.Render()
             ImGui.Text('Activate Mini Mode')
             ImGui.EndTooltip()
         end
-        ImGui.SetCursorPos(_savedPos)
+        ImGui.SetCursorPos(ImVec2(_sx, _sy))
 
         -- Header: logo placeholder + version info
         if _version then

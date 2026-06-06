@@ -119,13 +119,15 @@ mq.bind('/e9loot', function(subcmd, ...)
         end
     elseif subcmd == 'mini' then
         Panel.ToggleMini()
+    elseif subcmd == 'show' then
+        Panel.Show()
     elseif subcmd == 'toggledone' then
         local newVal = not Config:Get('AnnounceDone')
         Config:SetAndSave('AnnounceDone', newVal)
         channel:Broadcast({ type='set_announcedone', value=newVal })
         printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | mini | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\aye9loot commands: loot | mini | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
