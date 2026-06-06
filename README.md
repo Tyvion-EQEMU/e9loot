@@ -106,11 +106,11 @@ All e9loot files are kept in their own subfolder so they don't clutter the main 
 
 ```
 <MQ2 config dir>/e9loot/
-├── e9loot_shared.ini        (shared group settings)
-├── <CharName>_e9loot.ini   (per-character settings)
-├── <CharName>_e9loot.log   (per-character session log)
-├── e9loot_currency.txt
-├── e9loot_quest.txt
+├── e9loot_<Server>_shared.ini
+├── e9loot_<Server>_<CharName>.ini
+├── e9loot_<Server>_<CharName>.log
+├── e9loot_<Server>_currency.txt
+├── e9loot_<Server>_quest.txt
 └── ... (one .txt per list type)
 ```
 

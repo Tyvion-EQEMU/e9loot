@@ -35,7 +35,8 @@ local function e9lootDir()
 end
 
 local function openLog()
-    local path = string.format('%s/%s_e9loot.log', e9lootDir(), mq.TLO.Me.CleanName())
+    local server = mq.TLO.EverQuest.Server():gsub(' ', '_')
+    local path = string.format('%s/e9loot_%s_%s.log', e9lootDir(), server, mq.TLO.Me.CleanName())
     _logFile = io.open(path, 'a')
     if _logFile then
         _logFile:write(string.format('\n=== Session %s ===\n', os.date('%Y-%m-%d %H:%M:%S')))

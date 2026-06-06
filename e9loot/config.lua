@@ -26,12 +26,20 @@ local function e9lootDir()
     return _cfgDir
 end
 
+local _serverTag = nil
+local function serverTag()
+    if not _serverTag then
+        _serverTag = mq.TLO.EverQuest.Server():gsub(' ', '_')
+    end
+    return _serverTag
+end
+
 local function iniPath()
-    return string.format('%s/%s_e9loot.ini', e9lootDir(), mq.TLO.Me.CleanName())
+    return string.format('%s/e9loot_%s_%s.ini', e9lootDir(), serverTag(), mq.TLO.Me.CleanName())
 end
 
 local function sharedIniPath()
-    return string.format('%s/e9loot_shared.ini', e9lootDir())
+    return string.format('%s/e9loot_%s_shared.ini', e9lootDir(), serverTag())
 end
 
 -- Default values — all settings live here; add new keys here first

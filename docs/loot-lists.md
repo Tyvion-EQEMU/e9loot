@@ -102,19 +102,19 @@ Files are created automatically on first run if they don't exist.
 
 ```
 <MQ2 config dir>/e9loot/
-├── e9loot_currency.txt
-├── e9loot_quest.txt
-├── e9loot_event.txt
-├── e9loot_lore.txt
-├── e9loot_astrial.txt
-├── e9loot_tiered.txt
-├── e9loot_beasts.txt
-├── e9loot_deva.txt
-├── e9loot_specials.txt
-├── e9loot_destroy.txt
-├── e9loot_skip.txt
-├── e9loot_shared.ini
-└── <CharacterName>_e9loot.ini
+├── e9loot_<Server>_currency.txt
+├── e9loot_<Server>_quest.txt
+├── e9loot_<Server>_event.txt
+├── e9loot_<Server>_lore.txt
+├── e9loot_<Server>_astrial.txt
+├── e9loot_<Server>_tiered.txt
+├── e9loot_<Server>_beasts.txt
+├── e9loot_<Server>_deva.txt
+├── e9loot_<Server>_specials.txt
+├── e9loot_<Server>_destroy.txt
+├── e9loot_<Server>_skip.txt
+├── e9loot_<Server>_shared.ini
+└── e9loot_<Server>_<CharName>.ini
 ```
 
 Each file contains one item per line in the format:

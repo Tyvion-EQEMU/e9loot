@@ -18,7 +18,9 @@ function Base.new(name, seeds)
     return self
 end
 
-local _listDir = nil
+local _listDir    = nil
+local _serverTag  = nil
+
 local function e9lootDir()
     if not _listDir then
         _listDir = mq.configDir .. '/e9loot'
@@ -27,8 +29,15 @@ local function e9lootDir()
     return _listDir
 end
 
+local function serverTag()
+    if not _serverTag then
+        _serverTag = mq.TLO.EverQuest.Server():gsub(' ', '_')
+    end
+    return _serverTag
+end
+
 local function filePath(name)
-    return string.format('%s/e9loot_%s.txt', e9lootDir(), name)
+    return string.format('%s/e9loot_%s_%s.txt', e9lootDir(), serverTag(), name)
 end
 
 function Base:Load()
