@@ -28,7 +28,7 @@ These settings are fully wired in config.lua and the loot engine but have no con
   3. Complete the loot sweep
   4. Re-establish the camp at the saved location
   5. Resume pulls
-  - Longer term: could explore whether RGMercs exposes a "stop pull" signal short of a full pause, or whether e9loot could register as a loot handler that RGMercs defers to natively. The combat state monitoring already in place (suspend looting during combat, resume when clear) is a step toward this integration.
+  - **Reference implementation**: `C:\games\mq-rekka\lua\rgmercs\modules\lootnscoot.lua` shows exactly how RGMercs integrates with an external loot script. The pattern: LNS is launched with `/lua run lootnscoot directed rgmercs`; RGMercs drives it each tick via `GiveTime()` using the MQ2 **Actors** messaging system (`Actors.register` / `actor:send`); RGMercs sends `{ directions='doloot' }` to trigger a sweep and blocks in `DoLooting()` waiting for a `done_looting` message back. e9loot could adopt the same `directed rgmercs` launch mode and Actors handshake. Note: the camp management problem is NOT solved in LNS — that would be new work on top of the directed mode pattern.
 
 ## Maybe Someday
 
