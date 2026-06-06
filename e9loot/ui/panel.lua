@@ -163,15 +163,23 @@ local function renderHistory()
                     ImGui.TextColored(col[1], col[2], col[3], col[4], (entry.decision or ''):upper())
 
                     ImGui.TableNextColumn()
+                    local canInspect = entry.decision == 'keep' or entry.decision == 'sell'
                     ImGui.TextColored(col[1], col[2], col[3], col[4], entry.name)
-                    if ImGui.IsItemHovered() then
-                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
-                        if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
-                            local found = mq.TLO.FindItem('=' .. entry.name)
-                            if found and found.ID() and found.ID() > 0 then
-                                found.Inspect()
-                            else
-                                printf('\aye9loot: %s is not in your inventory', entry.name)
+                    if canInspect then
+                        local rmin = ImGui.GetItemRectMinVec()
+                        local rmax = ImGui.GetItemRectMaxVec()
+                        local dl2  = ImGui.GetWindowDrawList()
+                        dl2:AddLine(ImVec2(rmin.x, rmax.y), rmax,
+                            ImGui.ColorConvertFloat4ToU32(ImVec4(col[1], col[2], col[3], col[4])), 1.0)
+                        if ImGui.IsItemHovered() then
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+                            if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
+                                local found = mq.TLO.FindItem('=' .. entry.name)
+                                if found and found.ID() and found.ID() > 0 then
+                                    found.Inspect()
+                                else
+                                    printf('\aye9loot: %s is not in your inventory', entry.name)
+                                end
                             end
                         end
                     end
