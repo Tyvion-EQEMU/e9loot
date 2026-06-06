@@ -70,9 +70,6 @@ Lists.LoadAll()
 -- Boot channel
 channel:Init()
 
--- Suppress corpse-hidden confirmation messages for the session
-mq.cmd('/hidecorpse looted')
-
 -- Boot core loot engine
 Loot.Init(Config, Lists, framework, channel)
 
@@ -170,11 +167,10 @@ while true do
     mq.doevents()
     channel:Tick()
 
-    -- Zone change: clear corpse done-set and re-apply hidecorpse (resets on zone)
+    -- Zone change: clear corpse done-set
     local curZone = mq.TLO.Zone.ID()
-    if curZone ~= lastZone then
+    if curZone and curZone ~= lastZone then
         Corpse.ResetDone()
-        mq.cmd('/hidecorpse looted')
         lastZone = curZone
     end
 
