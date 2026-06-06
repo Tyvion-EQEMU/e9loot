@@ -167,7 +167,12 @@ local function renderHistory()
                     if ImGui.IsItemHovered() then
                         ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
                         if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
-                            mq.cmdf('/itemdisplay "%s"', entry.name)
+                            local found = mq.TLO.FindItem('=' .. entry.name)
+                            if found and found.ID() and found.ID() > 0 then
+                                found.Inspect()
+                            else
+                                printf('\aye9loot: %s is not in your inventory', entry.name)
+                            end
                         end
                     end
 
