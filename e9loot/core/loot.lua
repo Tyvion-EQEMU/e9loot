@@ -36,7 +36,7 @@ end
 
 local function openLog()
     local server = mq.TLO.EverQuest.Server():gsub(' ', '_')
-    local path = string.format('%s/e9loot_%s_%s.log', e9lootDir(), server, mq.TLO.Me.CleanName())
+    local path = string.format('%s/CharLogs_%s_%s.log', e9lootDir(), server, mq.TLO.Me.CleanName())
     _logFile = io.open(path, 'a')
     if _logFile then
         _logFile:write(string.format('\n=== Session %s ===\n', os.date('%Y-%m-%d %H:%M:%S')))

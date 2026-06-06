@@ -37,7 +37,7 @@ local function serverTag()
 end
 
 local function filePath(name)
-    return string.format('%s/e9loot_%s_%s.txt', e9lootDir(), serverTag(), name)
+    return string.format('%s/LootList_%s_%s.txt', e9lootDir(), serverTag(), name)
 end
 
 function Base:Load()

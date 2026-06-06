@@ -35,11 +35,11 @@ local function serverTag()
 end
 
 local function iniPath()
-    return string.format('%s/e9loot_%s_%s.ini', e9lootDir(), serverTag(), mq.TLO.Me.CleanName())
+    return string.format('%s/CharSettings_%s_%s.ini', e9lootDir(), serverTag(), mq.TLO.Me.CleanName())
 end
 
 local function sharedIniPath()
-    return string.format('%s/e9loot_%s_shared.ini', e9lootDir(), serverTag())
+    return string.format('%s/SharedSettings_%s.ini', e9lootDir(), serverTag())
 end
 
 -- Default values — all settings live here; add new keys here first
