@@ -22,6 +22,14 @@ These settings are fully wired in config.lua and the loot engine but have no con
   2. *Pin a target item per slot* — user specifies a "best in slot" item name for a given slot. If that exact item is already equipped, the slot is locked and ignored. If it is not yet equipped, normal upgrade logic runs until the pinned item is found and equipped. Effectively pre-sets a gear goal per slot.
   - Open questions: where does this live in the UI (new tab in editor? per-slot config table in the panel?), how are slots identified to the user (slot name vs slot number), and how does it interact with WeaponMode filtering.
 
+- **Deeper RGMercs Integration — Camp-Aware Looting** — Current framework pause stops pulls but does not stop RGMercs from running toons back to camp. With a small aggro radius and camphard off, this creates a loop: e9loot warps a toon to a corpse → RGMercs immediately runs them back to camp → loot never completes → repeat. The fix likely requires e9loot to do more than just pause before a loot sweep:
+  1. Record the current camp location (RGMercs command TBD — needs research into what RGMercs exposes)
+  2. Fully stop the camp (not just pause pulls) so toons stay where they are during looting
+  3. Complete the loot sweep
+  4. Re-establish the camp at the saved location
+  5. Resume pulls
+  - Longer term: could explore whether RGMercs exposes a "stop pull" signal short of a full pause, or whether e9loot could register as a loot handler that RGMercs defers to natively. The combat state monitoring already in place (suspend looting during combat, resume when clear) is a step toward this integration.
+
 ## Maybe Someday
 
 - **Server Profiles** — On first run (setup dialog), user selects their server from a dropdown. Each server ships with its own pre-populated loot lists (the `.txt` files backing the lua list system). Planned servers: Profusion EMU, Ascendant, Lazarus. A "Custom" option loads no pre-populated lists — blank slate for players on unlisted servers or those who want full manual control. Selecting a server would copy the appropriate list files into place; switching servers would require a decision on whether to overwrite existing lists or merge. This likely means duplicating the list file tree per server (e.g., `lists/profusion/`, `lists/ascendant/`, `lists/custom/`) and having the loader pick the right path based on the saved server setting.
