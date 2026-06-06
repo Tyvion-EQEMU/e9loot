@@ -422,18 +422,18 @@ function Panel.Render()
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Done Looting')
+            ImGui.TableNextColumn()
+            local announceDone = _config:Get('AnnounceDone')
+            local newAnnounceDone, _ = ImGui.Checkbox('##announcedone', announceDone)
+            if newAnnounceDone ~= announceDone then
+                _config:SetAndSave('AnnounceDone', newAnnounceDone)
+            end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.PushTextWrapPos(280)
                 ImGui.TextWrapped('When enabled, characters will broadcast via /g (group chat) when they are finished looting all available corpses')
                 ImGui.PopTextWrapPos()
                 ImGui.EndTooltip()
-            end
-            ImGui.TableNextColumn()
-            local announceDone = _config:Get('AnnounceDone')
-            local newAnnounceDone, _ = ImGui.Checkbox('##announcedone', announceDone)
-            if newAnnounceDone ~= announceDone then
-                _config:SetAndSave('AnnounceDone', newAnnounceDone)
             end
 
             ImGui.EndTable()
