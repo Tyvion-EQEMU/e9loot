@@ -21,4 +21,4 @@ _Add things here as they come to you — no need to be ready to build them yet._
 
 ## Maybe Someday
 
-_Larger or lower-priority ideas._
+- **Server Profiles** — On first run (setup dialog), user selects their server from a dropdown. Each server ships with its own pre-populated loot lists (the `.txt` files backing the lua list system). Planned servers: Profusion EMU, Ascendant, Lazarus. A "Custom" option loads no pre-populated lists — blank slate for players on unlisted servers or those who want full manual control. Selecting a server would copy the appropriate list files into place; switching servers would require a decision on whether to overwrite existing lists or merge. This likely means duplicating the list file tree per server (e.g., `lists/profusion/`, `lists/ascendant/`, `lists/custom/`) and having the loader pick the right path based on the saved server setting.
