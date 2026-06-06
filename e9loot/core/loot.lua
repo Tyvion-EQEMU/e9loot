@@ -13,9 +13,9 @@ local _config
 local _lists
 local _framework
 local _channel
-local _logFile        = nil
-local _looting        = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
-local _pausedByCombat = false  -- true only when auto-paused by combat; cleared by any manual SetEnabled call
+local _logFile   = nil
+local _looting   = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
+local _inCombat  = false  -- true while combat suppresses looting; never affects LootEnabled
 
 local DECISION = {
     KEEP    = 'keep',
@@ -28,8 +28,14 @@ local DECISION = {
 -----------------------------------------------------------------------
 -- Persistent log file (appended each session)
 -----------------------------------------------------------------------
+local function e9lootDir()
+    local dir = mq.configDir .. '/e9loot'
+    os.execute('if not exist "' .. dir .. '" mkdir "' .. dir .. '"')
+    return dir
+end
+
 local function openLog()
-    local path = string.format('%s/%s_e9loot.log', mq.configDir, mq.TLO.Me.CleanName())
+    local path = string.format('%s/%s_e9loot.log', e9lootDir(), mq.TLO.Me.CleanName())
     _logFile = io.open(path, 'a')
     if _logFile then
         _logFile:write(string.format('\n=== Session %s ===\n', os.date('%Y-%m-%d %H:%M:%S')))
@@ -250,33 +256,28 @@ local function hasLiveXTargets()
     return false
 end
 
--- Manual enable/disable — always clears the combat-pause flag so auto-resume cannot override the user.
 function Loot.SetEnabled(value)
-    _pausedByCombat = false
     _config:SetAndSave('LootEnabled', value)
 end
 
--- Call once per main-loop tick to handle combat-triggered auto-pause and auto-resume.
-function Loot.CombatTick()
-    if _config:Get('LootEnabled') and mq.TLO.Me.Combat() then
-        _config:SetAndSave('LootEnabled', false)
-        _pausedByCombat = true
-        printf('\are9loot: combat detected — looting paused')
-    end
+function Loot.IsInCombat()
+    return _inCombat
+end
 
-    if _pausedByCombat and not _config:Get('LootEnabled') then
-        if not mq.TLO.Me.Combat() and not hasLiveXTargets() then
-            _config:SetAndSave('LootEnabled', true)
-            _pausedByCombat = false
-            printf('\age9loot: combat clear — looting resumed')
-        end
-    elseif _pausedByCombat and _config:Get('LootEnabled') then
-        _pausedByCombat = false
+-- Call once per main-loop tick to track combat state without touching LootEnabled.
+function Loot.CombatTick()
+    local wasInCombat = _inCombat
+    _inCombat = mq.TLO.Me.Combat() or hasLiveXTargets()
+    if _inCombat and not wasInCombat then
+        printf('\are9loot: combat — looting suspended')
+    elseif not _inCombat and wasInCombat then
+        printf('\age9loot: combat clear — looting resumed')
     end
 end
 
 function Loot.LootNearby()
     if not _config:Get('LootEnabled') then return end
+    if _inCombat then return end
     if _looting then return end
 
     local useWarp = _config:Get('UseWarp')

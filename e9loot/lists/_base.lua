@@ -18,8 +18,17 @@ function Base.new(name, seeds)
     return self
 end
 
+local _listDir = nil
+local function e9lootDir()
+    if not _listDir then
+        _listDir = mq.configDir .. '/e9loot'
+        os.execute('if not exist "' .. _listDir .. '" mkdir "' .. _listDir .. '"')
+    end
+    return _listDir
+end
+
 local function filePath(name)
-    return string.format('%s/e9loot_%s.txt', mq.configDir, name)
+    return string.format('%s/e9loot_%s.txt', e9lootDir(), name)
 end
 
 function Base:Load()

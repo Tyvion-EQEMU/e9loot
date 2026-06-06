@@ -100,12 +100,21 @@ Some settings (Framework, Channel, Loot Range, Use Warp, etc.) are **shared** �
 them on one character updates all characters on the next restart. Others (Weapon Mode,
 Ranged Slot, Loot Enabled) are **per-character** so each toon can have its own values.
 
-## Logs
+## Config Files
 
-Each session appends to a log file at:
+All e9loot files are kept in their own subfolder so they don't clutter the main config directory:
+
 ```
-<MQ2 config dir>\<CharacterName>_e9loot.log
+<MQ2 config dir>/e9loot/
+├── e9loot_shared.ini        (shared group settings)
+├── <CharName>_e9loot.ini   (per-character settings)
+├── <CharName>_e9loot.log   (per-character session log)
+├── e9loot_currency.txt
+├── e9loot_quest.txt
+└── ... (one .txt per list type)
 ```
+
+The folder is created automatically on first run.
 
 ## Support
 

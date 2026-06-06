@@ -17,12 +17,21 @@ end
 
 local Config = {}
 
+local _cfgDir = nil
+local function e9lootDir()
+    if not _cfgDir then
+        _cfgDir = mq.configDir .. '/e9loot'
+        os.execute('if not exist "' .. _cfgDir .. '" mkdir "' .. _cfgDir .. '"')
+    end
+    return _cfgDir
+end
+
 local function iniPath()
-    return string.format('%s/%s_e9loot.ini', mq.configDir, mq.TLO.Me.CleanName())
+    return string.format('%s/%s_e9loot.ini', e9lootDir(), mq.TLO.Me.CleanName())
 end
 
 local function sharedIniPath()
-    return string.format('%s/e9loot_shared.ini', mq.configDir)
+    return string.format('%s/e9loot_shared.ini', e9lootDir())
 end
 
 -- Default values — all settings live here; add new keys here first

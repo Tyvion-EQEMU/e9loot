@@ -97,22 +97,24 @@ current tab.
 
 ## List Files
 
-Each list is stored as a plain text file in the `lists/` folder inside the e9loot
-directory. Files are created automatically on first run if they don't exist.
+Each list is stored as a plain text file under your MacroQuest config directory.
+Files are created automatically on first run if they don't exist.
 
 ```
-e9loot/lists/
-├── currency.txt
-├── quest.txt
-├── event.txt
-├── lore.txt
-├── astrial.txt
-├── tiered.txt
-├── beasts.txt
-├── deva.txt
-├── specials.txt
-├── destroy.txt
-└── skip.txt
+<MQ2 config dir>/e9loot/
+├── e9loot_currency.txt
+├── e9loot_quest.txt
+├── e9loot_event.txt
+├── e9loot_lore.txt
+├── e9loot_astrial.txt
+├── e9loot_tiered.txt
+├── e9loot_beasts.txt
+├── e9loot_deva.txt
+├── e9loot_specials.txt
+├── e9loot_destroy.txt
+├── e9loot_skip.txt
+├── e9loot_shared.ini
+└── <CharacterName>_e9loot.ini
 ```
 
 Each file contains one item per line in the format:
