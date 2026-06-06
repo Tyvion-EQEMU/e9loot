@@ -12,6 +12,7 @@ local _editor    = nil
 local _framework = nil
 local _adapters  = nil
 local _channel   = nil
+local _version   = nil
 
 -- Weapon mode combo state
 local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
@@ -122,7 +123,7 @@ local function renderHistory()
     ImGui.End()
 end
 
-function Panel.Init(config, loot, setup, editor, framework, adapters, channel)
+function Panel.Init(config, loot, setup, editor, framework, adapters, channel, version)
     _config    = config
     _loot      = loot
     _setup     = setup
@@ -130,6 +131,7 @@ function Panel.Init(config, loot, setup, editor, framework, adapters, channel)
     _framework = framework
     _adapters  = adapters
     _channel   = channel
+    _version   = version
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
 end
@@ -137,11 +139,30 @@ end
 function Panel.Render()
     if not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(340, 210), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(340, 290), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot', true,
         bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.NoScrollbar))
 
     if shouldDraw then
+        -- Header: 60×60 logo placeholder + app name / version / author
+        if _version then
+            local sp = ImGui.GetCursorScreenPosVec()
+            local dl = ImGui.GetWindowDrawList()
+            dl:AddRectFilled(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(40, 80, 140, 200))
+            dl:AddRect(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(100, 150, 210, 180))
+            ImGui.Dummy(ImVec2(60, 60))
+            ImGui.SameLine()
+            local titlePos = ImGui.GetCursorPosVec()
+            ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * 1.05)
+            ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
+            ImGui.PopFont()
+            ImGui.SetCursorPos(ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing()))
+            ImGui.TextDisabled('by ' .. _version._author)
+            ImGui.Spacing()
+            ImGui.Separator()
+            ImGui.Spacing()
+        end
+
         local enabled = _config:Get('LootEnabled')
 
         -- Pause button: bright red when running (actionable), dim when already paused

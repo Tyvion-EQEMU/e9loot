@@ -3,6 +3,13 @@
 local mq     = require('mq')
 local imgui  = require('ImGui')
 
+-- Version block — single source of truth
+local Version = {
+    _AppName = 'e9loot',
+    _version = '0.1.0',
+    _author  = 'Tyvion',
+}
+
 local Config  = require('e9loot.config')
 local Lists   = require('e9loot.lists.init')
 local Loot    = require('e9loot.core.loot')
@@ -69,7 +76,7 @@ Loot.Init(Config, Lists, framework, channel)
 -- Wire panel (pass lists ref into config for editor access)
 Config._lists = Lists.All()
 
-Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS, channel)
+Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS, channel, Version)
 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)
@@ -149,7 +156,7 @@ local function hasLiveXTargets()
     return false
 end
 
-printf('\age9loot started — framework: %s  channel: %s', frameworkName, channelName)
+printf('\age9loot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
 printf('\ayType /e9loot for command help.')
 
 while true do
