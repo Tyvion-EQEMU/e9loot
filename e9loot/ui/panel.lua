@@ -235,6 +235,19 @@ function Panel.Render()
     local shouldDraw = ImGui.Begin('e9loot', nil, ImGuiWindowFlags.NoScrollbar)
 
     if shouldDraw then
+        -- Minimize button — top right corner, preserves cursor for layout below
+        local _savedPos = ImGui.GetCursorPosVec()
+        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 22, 4))
+        if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
+            _miniMode = true
+        end
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text('Activate Mini Mode')
+            ImGui.EndTooltip()
+        end
+        ImGui.SetCursorPos(_savedPos)
+
         -- Header: logo placeholder + version info
         if _version then
             local sp = ImGui.GetCursorScreenPosVec()
@@ -422,14 +435,6 @@ function Panel.Render()
         ImGui.Spacing()
 
         -- Action buttons
-        if ImGui.Button('List Editor', 95, 0) then
-            if not _editor.IsOpen() then
-                _editor.Open(_config._lists)
-            end
-        end
-
-        ImGui.SameLine()
-
         local histLabel = _histOpen and 'History [on]' or 'History'
         if ImGui.Button(histLabel, 95, 0) then
             _histOpen = not _histOpen
@@ -438,13 +443,10 @@ function Panel.Render()
 
         ImGui.SameLine()
 
-        if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
-            _miniMode = true
-        end
-        if ImGui.IsItemHovered() then
-            ImGui.BeginTooltip()
-            ImGui.Text('Activate Mini Mode')
-            ImGui.EndTooltip()
+        if ImGui.Button('List Editor', 95, 0) then
+            if not _editor.IsOpen() then
+                _editor.Open(_config._lists)
+            end
         end
 
         ImGui.Spacing()
