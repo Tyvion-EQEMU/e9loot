@@ -70,6 +70,9 @@ Lists.LoadAll()
 -- Boot channel
 channel:Init()
 
+-- Suppress corpse-hidden confirmation messages for the session
+mq.cmd('/hidecorpse looted')
+
 -- Boot core loot engine
 Loot.Init(Config, Lists, framework, channel)
 
@@ -114,13 +117,15 @@ mq.bind('/e9loot', function(subcmd, ...)
         else
             printf('\aye9loot set <setting> <value>  (e.g. /e9loot set usewarp false)')
         end
+    elseif subcmd == 'mini' then
+        Panel.ToggleMini()
     elseif subcmd == 'toggledone' then
         local newVal = not Config:Get('AnnounceDone')
         Config:SetAndSave('AnnounceDone', newVal)
         channel:Broadcast({ type='set_announcedone', value=newVal })
         printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | setup | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\aye9loot commands: loot | mini | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
@@ -163,10 +168,11 @@ while true do
     mq.doevents()
     channel:Tick()
 
-    -- Zone change: clear corpse done-set
+    -- Zone change: clear corpse done-set and re-apply hidecorpse (resets on zone)
     local curZone = mq.TLO.Zone.ID()
     if curZone ~= lastZone then
         Corpse.ResetDone()
+        mq.cmd('/hidecorpse looted')
         lastZone = curZone
     end
 

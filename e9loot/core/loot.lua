@@ -59,7 +59,7 @@ end
 -- All other decisions are silent in MQ chat — history panel and log only.
 -----------------------------------------------------------------------
 local function announceKeep(name, reason, toon)
-    local msg = string.format('e9loot | [%s] KEEP: %s (%s)', toon, name, reason)
+    local msg = string.format('e9loot | KEEP: %s (%s)', name, reason)
     if mq.TLO.Me.Grouped() then
         mq.cmdf('/g %s', msg)
     else
@@ -234,7 +234,6 @@ function Loot.LootCorpse(corpseId, useWarp)
 
     Corpse.CloseCorpse()
     Corpse.MarkDone(corpseId)
-    mq.cmd('/hidecorpse looted')
     return true
 end
 

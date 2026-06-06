@@ -1,7 +1,8 @@
-﻿-- Main ImGui panel: status bar, pause/resume, weapon mode, history table, editor/setup launchers
+-- Main ImGui panel: header, pause/resume, two-column settings, history, mini-mode
 
 local mq     = require('mq')
 local Corpse = require('e9loot.core.corpse')
+local Mini   = require('e9loot.ui.mini')
 
 local Panel = {}
 
@@ -14,7 +15,7 @@ local _adapters  = nil
 local _channel   = nil
 local _version   = nil
 
--- Weapon mode combo state
+-- Weapon mode
 local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
 local WEAPONMODE_LABELS = {
     DW      = 'Dual Wield',
@@ -29,9 +30,25 @@ local function wmIndexOf(val)
     return 1
 end
 
--- History window state
-local _histOpen   = false
-local _histFilter = ''
+-- Framework / channel combo lists
+local FRAMEWORKS = { 'none', 'rgmercs', 'e3', 'kissassist' }
+local CHANNELS   = { 'none', 'dannet', 'eqbc' }
+
+local function indexOfStr(tbl, val)
+    for i, v in ipairs(tbl) do if v == val then return i end end
+    return 1
+end
+
+-- History state
+local _histOpen           = false
+local _histFilter         = ''
+local _histDecisionFilter = { keep=false, sell=false, destroy=false, skip=false }
+
+-- Restart modal
+local _wantRestartModal = false
+
+-- Mini mode
+local _miniMode = false
 
 local DECISION_COLORS = {
     keep    = { 0.3, 1.0, 0.3, 1.0 },
@@ -40,6 +57,20 @@ local DECISION_COLORS = {
     skip    = { 0.5, 0.5, 0.5, 0.7 },
 }
 
+-- Active / inactive button colors for decision filter toggles
+local FILTER_BTNCOLS = {
+    keep    = { a={ 0.20, 0.75, 0.20, 1.0 }, i={ 0.07, 0.26, 0.07, 1.0 } },
+    sell    = { a={ 0.82, 0.62, 0.10, 1.0 }, i={ 0.28, 0.21, 0.04, 1.0 } },
+    destroy = { a={ 0.60, 0.60, 0.60, 1.0 }, i={ 0.20, 0.20, 0.20, 1.0 } },
+    skip    = { a={ 0.80, 0.80, 0.80, 1.0 }, i={ 0.24, 0.24, 0.24, 1.0 } },
+}
+
+local DECISION_ORDER  = { 'keep', 'sell', 'destroy', 'skip' }
+local DECISION_LABELS = { keep='Keep', sell='Sell', destroy='Destroy', skip='Skip' }
+
+-----------------------------------------------------------------------
+-- History window
+-----------------------------------------------------------------------
 local function renderHistory()
     if not _histOpen then return end
 
@@ -55,12 +86,37 @@ local function renderHistory()
         local filterLow = newFilter:lower()
 
         ImGui.SameLine()
-        if ImGui.Button('Clear Filter') then _histFilter = '' end
+        if ImGui.Button('Clear Filter') then
+            _histFilter = ''
+            for _, d in ipairs(DECISION_ORDER) do
+                _histDecisionFilter[d] = false
+            end
+        end
+
+        -- Decision filter toggles
+        for _, d in ipairs(DECISION_ORDER) do
+            ImGui.SameLine()
+            local active = _histDecisionFilter[d]
+            local bc     = active and FILTER_BTNCOLS[d].a or FILTER_BTNCOLS[d].i
+            ImGui.PushStyleColor(ImGuiCol.Button,
+                bc[1], bc[2], bc[3], bc[4])
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
+                math.min(1.0, bc[1]*1.25), math.min(1.0, bc[2]*1.25), math.min(1.0, bc[3]*1.25), 1.0)
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive,
+                bc[1]*0.8, bc[2]*0.8, bc[3]*0.8, 1.0)
+            if ImGui.Button(DECISION_LABELS[d]) then
+                _histDecisionFilter[d] = not _histDecisionFilter[d]
+            end
+            ImGui.PopStyleColor(3)
+        end
 
         ImGui.Separator()
 
         local history = _loot.GetHistory()
         local kept, sold, destroyed = 0, 0, 0
+
+        local anyDecision = _histDecisionFilter.keep or _histDecisionFilter.sell
+            or _histDecisionFilter.destroy or _histDecisionFilter.skip
 
         if ImGui.BeginTable('##histtbl', 6,
             bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
@@ -82,8 +138,13 @@ local function renderHistory()
                 elseif entry.decision == 'destroy' then destroyed = destroyed + 1
                 end
 
-                local toonLow = (entry.toon or ''):lower()
-                if filterLow == '' or entry.name:lower():find(filterLow, 1, true) or toonLow:find(filterLow, 1, true) then
+                local toonLow      = (entry.toon or ''):lower()
+                local decisionPass = not anyDecision or _histDecisionFilter[entry.decision]
+                local textPass     = filterLow == ''
+                    or entry.name:lower():find(filterLow, 1, true)
+                    or toonLow:find(filterLow, 1, true)
+
+                if decisionPass and textPass then
                     local col = DECISION_COLORS[entry.decision] or { 1, 1, 1, 1 }
 
                     ImGui.TableNextRow()
@@ -102,9 +163,9 @@ local function renderHistory()
 
                     ImGui.TableNextColumn()
                     ImGui.PushStyleColor(ImGuiCol.Text, col[1], col[2], col[3], col[4])
-                    local _, nameClicked = ImGui.Selectable(entry.name .. '##h' .. i, false)
+                    local clicked = ImGui.Selectable(entry.name .. '##h' .. i, false)
                     ImGui.PopStyleColor()
-                    if nameClicked and entry.name then
+                    if clicked and entry.name then
                         mq.cmdf('/itemdisplay "%s"', entry.name)
                     end
 
@@ -123,6 +184,9 @@ local function renderHistory()
     ImGui.End()
 end
 
+-----------------------------------------------------------------------
+-- Panel API
+-----------------------------------------------------------------------
 function Panel.Init(config, loot, setup, editor, framework, adapters, channel, version)
     _config    = config
     _loot      = loot
@@ -134,28 +198,38 @@ function Panel.Init(config, loot, setup, editor, framework, adapters, channel, v
     _version   = version
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
+    Mini.Init(config, version)
+end
+
+function Panel.ToggleMini()
+    _miniMode = not _miniMode
 end
 
 function Panel.Render()
     if not _config then return end
 
+    -- Mini mode: show compact overlay, hide main window
+    if _miniMode then
+        Mini.Render(function() _miniMode = false end)
+        _editor.Render()
+        _setup.Render()
+        return
+    end
+
     ImGui.SetNextWindowSize(ImVec2(340, 380), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('e9loot', true,
-        ImGuiWindowFlags.NoScrollbar)
+    local shouldDraw = ImGui.Begin('e9loot', nil, ImGuiWindowFlags.NoScrollbar)
 
     if shouldDraw then
-        -- Header: 60×60 logo placeholder + app name / version / author
+        -- Header: logo placeholder + version info
         if _version then
             local sp = ImGui.GetCursorScreenPosVec()
             local dl = ImGui.GetWindowDrawList()
             dl:AddRectFilled(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(40, 80, 140, 200))
-            dl:AddRect(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(100, 150, 210, 180))
+            dl:AddRect(sp,       ImVec2(sp.x + 60, sp.y + 60), IM_COL32(100, 150, 210, 180))
             ImGui.Dummy(ImVec2(60, 68))
             ImGui.SameLine()
             ImGui.BeginGroup()
-            ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * 1.05)
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
-            ImGui.PopFont()
             ImGui.TextDisabled('by ' .. _version._author)
             ImGui.EndGroup()
             ImGui.Spacing()
@@ -165,37 +239,30 @@ function Panel.Render()
 
         local enabled = _config:Get('LootEnabled')
 
-        -- Pause button: bright red when running (actionable), dim when already paused
+        -- Pause / Resume with state labels
         ImGui.PushStyleColor(ImGuiCol.Button,
             enabled and 0.72 or 0.28,
             enabled and 0.22 or 0.12,
             enabled and 0.12 or 0.08,
             1.0)
-        if ImGui.Button('Pause', 100, 0) then
+        if ImGui.Button(enabled and 'Pause' or 'Paused', 100, 0) then
             _config:SetAndSave('LootEnabled', false)
         end
         ImGui.PopStyleColor()
 
         ImGui.SameLine()
 
-        -- Resume button: bright green when paused (actionable), dim when already running
         ImGui.PushStyleColor(ImGuiCol.Button,
             enabled and 0.12 or 0.15,
             enabled and 0.28 or 0.60,
             enabled and 0.10 or 0.12,
             1.0)
-        if ImGui.Button('Resume', 100, 0) then
+        if ImGui.Button(enabled and 'Running' or 'Resume', 100, 0) then
             _config:SetAndSave('LootEnabled', true)
         end
         ImGui.PopStyleColor()
 
-        ImGui.SameLine()
-
-        local fw = _config:Get('Framework')
-        local ch = _config:Get('Channel')
-        ImGui.TextDisabled(string.format('[%s/%s]', fw, ch))
-
-        -- Group pause/resume: broadcast to all group members + apply to self
+        -- Group pause / resume (static labels — no cross-toon state awareness)
         if _channel and mq.TLO.Me.Grouped() then
             ImGui.PushStyleColor(ImGuiCol.Button,
                 enabled and 0.60 or 0.22,
@@ -226,45 +293,113 @@ function Panel.Render()
         ImGui.Separator()
         ImGui.Spacing()
 
-        -- Weapon mode combo
-        ImGui.Text('Weapon Mode:')
-        ImGui.SameLine()
-        ImGui.SetNextItemWidth(160)
-        local wmLabels = {}
-        for _, key in ipairs(WEAPONMODES) do
-            table.insert(wmLabels, WEAPONMODE_LABELS[key])
-        end
-        local newWmIdx, wmChanged = ImGui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
-        if wmChanged then
-            _wmIdx = newWmIdx
-            _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
+        -- Two-column settings table
+        if ImGui.BeginTable('##settings', 2, 0) then
+            ImGui.TableSetupColumn('##lbl', ImGuiTableColumnFlags.WidthFixed,   90)
+            ImGui.TableSetupColumn('##ctl', ImGuiTableColumnFlags.WidthStretch)
+
+            -- Framework
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Framework')
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local fwIdx = indexOfStr(FRAMEWORKS, _config:Get('Framework'))
+            local newFwIdx, fwChanged = ImGui.Combo('##fw', fwIdx, FRAMEWORKS, #FRAMEWORKS)
+            if fwChanged then
+                _config:SetAndSave('Framework', FRAMEWORKS[newFwIdx])
+                _wantRestartModal = true
+            end
+
+            -- Channel
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Channel')
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local chIdx = indexOfStr(CHANNELS, _config:Get('Channel'))
+            local newChIdx, chChanged = ImGui.Combo('##ch', chIdx, CHANNELS, #CHANNELS)
+            if chChanged then
+                _config:SetAndSave('Channel', CHANNELS[newChIdx])
+                _wantRestartModal = true
+            end
+
+            -- Weapon Mode
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Weapon Mode')
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local wmLabels = {}
+            for _, key in ipairs(WEAPONMODES) do
+                table.insert(wmLabels, WEAPONMODE_LABELS[key])
+            end
+            local newWmIdx, wmChanged = ImGui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
+            if wmChanged then
+                _wmIdx = newWmIdx
+                _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
+            end
+
+            -- Loot Range
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Loot Range')
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local curRange = _config:Get('LootRange')
+            local newRange, rangeChanged = ImGui.SliderInt('##lootrange', curRange, 50, 600)
+            if rangeChanged then
+                _config:SetAndSave('LootRange', newRange)
+            end
+
+            -- Use Warp
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Use Warp')
+            ImGui.TableNextColumn()
+            local useWarp = _config:Get('UseWarp')
+            local newUseWarp, _ = ImGui.Checkbox('##usewarp', useWarp)
+            if newUseWarp ~= useWarp then
+                _config:SetAndSave('UseWarp', newUseWarp)
+            end
+
+            -- Done Looting
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Done Looting')
+            ImGui.TableNextColumn()
+            local announceDone = _config:Get('AnnounceDone')
+            local newAnnounceDone, _ = ImGui.Checkbox('##announcedone', announceDone)
+            if newAnnounceDone ~= announceDone then
+                _config:SetAndSave('AnnounceDone', newAnnounceDone)
+            end
+
+            ImGui.EndTable()
         end
 
-        -- Loot range slider
-        ImGui.Text('Loot Range: ')
-        ImGui.SameLine()
-        ImGui.SetNextItemWidth(160)
-        local curRange = _config:Get('LootRange')
-        local newRange, rangeChanged = ImGui.SliderInt('##lootrange', curRange, 50, 600)
-        if rangeChanged then
-            _config:SetAndSave('LootRange', newRange)
+        -- Restart required modal
+        if _wantRestartModal then
+            ImGui.OpenPopup('##e9restart')
+            _wantRestartModal = false
         end
 
-        ImGui.Spacing()
-        ImGui.Separator()
-        ImGui.Spacing()
-
-        -- Navigation mode toggle
-        local useWarp = _config:Get('UseWarp')
-        local newUseWarp, _ = ImGui.Checkbox('Use /warp (uncheck for /nav)', useWarp)
-        if newUseWarp ~= useWarp then
-            _config:SetAndSave('UseWarp', newUseWarp)
-        end
-
-        local announceDone = _config:Get('AnnounceDone')
-        local newAnnounceDone, _ = ImGui.Checkbox('/g Done Looting when sweep clears', announceDone)
-        if newAnnounceDone ~= announceDone then
-            _config:SetAndSave('AnnounceDone', newAnnounceDone)
+        if ImGui.BeginPopupModal('##e9restart', nil, ImGuiWindowFlags.AlwaysAutoResize) then
+            ImGui.Text('Restart required — restart e9loot now?')
+            ImGui.Spacing()
+            if ImGui.Button('Confirm', 80, 0) then
+                mq.cmd('/multiline ; /lua stop e9loot ; /timed 50 /lua run e9loot')
+                ImGui.CloseCurrentPopup()
+            end
+            ImGui.SameLine()
+            if ImGui.Button('Cancel', 80, 0) then
+                ImGui.CloseCurrentPopup()
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.Text('Setting saved. Will take effect on next restart.')
+                ImGui.EndTooltip()
+            end
+            ImGui.EndPopup()
         end
 
         ImGui.Spacing()
@@ -272,12 +407,6 @@ function Panel.Render()
         ImGui.Spacing()
 
         -- Action buttons
-        if ImGui.Button('Change Setup', 110, 0) then
-            _setup.Open(_config, _adapters)
-        end
-
-        ImGui.SameLine()
-
         if ImGui.Button('List Editor', 95, 0) then
             if not _editor.IsOpen() then
                 _editor.Open(_config._lists)
@@ -290,6 +419,12 @@ function Panel.Render()
         if ImGui.Button(histLabel, 95, 0) then
             _histOpen = not _histOpen
             _config:SetAndSave('HistoryOpen', _histOpen)
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button('Mini Mode', 95, 0) then
+            _miniMode = true
         end
 
         ImGui.Spacing()
