@@ -70,7 +70,7 @@ Lists.LoadAll()
 -- Boot channel
 channel:Init()
 
-mq.cmd('/squelch /hidecorpse looted')
+mq.cmd('/hidecorpse looted')
 
 -- Boot core loot engine
 Loot.Init(Config, Lists, framework, channel)

@@ -244,8 +244,15 @@ function Panel.Render()
     end
 
     ImGui.SetNextWindowSize(ImVec2(340, 380), ImGuiCond.FirstUseEver)
+    local _lootEnabled = _config:Get('LootEnabled')
+    if not _lootEnabled then
+        ImGui.PushStyleColor(ImGuiCol.TitleBg,       0.40, 0.10, 0.08, 1.0)
+        ImGui.PushStyleColor(ImGuiCol.TitleBgActive, 0.55, 0.12, 0.08, 1.0)
+    end
     local open, shouldDraw = ImGui.Begin('e9loot', _panelOpen, ImGuiWindowFlags.NoScrollbar)
+    if not _lootEnabled then ImGui.PopStyleColor(2) end
     _panelOpen = open
+    if not open then mq.exit() end
 
     if shouldDraw then
         -- Minimize button — top right, y aligned to content start, FA_COMPRESS (core glyph range)
@@ -489,9 +496,12 @@ function Panel.Render()
             - ImGui.GetStyle().WindowPadding.y
         ImGui.SetCursorPosY(statusY)
         local corpses = #Corpse.FindNearby(_config:Get('LootRange'))
-        local paused  = _framework and _framework:IsPaused() or false
-        ImGui.TextDisabled(string.format('Nearby corpses: %d  |  %s', corpses,
-            paused and 'Integration PAUSED' or 'Running'))
+        if _lootEnabled then
+            ImGui.TextDisabled(string.format('Nearby corpses: %d  |  Running', corpses))
+        else
+            ImGui.TextColored(0.9, 0.3, 0.2, 1.0,
+                string.format('Nearby corpses: %d  |  Paused', corpses))
+        end
     end
 
     ImGui.End()
