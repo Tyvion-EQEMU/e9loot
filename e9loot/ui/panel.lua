@@ -33,7 +33,10 @@ end
 
 -- Framework / channel combo lists
 local FRAMEWORKS = { 'none', 'rgmercs', 'e3', 'kissassist' }
-local CHANNELS   = { 'none', 'dannet', 'eqbc' }
+local FRAMEWORK_LABELS = { none='None', rgmercs='RG Mercs', e3='E3', kissassist='Kiss Assist' }
+
+local CHANNELS = { 'none', 'dannet', 'eqbc' }
+local CHANNEL_LABELS = { none='None', dannet='DanNet', eqbc='EQBC' }
 
 local function indexOfStr(tbl, val)
     for i, v in ipairs(tbl) do if v == val then return i end end
@@ -336,27 +339,31 @@ function Panel.Render()
             ImGui.TableSetupColumn('##lbl', ImGuiTableColumnFlags.WidthFixed,   90)
             ImGui.TableSetupColumn('##ctl', ImGuiTableColumnFlags.WidthStretch)
 
-            -- Framework
+            -- Integration (Framework)
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
-            ImGui.Text('Framework')
+            ImGui.Text('Integration')
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
             local fwIdx = indexOfStr(FRAMEWORKS, _config:Get('Framework'))
-            local newFwIdx, fwChanged = ImGui.Combo('##fw', fwIdx, FRAMEWORKS, #FRAMEWORKS)
+            local fwDisplayLabels = {}
+            for _, k in ipairs(FRAMEWORKS) do table.insert(fwDisplayLabels, FRAMEWORK_LABELS[k] or k) end
+            local newFwIdx, fwChanged = ImGui.Combo('##fw', fwIdx, fwDisplayLabels, #fwDisplayLabels)
             if fwChanged then
                 _config:SetAndSave('Framework', FRAMEWORKS[newFwIdx])
                 _wantRestartModal = true
             end
 
-            -- Channel
+            -- Broadcast (Channel)
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
-            ImGui.Text('Channel')
+            ImGui.Text('Broadcast')
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
             local chIdx = indexOfStr(CHANNELS, _config:Get('Channel'))
-            local newChIdx, chChanged = ImGui.Combo('##ch', chIdx, CHANNELS, #CHANNELS)
+            local chDisplayLabels = {}
+            for _, k in ipairs(CHANNELS) do table.insert(chDisplayLabels, CHANNEL_LABELS[k] or k) end
+            local newChIdx, chChanged = ImGui.Combo('##ch', chIdx, chDisplayLabels, #chDisplayLabels)
             if chChanged then
                 _config:SetAndSave('Channel', CHANNELS[newChIdx])
                 _wantRestartModal = true
@@ -389,11 +396,21 @@ function Panel.Render()
             if rangeChanged then
                 _config:SetAndSave('LootRange', newRange)
             end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.Text('Ctrl+Click to type a value')
+                ImGui.EndTooltip()
+            end
 
             -- Use Warp
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Use Warp')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.Text('MQ2RWarp.dll required')
+                ImGui.EndTooltip()
+            end
             ImGui.TableNextColumn()
             local useWarp = _config:Get('UseWarp')
             local newUseWarp, _ = ImGui.Checkbox('##usewarp', useWarp)
@@ -405,6 +422,11 @@ function Panel.Render()
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Done Looting')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.TextWrapped('When enabled, characters will broadcast via /g (group chat) when they are finished looting all available corpses')
+                ImGui.EndTooltip()
+            end
             ImGui.TableNextColumn()
             local announceDone = _config:Get('AnnounceDone')
             local newAnnounceDone, _ = ImGui.Checkbox('##announcedone', announceDone)
@@ -459,12 +481,15 @@ function Panel.Render()
             end
         end
 
-        ImGui.Spacing()
-
+        -- Status line anchored to bottom-left of window
+        local statusY = ImGui.GetWindowHeight()
+            - ImGui.GetTextLineHeight()
+            - ImGui.GetStyle().WindowPadding.y
+        ImGui.SetCursorPosY(statusY)
         local corpses = #Corpse.FindNearby(_config:Get('LootRange'))
         local paused  = _framework and _framework:IsPaused() or false
-        ImGui.Text(string.format('Nearby corpses: %d  |  %s', corpses,
-            paused and 'Framework PAUSED' or 'Running'))
+        ImGui.TextDisabled(string.format('Nearby corpses: %d  |  %s', corpses,
+            paused and 'Integration PAUSED' or 'Running'))
     end
 
     ImGui.End()
