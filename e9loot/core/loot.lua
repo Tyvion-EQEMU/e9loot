@@ -13,8 +13,9 @@ local _config
 local _lists
 local _framework
 local _channel
-local _logFile  = nil
-local _looting  = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
+local _logFile        = nil
+local _looting        = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
+local _pausedByCombat = false  -- true only when auto-paused by combat; cleared by any manual SetEnabled call
 
 local DECISION = {
     KEEP    = 'keep',
@@ -237,6 +238,42 @@ function Loot.LootCorpse(corpseId, useWarp)
     return true
 end
 
+local function hasLiveXTargets()
+    local xtCount = mq.TLO.Me.XTarget() or 0
+    for i = 1, xtCount do
+        local xt = mq.TLO.Me.XTarget(i)
+        if xt and xt.ID() and xt.ID() > 0 and (xt.PctHPs() or 0) > 0 then
+            return true
+        end
+    end
+    return false
+end
+
+-- Manual enable/disable — always clears the combat-pause flag so auto-resume cannot override the user.
+function Loot.SetEnabled(value)
+    _pausedByCombat = false
+    _config:SetAndSave('LootEnabled', value)
+end
+
+-- Call once per main-loop tick to handle combat-triggered auto-pause and auto-resume.
+function Loot.CombatTick()
+    if _config:Get('LootEnabled') and mq.TLO.Me.Combat() then
+        _config:SetAndSave('LootEnabled', false)
+        _pausedByCombat = true
+        printf('\are9loot: combat detected — looting paused')
+    end
+
+    if _pausedByCombat and not _config:Get('LootEnabled') then
+        if not mq.TLO.Me.Combat() and not hasLiveXTargets() then
+            _config:SetAndSave('LootEnabled', true)
+            _pausedByCombat = false
+            printf('\age9loot: combat clear — looting resumed')
+        end
+    elseif _pausedByCombat and _config:Get('LootEnabled') then
+        _pausedByCombat = false
+    end
+end
+
 function Loot.LootNearby()
     if not _config:Get('LootEnabled') then return end
     if _looting then return end
@@ -247,6 +284,7 @@ function Loot.LootNearby()
 
     _looting = true
     for _, c in ipairs(corpses) do
+        if not _config:Get('LootEnabled') then break end
         if not Corpse.SafeToLoot() then break end
         Loot.LootCorpse(c.id, useWarp)
         mq.delay(250)
@@ -284,7 +322,7 @@ function Loot.Init(cfg, lists, framework, channel)
             })
         elseif payload.type == 'set_enabled' then
             if type(payload.value) == 'boolean' then
-                _config:SetAndSave('LootEnabled', payload.value)
+                Loot.SetEnabled(payload.value)
             end
         elseif payload.type == 'set_announcedone' then
             if type(payload.value) == 'boolean' then

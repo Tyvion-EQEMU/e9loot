@@ -6,6 +6,7 @@ local ImAnim = require('ImAnim')
 local Mini = {}
 
 local _config  = nil
+local _loot    = nil
 local _version = nil
 
 local _INST_ID  = ImHashStr('e9mini_toggle')
@@ -31,7 +32,7 @@ local function renderToggle(value)
 
     if ImGui.InvisibleButton('##e9mini_tgl', ImVec2(w, h)) then
         value = not value
-        _config:SetAndSave('LootEnabled', value)
+        _loot.SetEnabled(value)
     end
 
     local target = value and 1.0 or 0.0
@@ -52,8 +53,9 @@ local function renderToggle(value)
     dl:AddCircle(ImVec2(tx, ty),                  tr, IM_COL32(0, 0, 0, 60), 32, 0.5)
 end
 
-function Mini.Init(config, version)
+function Mini.Init(config, loot, version)
     _config  = config
+    _loot    = loot
     _version = version
 end
 

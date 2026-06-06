@@ -6,7 +6,7 @@ local imgui  = require('ImGui')
 -- Version block — single source of truth
 local Version = {
     _AppName = 'e9loot',
-    _version = '0.1.0',
+    _version = '0.2.0',
     _author  = 'Tyvion',
 }
 
@@ -90,10 +90,10 @@ mq.bind('/e9loot', function(subcmd, ...)
     elseif subcmd == 'editor' then
         Editor.Open(Lists.All())
     elseif subcmd == 'enable' then
-        Config:SetAndSave('LootEnabled', true)
+        Loot.SetEnabled(true)
         printf('\age9loot enabled')
     elseif subcmd == 'disable' then
-        Config:SetAndSave('LootEnabled', false)
+        Loot.SetEnabled(false)
         printf('\are9loot disabled')
     elseif subcmd == 'reload' then
         Lists.LoadAll()
@@ -145,22 +145,9 @@ end)
 -----------------------------------------------------------------------
 -- Main loop
 -----------------------------------------------------------------------
-local LOOT_INTERVAL  = 5000  -- ms between automatic loot sweeps
-local lastLootTime   = 0
-local lastZone       = mq.TLO.Zone.ID()
-local _pausedByCombat = false  -- true only when we auto-paused; prevents auto-resume after manual pause
-
--- Returns true if any XTarget slot contains a live mob
-local function hasLiveXTargets()
-    local xtCount = mq.TLO.Me.XTarget() or 0
-    for i = 1, xtCount do
-        local xt = mq.TLO.Me.XTarget(i)
-        if xt and xt.ID() and xt.ID() > 0 and (xt.PctHPs() or 0) > 0 then
-            return true
-        end
-    end
-    return false
-end
+local LOOT_INTERVAL = 5000  -- ms between automatic loot sweeps
+local lastLootTime  = 0
+local lastZone      = mq.TLO.Zone.ID()
 
 printf('\age9loot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
 printf('\ayType /e9loot for command help.')
@@ -176,24 +163,7 @@ while true do
         lastZone = curZone
     end
 
-    -- Auto-pause when combat starts
-    if Config:Get('LootEnabled') and mq.TLO.Me.Combat() then
-        Config:SetAndSave('LootEnabled', false)
-        _pausedByCombat = true
-        printf('\are9loot: combat detected — looting paused')
-    end
-
-    -- Auto-resume once combat is fully clear (no combat flag, no live XTargets)
-    if _pausedByCombat and not Config:Get('LootEnabled') then
-        if not mq.TLO.Me.Combat() and not hasLiveXTargets() then
-            Config:SetAndSave('LootEnabled', true)
-            _pausedByCombat = false
-            printf('\age9loot: combat clear — looting resumed')
-        end
-    elseif _pausedByCombat and Config:Get('LootEnabled') then
-        -- User manually resumed; stop tracking the combat-pause
-        _pausedByCombat = false
-    end
+    Loot.CombatTick()
 
     -- Periodic auto-loot
     local now = mq.gettime()

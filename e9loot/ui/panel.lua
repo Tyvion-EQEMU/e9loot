@@ -219,7 +219,7 @@ function Panel.Init(config, loot, setup, editor, framework, adapters, channel, v
     _version   = version
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
-    Mini.Init(config, version)
+    Mini.Init(config, loot, version)
 end
 
 function Panel.ToggleMini()
@@ -294,7 +294,7 @@ function Panel.Render()
             enabled and 0.12 or 0.08,
             1.0)
         if ImGui.Button(enabled and 'Pause' or 'Paused', 100, 0) then
-            _config:SetAndSave('LootEnabled', false)
+            _loot.SetEnabled(false)
         end
         ImGui.PopStyleColor()
 
@@ -306,7 +306,7 @@ function Panel.Render()
             enabled and 0.10 or 0.12,
             1.0)
         if ImGui.Button(enabled and 'Running' or 'Resume', 100, 0) then
-            _config:SetAndSave('LootEnabled', true)
+            _loot.SetEnabled(true)
         end
         ImGui.PopStyleColor()
 
@@ -319,7 +319,7 @@ function Panel.Render()
                 1.0)
             if ImGui.Button('Pause All', 100, 0) then
                 _channel:Broadcast({ type='set_enabled', value=false })
-                _config:SetAndSave('LootEnabled', false)
+                _loot.SetEnabled(false)
             end
             ImGui.PopStyleColor()
 
@@ -332,7 +332,7 @@ function Panel.Render()
                 1.0)
             if ImGui.Button('Resume All', 100, 0) then
                 _channel:Broadcast({ type='set_enabled', value=true })
-                _config:SetAndSave('LootEnabled', true)
+                _loot.SetEnabled(true)
             end
             ImGui.PopStyleColor()
         end
