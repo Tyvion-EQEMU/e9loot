@@ -1,5 +1,9 @@
 # e9loot Roadmap
 
+## Documentation — High Priority
+
+- **README + GitHub Wiki** — Needed before sharing with other players. README should cover: installation steps, how to start the script, slash command reference, and a quick-start config guide. GitHub Wiki can go deeper: per-setting explanations, weapon mode and ranged mode guide, how the list editor works, FAQ. Should be written for someone who has never used MQ2 Lua before, not just existing EQ bot users.
+
 ## Not Yet Built — Backend Exists, No UI
 
 These settings are fully wired in config.lua and the loot engine but have no controls in the main panel yet.
