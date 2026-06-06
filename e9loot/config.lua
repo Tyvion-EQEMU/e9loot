@@ -33,6 +33,7 @@ Config.Defaults = {
 
     -- Loot behaviour
     WeaponMode   = 'DW',      -- DW | 2H | SNB | ANY | always | never
+    RangedMode   = 'any',     -- any | bows
     LootRange    = 200,       -- radius in units to scan for corpses
     WarpDist     = 100,       -- max distance before warping to corpse (0 = warp always)
     UseWarp      = true,      -- true = /warp target, false = /nav to corpse

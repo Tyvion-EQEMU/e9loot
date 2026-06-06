@@ -95,6 +95,7 @@ local function evaluateItem(item)
     if _lists.beasts:Has(name, id)    then return DECISION.KEEP, 'beast'     end
 
     local weaponMode  = _config:Get('WeaponMode')
+    local rangedMode  = _config:Get('RangedMode')
     local trashPrice  = _config:Get('TrashPrice')
     local val         = item.Value() or 0
     local isNoDrop    = item.NoDrop() == true
@@ -105,7 +106,7 @@ local function evaluateItem(item)
         return DECISION.SKIP, 'worthless-stack'
     end
 
-    local upgradeSlot = Upgrade.FindUpgradeSlot(item, weaponMode)
+    local upgradeSlot = Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode)
     if upgradeSlot ~= nil then
         return DECISION.KEEP, 'upgrade', upgradeSlot
     end

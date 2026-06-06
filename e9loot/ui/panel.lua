@@ -38,6 +38,9 @@ local FRAMEWORK_LABELS = { none='None', rgmercs='RG Mercs', e3='E3', kissassist=
 local CHANNELS = { 'none', 'dannet', 'eqbc' }
 local CHANNEL_LABELS = { none='None', dannet='DanNet', eqbc='EQBC' }
 
+local RANGEDMODES = { 'any', 'bows' }
+local RANGEDMODE_LABELS = { any='Any Ranged', bows='Only Bows' }
+
 local function indexOfStr(tbl, val)
     for i, v in ipairs(tbl) do if v == val then return i end end
     return 1
@@ -390,6 +393,27 @@ function Panel.Render()
             if wmChanged then
                 _wmIdx = newWmIdx
                 _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
+            end
+
+            -- Ranged Slot
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Ranged Slot')
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local rmIdx = indexOfStr(RANGEDMODES, _config:Get('RangedMode'))
+            local rmLabels = {}
+            for _, k in ipairs(RANGEDMODES) do table.insert(rmLabels, RANGEDMODE_LABELS[k] or k) end
+            local newRmIdx, rmChanged = ImGui.Combo('##rm', rmIdx, rmLabels, #rmLabels)
+            if rmChanged then
+                _config:SetAndSave('RangedMode', RANGEDMODES[newRmIdx])
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped("Controls how items in the Ranged slot are evaluated. Choose 'Only Bows' to prevent non-bow ranged items from displacing a bow — recommended for Rangers and melee toons that pull.")
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
             end
 
             -- Loot Range

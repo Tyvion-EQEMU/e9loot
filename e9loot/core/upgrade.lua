@@ -7,6 +7,7 @@ local Upgrade = {}
 -- Numeric worn-slot IDs (from item.WornSlot(i)) that are weapon or shield slots
 local PRIMARY_SLOT   = 13
 local SECONDARY_SLOT = 14
+local RANGED_SLOT    = 11
 
 -- Slots we skip entirely — non-gear equippables
 local SKIP_SLOTS = { [0]=true, [21]=true, [22]=true }  -- Charm, Powersource, Ammo
@@ -27,11 +28,13 @@ local function armorScore(item)
 end
 
 -- True if newItem beats whatever is currently in numeric slot slotId
-local function isUpgrade(newItem, slotId)
+local function isUpgrade(newItem, slotId, rangedMode)
     local equipped = mq.TLO.Me.Inventory(slotId)
     if not equipped or not equipped.ID() or equipped.ID() == 0 then return true end
 
     if slotId == PRIMARY_SLOT or slotId == SECONDARY_SLOT then
+        return weaponScore(newItem) > weaponScore(equipped)
+    elseif slotId == RANGED_SLOT and rangedMode == 'bows' then
         return weaponScore(newItem) > weaponScore(equipped)
     else
         return armorScore(newItem) > armorScore(equipped)
@@ -59,6 +62,8 @@ end
 local function is2H(t)     return t:sub(1,2) == '2h' end
 local function is1H(t)     return t:sub(1,2) == '1h' or t == 'piercing' or t == 'hand to hand' or t == 'martial' end
 local function isShield(t) return t:find('shield') ~= nil end
+-- 'archery' covers both bows and crossbows in MQ2
+local function isBow(t)    return t == 'archery' or t == 'bow' or t == 'crossbow' end
 
 -- True if the item can go in Primary or Secondary slot
 local function fitsWeaponSlot(item)
@@ -87,21 +92,25 @@ local function allowedByMode(item, weaponMode)
 end
 
 -- Returns the first worn slotId where item beats what is currently equipped, or nil.
--- Respects weapon mode filtering. Returns nil for 'always'/'never' modes.
-function Upgrade.FindUpgradeSlot(item, weaponMode)
+-- Respects weapon mode and ranged mode filtering. Returns nil for 'always'/'never' modes.
+function Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode)
     if not item or not item.ID() or item.ID() == 0 then return nil end
     weaponMode = weaponMode or 'DW'
+    rangedMode = rangedMode or 'any'
     if weaponMode == 'always' or weaponMode == 'never' then return nil end
-    if not classCanUse(item)        then return nil end
+    if not classCanUse(item)               then return nil end
     if not allowedByMode(item, weaponMode) then return nil end
 
     local wornCount = item.WornSlots() or 0
     if wornCount == 0 then return nil end
 
+    local t = itemType(item)
     for i = 1, wornCount do
         local slotId = tonumber(item.WornSlot(i)()) or -1
         if slotId >= 0 and not SKIP_SLOTS[slotId] then
-            if isUpgrade(item, slotId) then
+            if slotId == RANGED_SLOT and rangedMode == 'bows' and not isBow(t) then
+                -- skip: non-bow item cannot displace a bow in 'bows' mode
+            elseif isUpgrade(item, slotId, rangedMode) then
                 return slotId
             end
         end
