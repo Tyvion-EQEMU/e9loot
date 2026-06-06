@@ -244,9 +244,9 @@ function Panel.Render()
     _panelOpen = open
 
     if shouldDraw then
-        -- Minimize button — top right corner, save/restore cursor with two-value form
-        local _sx, _sy = ImGui.GetCursorPos()
-        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 28, 2))
+        -- Minimize button — top right corner, same pattern as RGMercs RenderWindowControls
+        local _savedPos = ImGui.GetCursorPosVec()
+        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 26, 0))
         if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
             _miniMode = true
         end
@@ -255,7 +255,7 @@ function Panel.Render()
             ImGui.Text('Activate Mini Mode')
             ImGui.EndTooltip()
         end
-        ImGui.SetCursorPos(ImVec2(_sx, _sy))
+        ImGui.SetCursorPos(_savedPos)
 
         -- Header: logo placeholder + version info
         if _version then
