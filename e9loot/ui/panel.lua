@@ -1,6 +1,7 @@
 -- Main ImGui panel: header, pause/resume, two-column settings, history, mini-mode
 
 local mq     = require('mq')
+local Icons  = require('mq.ICONS')
 local Corpse = require('e9loot.core.corpse')
 local Mini   = require('e9loot.ui.mini')
 
@@ -162,11 +163,12 @@ local function renderHistory()
                     ImGui.TextColored(col[1], col[2], col[3], col[4], (entry.decision or ''):upper())
 
                     ImGui.TableNextColumn()
-                    ImGui.PushStyleColor(ImGuiCol.Text, col[1], col[2], col[3], col[4])
-                    local clicked = ImGui.Selectable(entry.name .. '##h' .. i, false)
-                    ImGui.PopStyleColor()
-                    if clicked and entry.name then
-                        mq.cmdf('/itemdisplay "%s"', entry.name)
+                    ImGui.TextColored(col[1], col[2], col[3], col[4], entry.name)
+                    if ImGui.IsItemHovered() then
+                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+                        if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
+                            mq.cmdf('/itemdisplay "%s"', entry.name)
+                        end
                     end
 
                     ImGui.TableNextColumn()
@@ -423,8 +425,13 @@ function Panel.Render()
 
         ImGui.SameLine()
 
-        if ImGui.Button('Mini Mode', 95, 0) then
+        if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
             _miniMode = true
+        end
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text('Activate Mini Mode')
+            ImGui.EndTooltip()
         end
 
         ImGui.Spacing()

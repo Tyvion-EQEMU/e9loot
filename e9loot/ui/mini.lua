@@ -27,7 +27,7 @@ local function renderToggle(value)
     local dt  = getDt()
     local dl  = ImGui.GetWindowDrawList()
     local pos = ImGui.GetCursorScreenPosVec()
-    local w, h = 44, 22
+    local w, h = 32, 16
 
     if ImGui.InvisibleButton('##e9mini_tgl', ImVec2(w, h)) then
         value = not value

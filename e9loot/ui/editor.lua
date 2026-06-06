@@ -121,9 +121,12 @@ local function renderTab(listName)
                 ImGui.TextDisabled(tostring(i))
 
                 ImGui.TableNextColumn()
-                local _, nameClicked = ImGui.Selectable(entry.name .. '##e' .. i, false)
-                if nameClicked then
-                    mq.cmdf('/itemdisplay "%s"', entry.name)
+                ImGui.Text(entry.name)
+                if ImGui.IsItemHovered() then
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+                    if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
+                        mq.cmdf('/itemdisplay "%s"', entry.name)
+                    end
                 end
 
                 ImGui.TableNextColumn()
