@@ -153,7 +153,7 @@ function Editor.Render()
 
     ImGui.SetNextWindowSize(ImVec2(520, 480), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot — List Editor', _open,
-        ImGuiWindowFlags.NoCollapse)
+        ImGuiWindowFlags.None)
     _open = open
 
     if shouldDraw then

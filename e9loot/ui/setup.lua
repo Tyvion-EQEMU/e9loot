@@ -77,7 +77,7 @@ function Setup.Render()
 
     ImGui.SetNextWindowSize(ImVec2(440, 340), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot — First Time Setup', _open,
-        bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.NoResize))
+        ImGuiWindowFlags.NoResize)
     _open = open
 
     if shouldDraw then

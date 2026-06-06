@@ -45,7 +45,7 @@ local function renderHistory()
 
     ImGui.SetNextWindowSize(ImVec2(660, 400), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot — Loot History', _histOpen,
-        ImGuiWindowFlags.NoCollapse)
+        ImGuiWindowFlags.None)
     _histOpen = open
 
     if shouldDraw then
@@ -139,9 +139,9 @@ end
 function Panel.Render()
     if not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(340, 290), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(340, 380), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot', true,
-        bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.NoScrollbar))
+        ImGuiWindowFlags.NoScrollbar)
 
     if shouldDraw then
         -- Header: 60×60 logo placeholder + app name / version / author
@@ -150,7 +150,7 @@ function Panel.Render()
             local dl = ImGui.GetWindowDrawList()
             dl:AddRectFilled(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(40, 80, 140, 200))
             dl:AddRect(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(100, 150, 210, 180))
-            ImGui.Dummy(ImVec2(60, 60))
+            ImGui.Dummy(ImVec2(60, 68))
             ImGui.SameLine()
             local titlePos = ImGui.GetCursorPosVec()
             ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * 1.05)
