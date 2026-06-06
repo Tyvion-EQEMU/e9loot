@@ -17,7 +17,10 @@ These settings are fully wired in config.lua and the loot engine but have no con
 
 ## Ideas / Not Yet Defined
 
-_Add things here as they come to you — no need to be ready to build them yet._
+- **Slot Exclusions / BIS Pinning** — Two related use cases:
+  1. *Ignore a slot entirely* — user marks a slot (e.g. Waist) as off-limits and e9loot never evaluates or replaces whatever is equipped there. Useful for custom/server-specific items with abnormal stats that would otherwise get displaced by standard upgrade logic.
+  2. *Pin a target item per slot* — user specifies a "best in slot" item name for a given slot. If that exact item is already equipped, the slot is locked and ignored. If it is not yet equipped, normal upgrade logic runs until the pinned item is found and equipped. Effectively pre-sets a gear goal per slot.
+  - Open questions: where does this live in the UI (new tab in editor? per-slot config table in the panel?), how are slots identified to the user (slot name vs slot number), and how does it interact with WeaponMode filtering.
 
 ## Maybe Someday
 
