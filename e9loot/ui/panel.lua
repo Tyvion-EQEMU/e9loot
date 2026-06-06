@@ -406,16 +406,16 @@ function Panel.Render()
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Use Warp')
-            if ImGui.IsItemHovered() then
-                ImGui.BeginTooltip()
-                ImGui.Text('MQ2RWarp.dll required')
-                ImGui.EndTooltip()
-            end
             ImGui.TableNextColumn()
             local useWarp = _config:Get('UseWarp')
             local newUseWarp, _ = ImGui.Checkbox('##usewarp', useWarp)
             if newUseWarp ~= useWarp then
                 _config:SetAndSave('UseWarp', newUseWarp)
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.Text('MQ2RWarp.dll required')
+                ImGui.EndTooltip()
             end
 
             -- Done Looting
@@ -424,7 +424,9 @@ function Panel.Render()
             ImGui.Text('Done Looting')
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
                 ImGui.TextWrapped('When enabled, characters will broadcast via /g (group chat) when they are finished looting all available corpses')
+                ImGui.PopTextWrapPos()
                 ImGui.EndTooltip()
             end
             ImGui.TableNextColumn()
