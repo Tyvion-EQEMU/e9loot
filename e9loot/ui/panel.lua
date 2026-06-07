@@ -46,6 +46,8 @@ local function indexOfStr(tbl, val)
     return 1
 end
 
+local _logoTex = nil
+
 -- Panel open state (tracks X button)
 local _panelOpen = true
 
@@ -222,6 +224,12 @@ function Panel.Init(config, loot, setup, editor, framework, adapters, channel, v
     _version   = version
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
+
+    local base = mq.configDir:match('(.+)[/\\]config')
+    if base then
+        _logoTex = mq.CreateTexture(base .. '/lua/e9loot/profusion_logo_64x64.png')
+    end
+
     Mini.Init(config, loot, version)
 end
 
@@ -272,13 +280,17 @@ function Panel.Render()
         end
         ImGui.SetCursorPos(_savedPos)
 
-        -- Header: logo placeholder + version info
+        -- Header: logo + version info
         if _version then
-            local sp = ImGui.GetCursorScreenPosVec()
-            local dl = ImGui.GetWindowDrawList()
-            dl:AddRectFilled(sp, ImVec2(sp.x + 60, sp.y + 60), IM_COL32(40, 80, 140, 200))
-            dl:AddRect(sp,       ImVec2(sp.x + 60, sp.y + 60), IM_COL32(100, 150, 210, 180))
-            ImGui.Dummy(ImVec2(60, 68))
+            if _logoTex then
+                ImGui.Image(_logoTex, ImVec2(64, 64))
+            else
+                local sp = ImGui.GetCursorScreenPosVec()
+                local dl = ImGui.GetWindowDrawList()
+                dl:AddRectFilled(sp, ImVec2(sp.x + 64, sp.y + 64), IM_COL32(40, 80, 140, 200))
+                dl:AddRect(sp,       ImVec2(sp.x + 64, sp.y + 64), IM_COL32(100, 150, 210, 180))
+                ImGui.Dummy(ImVec2(64, 64))
+            end
             ImGui.SameLine()
             ImGui.BeginGroup()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))

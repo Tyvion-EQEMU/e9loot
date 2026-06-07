@@ -8,6 +8,7 @@ local Mini = {}
 local _config  = nil
 local _loot    = nil
 local _version = nil
+local _logoTex = nil
 
 local _INST_ID  = ImHashStr('e9mini_toggle')
 local _THUMB_CH = ImHashStr('e9mini_thumb')
@@ -57,6 +58,11 @@ function Mini.Init(config, loot, version)
     _config  = config
     _loot    = loot
     _version = version
+
+    local base = mq.configDir:match('(.+)[/\\]config')
+    if base then
+        _logoTex = mq.CreateTexture(base .. '/lua/e9loot/profusion_logo_32x32.png')
+    end
 end
 
 function Mini.Render(onClose)
@@ -69,15 +75,21 @@ function Mini.Render(onClose)
     )
     ImGui.Begin('##e9mini', nil, flags)
 
-    -- Logo placeholder — click to restore main window
-    local sp = ImGui.GetCursorScreenPosVec()
-    local dl = ImGui.GetWindowDrawList()
-    dl:AddRectFilled(sp, ImVec2(sp.x + 32, sp.y + 32), IM_COL32(40, 80, 140, 200))
-    dl:AddRect(sp,       ImVec2(sp.x + 32, sp.y + 32), IM_COL32(100, 150, 210, 180))
-    if ImGui.InvisibleButton('##e9mini_logo', ImVec2(32, 32)) then
+    -- Logo — click to restore main window
+    if _logoTex then
+        ImGui.Image(_logoTex, ImVec2(32, 32))
+    else
+        local sp = ImGui.GetCursorScreenPosVec()
+        local dl = ImGui.GetWindowDrawList()
+        dl:AddRectFilled(sp, ImVec2(sp.x + 32, sp.y + 32), IM_COL32(40, 80, 140, 200))
+        dl:AddRect(sp,       ImVec2(sp.x + 32, sp.y + 32), IM_COL32(100, 150, 210, 180))
+        ImGui.InvisibleButton('##e9mini_logo', ImVec2(32, 32))
+    end
+    if ImGui.IsItemClicked() then
         if onClose then onClose() end
     end
     if ImGui.IsItemHovered() then
+        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
         ImGui.BeginTooltip()
         ImGui.Text('Click to restore main window')
         ImGui.EndTooltip()
