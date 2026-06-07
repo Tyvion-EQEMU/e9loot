@@ -160,7 +160,7 @@ local function lootSlot(slotIndex)
     local myToon                       = mq.TLO.Me.CleanName()
     local id                           = item.ID()
 
-    Logger.Debug('%s → %s (%s)', name, decision, reason)
+    Logger.Debug('%s -> %s (%s)', name, decision, reason)
 
     if decision == DECISION.IGNORE then return end
 
@@ -296,7 +296,7 @@ function Loot.LootNearby()
     local corpses = Corpse.FindNearby(_config:Get('LootRange'))
     if #corpses == 0 then return end
 
-    Logger.Debug('sweep started — %d corpse(s) in range', #corpses)
+    Logger.Debug('sweep started - %d corpse(s) in range', #corpses)
     _looting = true
     for _, c in ipairs(corpses) do
         if not _config:Get('LootEnabled') then break end
