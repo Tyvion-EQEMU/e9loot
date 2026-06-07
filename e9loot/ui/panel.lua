@@ -544,7 +544,9 @@ function Panel.Render()
                 ImGui.Text('Integration')
                 if ImGui.IsItemHovered() then
                     ImGui.BeginTooltip()
+                    ImGui.PushTextWrapPos(280)
                     ImGui.TextWrapped('Which bot framework e9loot works alongside.')
+                    ImGui.PopTextWrapPos()
                     ImGui.EndTooltip()
                 end
                 ImGui.TableNextColumn()
