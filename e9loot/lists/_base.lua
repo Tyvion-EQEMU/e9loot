@@ -24,7 +24,10 @@ local _serverTag  = nil
 local function e9lootDir()
     if not _listDir then
         _listDir = mq.configDir .. '/e9loot'
-        os.execute('if not exist "' .. _listDir .. '" mkdir "' .. _listDir .. '"')
+        local ok, _, code = os.rename(_listDir, _listDir)
+        if not ok and code ~= 13 then
+            os.execute('mkdir "' .. _listDir .. '"')
+        end
     end
     return _listDir
 end

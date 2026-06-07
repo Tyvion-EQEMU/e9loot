@@ -28,10 +28,16 @@ local DECISION = {
 -----------------------------------------------------------------------
 -- Persistent log file (appended each session)
 -----------------------------------------------------------------------
+local _lootDir = nil
 local function e9lootDir()
-    local dir = mq.configDir .. '/e9loot'
-    os.execute('if not exist "' .. dir .. '" mkdir "' .. dir .. '"')
-    return dir
+    if not _lootDir then
+        _lootDir = mq.configDir .. '/e9loot'
+        local ok, _, code = os.rename(_lootDir, _lootDir)
+        if not ok and code ~= 13 then
+            os.execute('mkdir "' .. _lootDir .. '"')
+        end
+    end
+    return _lootDir
 end
 
 local function openLog()

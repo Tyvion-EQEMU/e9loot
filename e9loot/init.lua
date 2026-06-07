@@ -6,7 +6,7 @@ local imgui  = require('ImGui')
 -- Version block — single source of truth
 local Version = {
     _AppName = 'e9loot',
-    _version = '0.3.0',
+    _version = '0.4.0',
     _author  = 'Tyvion',
 }
 

@@ -21,7 +21,12 @@ local _cfgDir = nil
 local function e9lootDir()
     if not _cfgDir then
         _cfgDir = mq.configDir .. '/e9loot'
-        os.execute('if not exist "' .. _cfgDir .. '" mkdir "' .. _cfgDir .. '"')
+        -- os.rename to self: returns true/EACCES(13) if dir exists, ENOENT(2) if not.
+        -- Avoids spawning cmd.exe on every startup after the folder already exists.
+        local ok, _, code = os.rename(_cfgDir, _cfgDir)
+        if not ok and code ~= 13 then
+            os.execute('mkdir "' .. _cfgDir .. '"')
+        end
     end
     return _cfgDir
 end

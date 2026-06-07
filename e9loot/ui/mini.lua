@@ -87,15 +87,32 @@ function Mini.Render(onClose)
     ImGui.BeginGroup()
         ImGui.Text('E9 Loot')
 
-        local enabled = _config:Get('LootEnabled')
+        local enabled   = _config:Get('LootEnabled')
+        local inCombat  = _loot.IsInCombat()
         renderToggle(enabled)
         ImGui.SameLine()
-        if enabled then
-            ImGui.TextColored(0.3, 1.0, 0.3, 1.0, 'Running')
-        else
+        if not enabled then
             ImGui.TextColored(1.0, 0.4, 0.4, 1.0, 'Paused')
+        elseif inCombat then
+            ImGui.TextColored(1.0, 0.55, 0.1, 1.0, 'Combat')
+        else
+            ImGui.TextColored(0.3, 1.0, 0.3, 1.0, 'Running')
         end
     ImGui.EndGroup()
+
+    -- Red border when in combat — double rect for a pronounced glow effect
+    if inCombat then
+        local wpos  = ImGui.GetWindowPosVec()
+        local wsize = ImGui.GetWindowSizeVec()
+        local x2    = wpos.x + wsize.x
+        local y2    = wpos.y + wsize.y
+        local dl    = ImGui.GetWindowDrawList()
+        dl:AddRect(wpos, ImVec2(x2, y2),
+            IM_COL32(255, 30, 30, 255), 0, 0, 3.0)
+        dl:AddRect(ImVec2(wpos.x + 2, wpos.y + 2), ImVec2(x2 - 2, y2 - 2),
+            IM_COL32(255, 80, 80, 180), 0, 0, 1.5)
+    end
+
     ImGui.End()
 end
 

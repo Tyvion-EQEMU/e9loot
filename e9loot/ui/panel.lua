@@ -248,6 +248,7 @@ function Panel.Render()
 
     ImGui.SetNextWindowSize(ImVec2(340, 380), ImGuiCond.FirstUseEver)
     local _lootEnabled = _config:Get('LootEnabled')
+    local _inCombat    = _loot.IsInCombat()
     if not _lootEnabled then
         ImGui.PushStyleColor(ImGuiCol.TitleBg,       0.40, 0.10, 0.08, 1.0)
         ImGui.PushStyleColor(ImGuiCol.TitleBgActive, 0.55, 0.12, 0.08, 1.0)
@@ -520,11 +521,14 @@ function Panel.Render()
             - ImGui.GetStyle().WindowPadding.y
         ImGui.SetCursorPosY(statusY)
         local corpses = #Corpse.FindNearby(_config:Get('LootRange'))
-        if _lootEnabled then
-            ImGui.TextDisabled(string.format('Nearby corpses: %d  |  Running', corpses))
-        else
+        if not _lootEnabled then
             ImGui.TextColored(0.9, 0.3, 0.2, 1.0,
                 string.format('Nearby corpses: %d  |  Paused', corpses))
+        elseif _inCombat then
+            ImGui.TextColored(1.0, 0.55, 0.1, 1.0,
+                string.format('Nearby corpses: %d  |  Combat', corpses))
+        else
+            ImGui.TextDisabled(string.format('Nearby corpses: %d  |  Running', corpses))
         end
     end
 
