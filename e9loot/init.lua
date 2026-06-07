@@ -85,6 +85,7 @@ Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS, channel, 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)
     subcmd = (subcmd or ''):lower()
+    local args = { ... }
     if subcmd == 'loot' then
         Loot.LootNearby()
     elseif subcmd == 'setup' then
@@ -101,7 +102,6 @@ mq.bind('/e9loot', function(subcmd, ...)
         Lists.LoadAll()
         printf('\age9loot: lists reloaded')
     elseif subcmd == 'set' then
-        local args   = { ... }
         local rawKey = args[1]
         local value  = args[2]
         if rawKey and value then
@@ -119,7 +119,14 @@ mq.bind('/e9loot', function(subcmd, ...)
             printf('\aye9loot set <setting> <value>  (e.g. /e9loot set usewarp false)')
         end
     elseif subcmd == 'mini' then
-        Panel.ToggleMini()
+        local miniArg = (args[1] or ''):lower()
+        if miniArg == 'on' then
+            Panel.SetMini(true)
+        elseif miniArg == 'off' then
+            Panel.SetMini(false)
+        else
+            Panel.ToggleMini()
+        end
     elseif subcmd == 'show' then
         Panel.Show()
     elseif subcmd == 'toggledone' then
@@ -128,7 +135,7 @@ mq.bind('/e9loot', function(subcmd, ...)
         channel:Broadcast({ type='set_announcedone', value=newVal })
         printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | mini | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\aye9loot commands: loot | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 

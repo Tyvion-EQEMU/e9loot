@@ -237,6 +237,10 @@ function Panel.ToggleMini()
     _miniMode = not _miniMode
 end
 
+function Panel.SetMini(value)
+    _miniMode = value
+end
+
 function Panel.Show()
     _panelOpen = true
     _miniMode  = false
