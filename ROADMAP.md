@@ -21,6 +21,9 @@ These settings are fully wired in config.lua and the loot engine but have no con
 
 ## Ideas / Not Yet Defined
 
+- **Import Loot List** — Add an Import button to each list tab in the in-game List Editor. Clicking it would let the user paste or load a newline-separated list of item names, bulk-adding them to that list without having to enter items one at a time. Open questions: input method (multi-line text input popup vs. file path field pointing to a .txt on disk), duplicate handling (skip silently or warn), and whether imported entries should be validated against known item names or accepted as-is.
+
+
 - **Slot Exclusions / BIS Pinning** — Two related use cases:
   1. *Ignore a slot entirely* — user marks a slot (e.g. Waist) as off-limits and e9loot never evaluates or replaces whatever is equipped there. Useful for custom/server-specific items with abnormal stats that would otherwise get displaced by standard upgrade logic.
   2. *Pin a target item per slot* — user specifies a "best in slot" item name for a given slot. If that exact item is already equipped, the slot is locked and ignored. If it is not yet equipped, normal upgrade logic runs until the pinned item is found and equipped. Effectively pre-sets a gear goal per slot.
