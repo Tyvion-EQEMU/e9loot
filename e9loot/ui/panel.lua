@@ -267,8 +267,11 @@ function Panel.Render()
     if not open then mq.exit() end
 
     if shouldDraw then
+        local footerH = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y * 2 + 2
+        ImGui.BeginChild('##panelmain', ImVec2(0, -footerH), false, ImGuiWindowFlags.None)
+
         -- Minimize button — top right, y aligned to content start, FA_COMPRESS (core glyph range)
-        -- GetContentRegionMax x accounts for scrollbar width when present
+        -- GetContentRegionMax x accounts for child scrollbar width when present
         local _savedPos = ImGui.GetCursorPosVec()
         local contentMaxX = select(1, ImGui.GetContentRegionMax())
         ImGui.SetCursorPos(ImVec2(contentMaxX - 18, _savedPos.y))
@@ -297,10 +300,10 @@ function Panel.Render()
             ImGui.BeginGroup()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
             ImGui.TextDisabled('by ' .. _version._author)
-            ImGui.EndGroup()
-            local btnW = 70
+            local btnW = 60
             ImGui.SetCursorPosX(select(1, ImGui.GetContentRegionMax()) - btnW)
-            if ImGui.Button('Credits', btnW, 16) then Credits.Open() end
+            if ImGui.Button('Credits', btnW, 0) then Credits.Open() end
+            ImGui.EndGroup()
             ImGui.Spacing()
             ImGui.Separator()
             ImGui.Spacing()
@@ -570,6 +573,8 @@ function Panel.Render()
                 Logger.GetConsole():Render(ImVec2(conW, 180))
             end
         end
+
+        ImGui.EndChild()
 
         ImGui.Separator()
         local corpses = #Corpse.FindNearby(_config:Get('LootRange'))
