@@ -1,8 +1,6 @@
--- Credits window: animated developer and inspiration listings
+-- Credits tooltip: hover the Credits button in the panel header to show
 
 local Credits = {}
-
-local _open = false
 
 local _colorWheel = {}
 local _colorTimer = {}
@@ -41,38 +39,29 @@ local function renderName(name)
     end
 end
 
-function Credits.Open()
-    _open = true
-end
+function Credits.RenderTooltip()
+    local io  = ImGui.GetIO()
+    local cx  = io.DisplaySize.x * 0.5
+    local cy  = io.DisplaySize.y * 0.5
+    ImGui.SetNextWindowPos(ImVec2(cx, cy), ImGuiCond.Always, ImVec2(0.5, 0.5))
+    ImGui.SetNextWindowSize(ImVec2(220, 0), ImGuiCond.Always)
+    ImGui.BeginTooltip()
 
-function Credits.IsOpen()
-    return _open
-end
-
-function Credits.Render()
-    if not _open then return end
-
-    ImGui.SetNextWindowSize(ImVec2(240, 160), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('e9loot - Credits', _open)
-    _open = open
-
-    if shouldDraw then
-        if ImGui.CollapsingHeader('Developed By', ImGuiTreeNodeFlags.DefaultOpen) then
-            for _, name in ipairs(DATA.Devs) do
-                renderName(name)
-            end
-        end
-
-        ImGui.Spacing()
-
-        if ImGui.CollapsingHeader('Inspirations & Acknowledgments', ImGuiTreeNodeFlags.DefaultOpen) then
-            for _, name in ipairs(DATA.Inspirations) do
-                renderName(name)
-            end
+    if ImGui.CollapsingHeader('Developed By', ImGuiTreeNodeFlags.DefaultOpen) then
+        for _, name in ipairs(DATA.Devs) do
+            renderName(name)
         end
     end
 
-    ImGui.End()
+    ImGui.Spacing()
+
+    if ImGui.CollapsingHeader('Inspirations & Acknowledgments', ImGuiTreeNodeFlags.DefaultOpen) then
+        for _, name in ipairs(DATA.Inspirations) do
+            renderName(name)
+        end
+    end
+
+    ImGui.EndTooltip()
 end
 
 return Credits

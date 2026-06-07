@@ -302,7 +302,8 @@ function Panel.Render()
             ImGui.TextDisabled('by ' .. _version._author)
             local btnW = 60
             ImGui.SetCursorPosX(select(1, ImGui.GetContentRegionMax()) - btnW)
-            if ImGui.Button('Credits', btnW, 0) then Credits.Open() end
+            ImGui.Button('Credits', btnW, 0)
+            if ImGui.IsItemHovered() then Credits.RenderTooltip() end
             ImGui.EndGroup()
             ImGui.Spacing()
             ImGui.Separator()
@@ -594,7 +595,6 @@ function Panel.Render()
     renderHistory()
     _editor.Render()
     _setup.Render()
-    Credits.Render()
 end
 
 return Panel
