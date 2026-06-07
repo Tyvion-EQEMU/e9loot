@@ -1,4 +1,4 @@
--- Credits window: animated developer, inspiration, and contributor listings
+-- Credits window: animated developer and inspiration listings
 
 local Credits = {}
 
@@ -13,11 +13,10 @@ local DATA = {
         'Claude',
     },
     Inspirations = {
-        { name = 'Enine',          role = 'Profusion Developer, original e9loot.mac' },
-        { name = 'Grimmier',       role = 'LootNScoot Author'                        },
-        { name = 'Derple & Algar', role = 'RGMercs Authors'                          },
+        'Enine',
+        'Grimmier',
+        'Derple & Algar',
     },
-    Contributors = {},
 }
 
 local function renderName(name)
@@ -53,7 +52,7 @@ end
 function Credits.Render()
     if not _open then return end
 
-    ImGui.SetNextWindowSize(ImVec2(320, 220), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(240, 160), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot - Credits', _open)
     _open = open
 
@@ -67,22 +66,8 @@ function Credits.Render()
         ImGui.Spacing()
 
         if ImGui.CollapsingHeader('Inspirations & Acknowledgments', ImGuiTreeNodeFlags.DefaultOpen) then
-            for _, entry in ipairs(DATA.Inspirations) do
-                renderName(entry.name)
-                ImGui.SameLine()
-                ImGui.TextDisabled('  ' .. entry.role)
-            end
-        end
-
-        ImGui.Spacing()
-
-        if ImGui.CollapsingHeader('Contributors') then
-            if #DATA.Contributors == 0 then
-                ImGui.TextDisabled('None yet - contributions welcome!')
-            else
-                for _, name in ipairs(DATA.Contributors) do
-                    renderName(name)
-                end
+            for _, name in ipairs(DATA.Inspirations) do
+                renderName(name)
             end
         end
     end
