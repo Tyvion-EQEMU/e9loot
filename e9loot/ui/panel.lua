@@ -4,6 +4,7 @@ local mq     = require('mq')
 local Icons  = require('mq.ICONS')
 local Corpse = require('e9loot.core.corpse')
 local Mini   = require('e9loot.ui.mini')
+local Logger = require('e9loot.utils.logger')
 
 local Panel = {}
 
@@ -522,6 +523,47 @@ function Panel.Render()
             if not _editor.IsOpen() then
                 _editor.Open(_config._lists)
             end
+        end
+
+        ImGui.Spacing()
+        if ImGui.CollapsingHeader('Debug') then
+            if ImGui.BeginTable('##debugopts', 2, 0) then
+                ImGui.TableSetupColumn('##dlbl', ImGuiTableColumnFlags.WidthFixed,   90)
+                ImGui.TableSetupColumn('##dctl', ImGuiTableColumnFlags.WidthStretch)
+
+                ImGui.TableNextRow()
+                ImGui.TableNextColumn(); ImGui.Text('Log Level')
+                ImGui.TableNextColumn(); ImGui.SetNextItemWidth(-1)
+                local levelIdx = _config:Get('LogLevel') or 3
+                local newLevelIdx, levelChanged = ImGui.Combo('##loglevel', levelIdx,
+                    Logger.LevelLabels(), #Logger.LevelLabels())
+                if levelChanged then _config:SetAndSave('LogLevel', newLevelIdx) end
+
+                ImGui.TableNextRow()
+                ImGui.TableNextColumn(); ImGui.Text('Log to File')
+                ImGui.TableNextColumn()
+                local logToFile = _config:Get('LogToFile')
+                local newLogToFile = ImGui.Checkbox('##logtofile', logToFile)
+                if newLogToFile ~= logToFile then _config:SetAndSave('LogToFile', newLogToFile) end
+                if ImGui.IsItemHovered() then
+                    ImGui.BeginTooltip()
+                    ImGui.Text('Writes to ConsoleLogs_<Server>_<Char>.log')
+                    ImGui.EndTooltip()
+                end
+
+                ImGui.TableNextRow()
+                ImGui.TableNextColumn(); ImGui.Text('Timestamps')
+                ImGui.TableNextColumn()
+                local logTs = _config:Get('LogTimestamps')
+                local newLogTs = ImGui.Checkbox('##logts', logTs)
+                if newLogTs ~= logTs then _config:SetAndSave('LogTimestamps', newLogTs) end
+
+                ImGui.EndTable()
+            end
+
+            ImGui.Spacing()
+            local conW = select(1, ImGui.GetContentRegionAvail())
+            Logger.GetConsole():Render(ImVec2(conW, 180))
         end
 
         -- Status line anchored to bottom-left of window

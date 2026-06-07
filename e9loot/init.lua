@@ -6,11 +6,12 @@ local imgui  = require('ImGui')
 -- Version block — single source of truth
 local Version = {
     _AppName = 'e9loot',
-    _version = '0.4.1',
+    _version = '0.5.0',
     _author  = 'Tyvion',
 }
 
 local Config  = require('e9loot.config')
+local Logger  = require('e9loot.utils.logger')
 local Lists   = require('e9loot.lists.init')
 local Loot    = require('e9loot.core.loot')
 local Corpse  = require('e9loot.core.corpse')
@@ -53,6 +54,7 @@ end
 local opts = parseArgs(arg)
 
 Config:Init()
+Logger.Init(Config)
 
 -- CLI overrides take precedence over saved config
 if opts.framework then Config:Set('Framework', opts.framework) end
@@ -151,6 +153,7 @@ local lastZone      = mq.TLO.Zone.ID()
 
 printf('\age9loot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
 printf('\ayType /e9loot for command help.')
+Logger.Info('v%s started — framework: %s  channel: %s', Version._version, frameworkName, channelName)
 
 while true do
     mq.doevents()

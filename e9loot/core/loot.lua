@@ -3,6 +3,7 @@
 local mq      = require('mq')
 local Corpse  = require('e9loot.core.corpse')
 local Upgrade = require('e9loot.core.upgrade')
+local Logger  = require('e9loot.utils.logger')
 
 local Loot = {}
 
@@ -159,6 +160,8 @@ local function lootSlot(slotIndex)
     local myToon                       = mq.TLO.Me.CleanName()
     local id                           = item.ID()
 
+    Logger.Debug('%s → %s (%s)', name, decision, reason)
+
     if decision == DECISION.IGNORE then return end
 
     -- SKIP: leave on corpse, history + log only, no chat echo
@@ -277,8 +280,10 @@ function Loot.CombatTick()
     _inCombat = mq.TLO.Me.Combat() or hasLiveXTargets()
     if _inCombat and not wasInCombat then
         printf('\are9loot: combat — looting suspended')
+        Logger.Info('combat — looting suspended')
     elseif not _inCombat and wasInCombat then
         printf('\age9loot: combat clear — looting resumed')
+        Logger.Info('combat clear — looting resumed')
     end
 end
 
@@ -291,6 +296,7 @@ function Loot.LootNearby()
     local corpses = Corpse.FindNearby(_config:Get('LootRange'))
     if #corpses == 0 then return end
 
+    Logger.Debug('sweep started — %d corpse(s) in range', #corpses)
     _looting = true
     for _, c in ipairs(corpses) do
         if not _config:Get('LootEnabled') then break end

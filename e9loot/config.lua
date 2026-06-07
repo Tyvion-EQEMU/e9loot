@@ -69,6 +69,11 @@ Config.Defaults = {
     AnnounceGroup = false,    -- broadcast loot events to group channel
     AnnounceDone  = true,     -- send /g Done Looting after a sweep clears all corpses
 
+    -- Debug / logging (per-character)
+    LogLevel      = 3,        -- 1=Error 2=Warn 3=Info 4=Debug
+    LogToFile     = false,
+    LogTimestamps = false,
+
     -- UI state (not shown in setup dialog)
     SetupDone    = false,     -- true after first-launch setup is saved
     PanelOpen    = true,
