@@ -153,7 +153,7 @@ local lastZone      = mq.TLO.Zone.ID()
 
 printf('\age9loot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
 printf('\ayType /e9loot for command help.')
-Logger.Info('v%s started — framework: %s  channel: %s', Version._version, frameworkName, channelName)
+Logger.Info('v%s started - framework: %s  channel: %s', Version._version, frameworkName, channelName)
 
 while true do
     mq.doevents()

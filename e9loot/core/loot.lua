@@ -280,10 +280,10 @@ function Loot.CombatTick()
     _inCombat = mq.TLO.Me.Combat() or hasLiveXTargets()
     if _inCombat and not wasInCombat then
         printf('\are9loot: combat — looting suspended')
-        Logger.Info('combat — looting suspended')
+        Logger.Debug('Combat Entered - Looting Suspended')
     elseif not _inCombat and wasInCombat then
         printf('\age9loot: combat clear — looting resumed')
-        Logger.Info('combat clear — looting resumed')
+        Logger.Debug('Combat Ended - Looting Resumed')
     end
 end
 

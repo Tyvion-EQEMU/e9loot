@@ -529,7 +529,7 @@ function Panel.Render()
         ImGui.Spacing()
         if ImGui.CollapsingHeader('Console') then
             if ImGui.BeginTable('##debugopts', 2, 0) then
-                ImGui.TableSetupColumn('##dlbl', ImGuiTableColumnFlags.WidthFixed,   90)
+                ImGui.TableSetupColumn('##dlbl', ImGuiTableColumnFlags.WidthFixed,  115)
                 ImGui.TableSetupColumn('##dctl', ImGuiTableColumnFlags.WidthStretch)
 
                 ImGui.TableNextRow()
