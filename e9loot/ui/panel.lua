@@ -267,8 +267,10 @@ function Panel.Render()
 
     if shouldDraw then
         -- Minimize button — top right, y aligned to content start, FA_COMPRESS (core glyph range)
+        -- GetContentRegionMax x accounts for scrollbar width when present
         local _savedPos = ImGui.GetCursorPosVec()
-        ImGui.SetCursorPos(ImVec2(ImGui.GetWindowWidth() - 26, _savedPos.y))
+        local contentMaxX = select(1, ImGui.GetContentRegionMax())
+        ImGui.SetCursorPos(ImVec2(contentMaxX - 18, _savedPos.y))
         if ImGui.SmallButton(Icons.FA_COMPRESS) then
             _miniMode = true
         end
