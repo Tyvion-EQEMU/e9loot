@@ -259,7 +259,7 @@ function Panel.Render()
         ImGui.PushStyleColor(ImGuiCol.TitleBg,       0.40, 0.10, 0.08, 1.0)
         ImGui.PushStyleColor(ImGuiCol.TitleBgActive, 0.55, 0.12, 0.08, 1.0)
     end
-    local open, shouldDraw = ImGui.Begin('e9loot', _panelOpen, ImGuiWindowFlags.NoScrollbar)
+    local open, shouldDraw = ImGui.Begin('e9loot', _panelOpen)
     if not _lootEnabled then ImGui.PopStyleColor(2) end
     _panelOpen = open
     if not open then mq.exit() end
@@ -526,7 +526,7 @@ function Panel.Render()
         end
 
         ImGui.Spacing()
-        if ImGui.CollapsingHeader('Debug') then
+        if ImGui.CollapsingHeader('Console') then
             if ImGui.BeginTable('##debugopts', 2, 0) then
                 ImGui.TableSetupColumn('##dlbl', ImGuiTableColumnFlags.WidthFixed,   90)
                 ImGui.TableSetupColumn('##dctl', ImGuiTableColumnFlags.WidthStretch)
@@ -562,15 +562,13 @@ function Panel.Render()
             end
 
             ImGui.Spacing()
-            local conW = select(1, ImGui.GetContentRegionAvail())
-            Logger.GetConsole():Render(ImVec2(conW, 180))
+            if ImGui.CollapsingHeader('E9Loot Output', ImGuiTreeNodeFlags.DefaultOpen) then
+                local conW = select(1, ImGui.GetContentRegionAvail())
+                Logger.GetConsole():Render(ImVec2(conW, 180))
+            end
         end
 
-        -- Status line anchored to bottom-left of window
-        local statusY = ImGui.GetWindowHeight()
-            - ImGui.GetTextLineHeight()
-            - ImGui.GetStyle().WindowPadding.y
-        ImGui.SetCursorPosY(statusY)
+        ImGui.Separator()
         local corpses = #Corpse.FindNearby(_config:Get('LootRange'))
         if not _lootEnabled then
             ImGui.TextColored(0.9, 0.3, 0.2, 1.0,
