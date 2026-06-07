@@ -8,12 +8,14 @@ local Mini = {}
 local _config  = nil
 local _loot    = nil
 local _version = nil
+local _channel = nil
 local _logoTex = nil
 
-function Mini.Init(config, loot, version)
+function Mini.Init(config, loot, version, channel)
     _config  = config
     _loot    = loot
     _version = version
+    _channel = channel
 
     _logoTex = mq.CreateTexture(mq.TLO.Lua.Dir() .. '/e9loot/profusion_logo_32x32.png')
 end
@@ -55,7 +57,10 @@ function Mini.Render(onClose)
         local enabled  = _config:Get('LootEnabled')
         local inCombat = _loot.IsInCombat()
         local newEnabled, toggled = Widgets.Toggle('##e9loot_enable', enabled)
-        if toggled then _loot.SetEnabled(newEnabled) end
+        if toggled then
+            if _channel then _channel:Broadcast({ type='set_enabled', value=newEnabled }) end
+            _loot.SetEnabled(newEnabled)
+        end
         ImGui.SameLine()
         if not enabled then
             ImGui.TextColored(1.0, 0.4, 0.4, 1.0, 'Paused')

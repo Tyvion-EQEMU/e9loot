@@ -230,7 +230,7 @@ function Panel.Init(config, loot, setup, editor, framework, adapters, channel, v
 
     _logoTex = mq.CreateTexture(mq.TLO.Lua.Dir() .. '/e9loot/profusion_logo_64x64.png')
 
-    Mini.Init(config, loot, version)
+    Mini.Init(config, loot, version, channel)
 end
 
 function Panel.ToggleMini()
