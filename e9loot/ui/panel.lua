@@ -225,10 +225,7 @@ function Panel.Init(config, loot, setup, editor, framework, adapters, channel, v
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
 
-    local base = mq.configDir:match('(.+)[/\\]config')
-    if base then
-        _logoTex = mq.CreateTexture(base .. '/lua/e9loot/profusion_logo_64x64.png')
-    end
+    _logoTex = mq.CreateTexture(mq.TLO.Lua.Dir() .. '/e9loot/profusion_logo_64x64.png')
 
     Mini.Init(config, loot, version)
 end
@@ -283,7 +280,7 @@ function Panel.Render()
         -- Header: logo + version info
         if _version then
             if _logoTex then
-                ImGui.Image(_logoTex, ImVec2(64, 64))
+                ImGui.Image(_logoTex:GetTextureID(), ImVec2(64, 64))
             else
                 local sp = ImGui.GetCursorScreenPosVec()
                 local dl = ImGui.GetWindowDrawList()

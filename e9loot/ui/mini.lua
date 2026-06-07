@@ -59,10 +59,7 @@ function Mini.Init(config, loot, version)
     _loot    = loot
     _version = version
 
-    local base = mq.configDir:match('(.+)[/\\]config')
-    if base then
-        _logoTex = mq.CreateTexture(base .. '/lua/e9loot/profusion_logo_32x32.png')
-    end
+    _logoTex = mq.CreateTexture(mq.TLO.Lua.Dir() .. '/e9loot/profusion_logo_32x32.png')
 end
 
 function Mini.Render(onClose)
@@ -77,7 +74,7 @@ function Mini.Render(onClose)
 
     -- Logo — click to restore main window
     if _logoTex then
-        ImGui.Image(_logoTex, ImVec2(32, 32))
+        ImGui.Image(_logoTex:GetTextureID(), ImVec2(32, 32))
     else
         local sp = ImGui.GetCursorScreenPosVec()
         local dl = ImGui.GetWindowDrawList()
