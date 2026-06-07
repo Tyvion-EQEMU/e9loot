@@ -69,7 +69,7 @@ local function snakeDraw(pos, size, lineW)
         if dist < TAIL then
             local bright = 1.0 - (dist / TAIL)
             bright = bright * bright
-            local v   = math.floor(bright * 200 + 30)
+            local v   = math.min(255, math.floor(bright * 220 + 55))
             local a   = math.floor(bright * 255)
             local p1  = perimeterPoint(pos, size, t1)
             local p2  = perimeterPoint(pos, size, (i + 1) / STEPS)
@@ -80,7 +80,7 @@ end
 
 -- Called from panel.lua with the button's screen rect
 function Credits.DrawSnake(pos, size)
-    snakeDraw(pos, size, 1.5)
+    snakeDraw(pos, size, 2.0)
 end
 
 -----------------------------------------------------------------------
