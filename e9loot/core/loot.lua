@@ -20,6 +20,7 @@ local _inCombat  = false  -- true while combat suppresses looting; never affects
 
 local DECISION = {
     KEEP    = 'keep',
+    BANK    = 'bank',
     SELL    = 'sell',
     DESTROY = 'destroy',
     SKIP    = 'skip',   -- no-drop item we don't want; leave on corpse
@@ -73,12 +74,13 @@ end
 -- KEEP announcements go to the in-game group channel (/g).
 -- All other decisions are silent in MQ chat — history panel and log only.
 -----------------------------------------------------------------------
-local function announceKeep(name, reason, toon)
-    local msg = string.format('e9loot | KEEP: %s (%s)', name, reason)
+local function announceLoot(decision, name, reason, toon)
+    local tag = decision:upper()
+    local msg = string.format('e9loot | %s: %s (%s)', tag, name, reason)
     if mq.TLO.Me.Grouped() then
         mq.cmdf('/g %s', msg)
     else
-        printf('\age9loot\aw | \a-w[%s]\aw %-7s | %s \a-w(%s)\aw', toon, 'KEEP', name, reason)
+        printf('\age9loot\aw | \a-w[%s]\aw %-7s | %s \a-w(%s)\aw', toon, tag, name, reason)
     end
 end
 
@@ -96,14 +98,16 @@ local function evaluateItem(item)
     -- User override lists take absolute priority over all automated logic
     if _lists.skip    and _lists.skip:Has(name, id)    then return DECISION.SKIP,    'skip-list'    end
     if _lists.destroy and _lists.destroy:Has(name, id) then return DECISION.DESTROY, 'destroy-list' end
+    if _lists.keep    and _lists.keep:Has(name, id)    then return DECISION.KEEP,    'keep-list'    end
+    if _lists.bank    and _lists.bank:Has(name, id)    then return DECISION.BANK,    'bank-list'    end
 
-    -- Explicit KEEP lists
+    -- Named category lists
     if _lists.currency:Has(name, id)  then return DECISION.SELL, 'currency'  end
     if _lists.quest:Has(name, id)     then return DECISION.KEEP, 'quest'     end
     if _lists.event:Has(name, id)     then return DECISION.KEEP, 'event'     end
     if _lists.lore:Has(name, id)      then return DECISION.KEEP, 'lore'      end
-    if _lists.astrial:Has(name, id)   then return DECISION.KEEP, 'astrial'   end
-    if _lists.deva:Has(name, id)      then return DECISION.KEEP, 'deva'      end
+    if _lists.astrial:Has(name, id)   then return DECISION.BANK, 'astrial'   end
+    if _lists.deva:Has(name, id)      then return DECISION.BANK, 'deva'      end
     if _lists.specials:Has(name, id)  then return DECISION.KEEP, 'special'   end
     if _lists.tiered:Has(name, id)    then return DECISION.KEEP, 'tiered'    end
     if _lists.beasts:Has(name, id)    then return DECISION.KEEP, 'beast'     end
@@ -178,7 +182,7 @@ local function lootSlot(slotIndex)
 
     -- No-drop confirmation dialog
     if isNoDrop then
-        handleNoDropDialog(decision == DECISION.KEEP or decision == DECISION.SELL)
+        handleNoDropDialog(decision == DECISION.KEEP or decision == DECISION.BANK or decision == DECISION.SELL)
         mq.delay(200)
     else
         mq.delay(150)
@@ -207,10 +211,15 @@ local function lootSlot(slotIndex)
             mq.cmd('/autoinventory')
             mq.delay(200)
         end
-        announceKeep(name, reason, myToon)
+        announceLoot(decision, name, reason, myToon)
+    elseif decision == DECISION.BANK then
+        mq.cmd('/autoinventory')
+        mq.delay(200)
+        announceLoot(decision, name, reason, myToon)
     elseif decision == DECISION.SELL then
         mq.cmd('/autoinventory')
         mq.delay(200)
+        announceLoot(decision, name, reason, myToon)
     else
         mq.cmd('/destroy')
         mq.delay(200)
