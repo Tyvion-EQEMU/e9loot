@@ -56,7 +56,7 @@ function Credits.RenderTooltip()
 
     ImGui.Spacing()
 
-    if ImGui.CollapsingHeader('Inspirations & Acknowledgments', ImGuiTreeNodeFlags.DefaultOpen) then
+    if ImGui.CollapsingHeader('Acknowledgments', ImGuiTreeNodeFlags.DefaultOpen) then
         for _, name in ipairs(DATA.Inspirations) do
             renderName(name)
         end
