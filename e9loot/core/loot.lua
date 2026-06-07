@@ -98,7 +98,7 @@ local function evaluateItem(item)
     if _lists.destroy and _lists.destroy:Has(name, id) then return DECISION.DESTROY, 'destroy-list' end
 
     -- Explicit KEEP lists
-    if _lists.currency:Has(name, id)  then return DECISION.KEEP, 'currency'  end
+    if _lists.currency:Has(name, id)  then return DECISION.SELL, 'currency'  end
     if _lists.quest:Has(name, id)     then return DECISION.KEEP, 'quest'     end
     if _lists.event:Has(name, id)     then return DECISION.KEEP, 'event'     end
     if _lists.lore:Has(name, id)      then return DECISION.KEEP, 'lore'      end
@@ -178,7 +178,7 @@ local function lootSlot(slotIndex)
 
     -- No-drop confirmation dialog
     if isNoDrop then
-        handleNoDropDialog(decision == DECISION.KEEP)
+        handleNoDropDialog(decision == DECISION.KEEP or decision == DECISION.SELL)
         mq.delay(200)
     else
         mq.delay(150)
