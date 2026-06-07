@@ -43,7 +43,7 @@ end
 function Credits.RenderTooltip()
     local io  = ImGui.GetIO()
     local cx  = io.DisplaySize.x * 0.5
-    local cy  = io.DisplaySize.y * 0.5
+    local cy  = io.DisplaySize.y * 0.33
     ImGui.SetNextWindowPos(ImVec2(cx, cy), ImGuiCond.Always, ImVec2(0.5, 0.5))
     ImGui.SetNextWindowSize(ImVec2(220, 0), ImGuiCond.Always)
     ImGui.BeginTooltip()
