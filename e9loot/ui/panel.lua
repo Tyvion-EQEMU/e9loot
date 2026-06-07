@@ -303,7 +303,12 @@ function Panel.Render()
             local btnW = 60
             ImGui.SetCursorPosX(select(1, ImGui.GetContentRegionMax()) - btnW)
             ImGui.Button('Credits', btnW, 0)
-            if ImGui.IsItemHovered() then Credits.RenderTooltip() end
+            if ImGui.IsItemHovered() then
+                local bmin = ImGui.GetItemRectMinVec()
+                local bmax = ImGui.GetItemRectMaxVec()
+                Credits.RenderTooltip()
+                Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y))
+            end
             ImGui.EndGroup()
             ImGui.Spacing()
             ImGui.Separator()

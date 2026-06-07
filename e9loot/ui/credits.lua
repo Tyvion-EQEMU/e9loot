@@ -40,6 +40,51 @@ local function renderName(name)
     end
 end
 
+-----------------------------------------------------------------------
+-- Snake border
+-----------------------------------------------------------------------
+local function perimeterPoint(pos, size, t)
+    local w, h = size.x, size.y
+    local d    = (t % 1.0) * (2 * (w + h))
+    if d < w then
+        return ImVec2(pos.x + d,             pos.y)
+    elseif d < w + h then
+        return ImVec2(pos.x + w,             pos.y + d - w)
+    elseif d < 2 * w + h then
+        return ImVec2(pos.x + w - (d - w - h), pos.y + h)
+    else
+        return ImVec2(pos.x,                 pos.y + h - (d - 2 * w - h))
+    end
+end
+
+local function snakeDraw(pos, size, lineW)
+    if size.x < 4 or size.y < 4 then return end
+    local phase = (os.clock() / 1.5) % 1.0
+    local dl    = ImGui.GetForegroundDrawList()
+    local STEPS = 64
+    local TAIL  = 0.28
+    for i = 0, STEPS - 1 do
+        local t1   = i / STEPS
+        local dist = (phase - t1) % 1.0
+        if dist < TAIL then
+            local bright = 1.0 - (dist / TAIL)
+            bright = bright * bright
+            local v   = math.floor(bright * 200 + 30)
+            local a   = math.floor(bright * 255)
+            local p1  = perimeterPoint(pos, size, t1)
+            local p2  = perimeterPoint(pos, size, (i + 1) / STEPS)
+            dl:AddLine(p1, p2, IM_COL32(v, v, v, a), lineW)
+        end
+    end
+end
+
+-- Called from panel.lua with the button's screen rect
+function Credits.DrawSnake(pos, size)
+    snakeDraw(pos, size, 1.5)
+end
+
+-----------------------------------------------------------------------
+
 function Credits.RenderTooltip()
     local io  = ImGui.GetIO()
     local cx  = io.DisplaySize.x * 0.5
@@ -61,6 +106,9 @@ function Credits.RenderTooltip()
             renderName(name)
         end
     end
+
+    -- Snake border around the tooltip window
+    snakeDraw(ImGui.GetWindowPosVec(), ImGui.GetWindowSizeVec(), 1.5)
 
     ImGui.EndTooltip()
 end
