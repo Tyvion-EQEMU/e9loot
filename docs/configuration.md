@@ -14,7 +14,8 @@ or via the `/e9loot set` command.
 
 **Setting:** `Framework`  
 **Shared:** Yes  
-**Options:** `None` | `RG Mercs` | `E3` | `Kiss Assist`
+**Options:** `None` | `RG Mercs` | `E3` | `Kiss Assist`  
+**Location:** System Settings (collapsed section below History / List Editor)
 
 Which bot framework e9loot works alongside. When a loot sweep starts, e9loot pauses
 the framework so it doesn't interfere with movement to corpses, then resumes it when
@@ -28,7 +29,8 @@ Set to `None` if you are running e9loot standalone without a bot framework.
 
 **Setting:** `Channel`  
 **Shared:** Yes  
-**Options:** `None` | `DanNet` | `EQBC`
+**Options:** `None` | `DanNet` | `EQBC`  
+**Location:** System Settings (collapsed section below History / List Editor)
 
 The network channel used to share loot events and group pause/resume commands across
 characters. With DanNet or EQBC enabled, loot history from all group members appears
@@ -148,6 +150,41 @@ worth less than this value that aren't on any keep list are left on the corpse. 
 
 Whether this character is currently looting. Controlled by the **Pause / Resume** buttons
 in the panel. Saved per-character so each toon can be individually paused.
+
+---
+
+## Console
+
+The **Console** section in the main panel (collapsed by default) provides in-panel log
+output and controls for the logging system.
+
+### Log Level
+
+**Setting:** `LogLevel`  
+**Shared:** No (per-character)  
+**Options:** `1` Error | `2` Warn | `3` Info | `4` Debug  
+**Default:** `3` (Info)
+
+Controls how verbose the console output is. Debug shows every item evaluation decision.
+
+### Log to File
+
+**Setting:** `LogToFile`  
+**Shared:** No (per-character)  
+**Default:** `false`
+
+When enabled, all console output is also written to:
+```
+<MQ2 config dir>/e9loot/ConsoleLogs_<Server>_<CharName>.log
+```
+
+### Show Timestamps
+
+**Setting:** `LogTimestamps`  
+**Shared:** No (per-character)  
+**Default:** `false`
+
+Prepends a `HH:MM:SS` timestamp to each line in the console output.
 
 ---
 

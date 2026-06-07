@@ -380,40 +380,17 @@ function Panel.Render()
             ImGui.TableSetupColumn('##lbl', ImGuiTableColumnFlags.WidthFixed,   90)
             ImGui.TableSetupColumn('##ctl', ImGuiTableColumnFlags.WidthStretch)
 
-            -- Integration (Framework)
-            ImGui.TableNextRow()
-            ImGui.TableNextColumn()
-            ImGui.Text('Integration')
-            ImGui.TableNextColumn()
-            ImGui.SetNextItemWidth(-1)
-            local fwIdx = indexOfStr(FRAMEWORKS, _config:Get('Framework'))
-            local fwDisplayLabels = {}
-            for _, k in ipairs(FRAMEWORKS) do table.insert(fwDisplayLabels, FRAMEWORK_LABELS[k] or k) end
-            local newFwIdx, fwChanged = ImGui.Combo('##fw', fwIdx, fwDisplayLabels, #fwDisplayLabels)
-            if fwChanged then
-                _config:SetAndSave('Framework', FRAMEWORKS[newFwIdx])
-                _wantRestartModal = true
-            end
-
-            -- Broadcast (Channel)
-            ImGui.TableNextRow()
-            ImGui.TableNextColumn()
-            ImGui.Text('Broadcast')
-            ImGui.TableNextColumn()
-            ImGui.SetNextItemWidth(-1)
-            local chIdx = indexOfStr(CHANNELS, _config:Get('Channel'))
-            local chDisplayLabels = {}
-            for _, k in ipairs(CHANNELS) do table.insert(chDisplayLabels, CHANNEL_LABELS[k] or k) end
-            local newChIdx, chChanged = ImGui.Combo('##ch', chIdx, chDisplayLabels, #chDisplayLabels)
-            if chChanged then
-                _config:SetAndSave('Channel', CHANNELS[newChIdx])
-                _wantRestartModal = true
-            end
-
             -- Weapon Mode
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Weapon Mode')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped('Controls which weapon types are considered when evaluating gear upgrades for the Primary and Secondary slots')
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
             local wmLabels = {}
@@ -430,6 +407,13 @@ function Panel.Render()
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Ranged Slot')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped("Controls how items in the Ranged slot are evaluated. Choose 'Only Bows' to prevent non-bow ranged items from displacing a bow — recommended for Rangers and melee toons that pull.")
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
             local rmIdx = indexOfStr(RANGEDMODES, _config:Get('RangedMode'))
@@ -439,18 +423,18 @@ function Panel.Render()
             if rmChanged then
                 _config:SetAndSave('RangedMode', RANGEDMODES[newRmIdx])
             end
-            if ImGui.IsItemHovered() then
-                ImGui.BeginTooltip()
-                ImGui.PushTextWrapPos(280)
-                ImGui.TextWrapped("Controls how items in the Ranged slot are evaluated. Choose 'Only Bows' to prevent non-bow ranged items from displacing a bow — recommended for Rangers and melee toons that pull.")
-                ImGui.PopTextWrapPos()
-                ImGui.EndTooltip()
-            end
 
             -- Loot Range
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Loot Range')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped('Scans for corpses within this range, anything outside this range is ignored')
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
             local curRange = _config:Get('LootRange')
@@ -468,6 +452,13 @@ function Panel.Render()
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Use Warp')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped('This will leverage /warp to navigate to corpses instead of /nav')
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
             ImGui.TableNextColumn()
             local useWarp = _config:Get('UseWarp')
             local newUseWarp, warpChanged = Widgets.Toggle('##usewarp', useWarp)
@@ -482,10 +473,6 @@ function Panel.Render()
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text('Done Looting')
-            ImGui.TableNextColumn()
-            local announceDone = _config:Get('AnnounceDone')
-            local newAnnounceDone, doneChanged = Widgets.Toggle('##announcedone', announceDone)
-            if doneChanged then _config:SetAndSave('AnnounceDone', newAnnounceDone) end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.PushTextWrapPos(280)
@@ -493,6 +480,10 @@ function Panel.Render()
                 ImGui.PopTextWrapPos()
                 ImGui.EndTooltip()
             end
+            ImGui.TableNextColumn()
+            local announceDone = _config:Get('AnnounceDone')
+            local newAnnounceDone, doneChanged = Widgets.Toggle('##announcedone', announceDone)
+            if doneChanged then _config:SetAndSave('AnnounceDone', newAnnounceDone) end
 
             ImGui.EndTable()
         end
@@ -538,6 +529,58 @@ function Panel.Render()
         if ImGui.Button('List Editor', 95, 0) then
             if not _editor.IsOpen() then
                 _editor.Open(_config._lists)
+            end
+        end
+
+        ImGui.Spacing()
+        if ImGui.CollapsingHeader('System Settings') then
+            if ImGui.BeginTable('##syssettings', 2, 0) then
+                ImGui.TableSetupColumn('##slbl', ImGuiTableColumnFlags.WidthFixed,  90)
+                ImGui.TableSetupColumn('##sctl', ImGuiTableColumnFlags.WidthStretch)
+
+                -- Integration (Framework)
+                ImGui.TableNextRow()
+                ImGui.TableNextColumn()
+                ImGui.Text('Integration')
+                if ImGui.IsItemHovered() then
+                    ImGui.BeginTooltip()
+                    ImGui.TextWrapped('Which bot framework e9loot works alongside.')
+                    ImGui.EndTooltip()
+                end
+                ImGui.TableNextColumn()
+                ImGui.SetNextItemWidth(-1)
+                local fwIdx = indexOfStr(FRAMEWORKS, _config:Get('Framework'))
+                local fwDisplayLabels = {}
+                for _, k in ipairs(FRAMEWORKS) do table.insert(fwDisplayLabels, FRAMEWORK_LABELS[k] or k) end
+                local newFwIdx, fwChanged = ImGui.Combo('##fw', fwIdx, fwDisplayLabels, #fwDisplayLabels)
+                if fwChanged then
+                    _config:SetAndSave('Framework', FRAMEWORKS[newFwIdx])
+                    _wantRestartModal = true
+                end
+
+                -- Broadcast (Channel)
+                ImGui.TableNextRow()
+                ImGui.TableNextColumn()
+                ImGui.Text('Broadcast')
+                if ImGui.IsItemHovered() then
+                    ImGui.BeginTooltip()
+                    ImGui.PushTextWrapPos(280)
+                    ImGui.TextWrapped('The network channel used to share loot events and group pause/resume commands across characters')
+                    ImGui.PopTextWrapPos()
+                    ImGui.EndTooltip()
+                end
+                ImGui.TableNextColumn()
+                ImGui.SetNextItemWidth(-1)
+                local chIdx = indexOfStr(CHANNELS, _config:Get('Channel'))
+                local chDisplayLabels = {}
+                for _, k in ipairs(CHANNELS) do table.insert(chDisplayLabels, CHANNEL_LABELS[k] or k) end
+                local newChIdx, chChanged = ImGui.Combo('##ch', chIdx, chDisplayLabels, #chDisplayLabels)
+                if chChanged then
+                    _config:SetAndSave('Channel', CHANNELS[newChIdx])
+                    _wantRestartModal = true
+                end
+
+                ImGui.EndTable()
             end
         end
 

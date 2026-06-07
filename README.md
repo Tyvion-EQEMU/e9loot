@@ -57,13 +57,16 @@ Once running, a small panel appears with:
 
 - **Pause / Resume** — stop or start looting for this character only
 - **Pause All / Resume All** — broadcast pause/resume to your whole group (requires DanNet or EQBC)
-- **Settings** — Integration, Broadcast, Weapon Mode, Ranged Slot, Loot Range, Use Warp, Done Looting
+- **Settings** — Weapon Mode, Ranged Slot, Loot Range, Use Warp, Done Looting
 - **History** — opens the loot history window showing every item decision this session
 - **List Editor** — opens the item list manager to add/remove items from all loot categories
+- **System Settings** *(collapsed)* — Integration (framework) and Broadcast (channel); rarely changed after setup
+- **Console** *(collapsed)* — scrollable in-panel log output with Log Level, Log to File, and Show Timestamps controls
 - **Status** — shows nearby corpse count and current state: `Running`, `Paused`, or `Combat`
 
 The **minimize button** (top-right of the panel) collapses e9loot into a small overlay
-showing just the enable toggle and status. A red border on the mini window means your
+showing just the enable toggle and status. Toggling the enable switch in the mini window
+broadcasts pause/resume to the whole group. A red border on the mini window means your
 character is in combat and looting is temporarily suspended.
 
 ## How Looting Works

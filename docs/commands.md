@@ -31,6 +31,8 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 |---------|-------------|
 | `/e9loot show` | Restore the main panel if it has been closed or minimized |
 | `/e9loot mini` | Toggle mini mode on/off |
+| `/e9loot mini on` | Force mini mode on for this character |
+| `/e9loot mini off` | Force mini mode off for this character |
 | `/e9loot editor` | Open the List Editor window |
 | `/e9loot setup` | Re-open the first-run setup dialog |
 
@@ -83,6 +85,9 @@ Changes a config setting by name. Setting names are case-insensitive.
 | `LootGroup` | boolean | `true`, `false` |
 | `AnnounceGroup` | boolean | `true`, `false` |
 | `AnnounceDone` | boolean | `true`, `false` |
+| `LogLevel` | number | `1` (Error), `2` (Warn), `3` (Info), `4` (Debug) |
+| `LogToFile` | boolean | `true`, `false` |
+| `LogTimestamps` | boolean | `true`, `false` |
 
 ---
 
