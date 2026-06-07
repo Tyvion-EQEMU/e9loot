@@ -454,7 +454,7 @@ function Panel.Render()
             -- Trash Sell Threshold
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
-            ImGui.Text('Trash Sell (pp)')
+            ImGui.Text('Min. Sell Value')
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.PushTextWrapPos(280)
