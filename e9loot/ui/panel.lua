@@ -85,6 +85,20 @@ local FILTER_BTNCOLS = {
 local DECISION_ORDER  = { 'keep', 'bank', 'sell', 'destroy', 'skip' }
 local DECISION_LABELS = { keep='Keep', bank='Bank', sell='Sell', destroy='Destroy', skip='Skip' }
 
+local function formatPP(pp)
+    if pp <= 0 then return 'Disabled' end
+    local copper = math.floor(pp * 1000 + 0.5)
+    local p = math.floor(copper / 1000); copper = copper % 1000
+    local g = math.floor(copper / 100);  copper = copper % 100
+    local s = math.floor(copper / 10);   local c = copper % 10
+    local parts = {}
+    if p > 0 then parts[#parts+1] = p .. 'p' end
+    if g > 0 then parts[#parts+1] = g .. 'g' end
+    if s > 0 then parts[#parts+1] = s .. 's' end
+    if c > 0 then parts[#parts+1] = c .. 'c' end
+    return table.concat(parts, ' ')
+end
+
 -----------------------------------------------------------------------
 -- History window
 -----------------------------------------------------------------------
@@ -465,14 +479,19 @@ function Panel.Render()
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
             local curTrash = _config:Get('TrashPrice')
-            local newTrash, trashChanged = ImGui.InputInt('##trashprice', curTrash, 1, 10)
+            local newTrash, trashChanged = ImGui.InputFloat('##trashprice', curTrash, 0.25, 1.0, '%.2f')
             if trashChanged then
                 if newTrash < 0 then newTrash = 0 end
                 _config:SetAndSave('TrashPrice', newTrash)
             end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
-                ImGui.Text(curTrash == 0 and 'Disabled — set above 0 to enable' or string.format('Selling items worth %dpp+', curTrash))
+                local displayTrash = trashChanged and newTrash or curTrash
+                if displayTrash <= 0 then
+                    ImGui.Text('Disabled — set above 0 to enable')
+                else
+                    ImGui.Text(string.format('%.2fpp  =  %s', displayTrash, formatPP(displayTrash)))
+                end
                 ImGui.EndTooltip()
             end
 
