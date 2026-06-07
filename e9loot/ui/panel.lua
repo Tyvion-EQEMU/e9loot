@@ -609,6 +609,13 @@ function Panel.Render()
 
                 ImGui.TableNextRow()
                 ImGui.TableNextColumn(); ImGui.Text('Log to File')
+                if ImGui.IsItemHovered() then
+                    ImGui.BeginTooltip()
+                    ImGui.PushTextWrapPos(280)
+                    ImGui.TextWrapped('Create a local log file of the Console events')
+                    ImGui.PopTextWrapPos()
+                    ImGui.EndTooltip()
+                end
                 ImGui.TableNextColumn()
                 local logToFile = _config:Get('LogToFile')
                 local newLogToFile, fileChanged = Widgets.Toggle('##logtofile', logToFile)
@@ -621,6 +628,13 @@ function Panel.Render()
 
                 ImGui.TableNextRow()
                 ImGui.TableNextColumn(); ImGui.Text('Show Timestamps')
+                if ImGui.IsItemHovered() then
+                    ImGui.BeginTooltip()
+                    ImGui.PushTextWrapPos(280)
+                    ImGui.TextWrapped('Add Timestamps to the local log file, if Log to File is enabled')
+                    ImGui.PopTextWrapPos()
+                    ImGui.EndTooltip()
+                end
                 ImGui.TableNextColumn()
                 local logTs = _config:Get('LogTimestamps')
                 local newLogTs, tsChanged = Widgets.Toggle('##logts', logTs)
