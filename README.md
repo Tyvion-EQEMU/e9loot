@@ -6,7 +6,7 @@ alongside bot frameworks like RGMercs, E3, and KissAssist.
 
 ## Requirements
 
-- **MacroQuest2** with Lua support (MQ2Lua plugin loaded)
+- **MacroQuest** with Lua support (MQ2Lua plugin loaded)
 - **MQ2Nav** — required for walking to corpses when warp is disabled
 - **MQ2DanNet** *(optional)* — enables group-wide broadcast of loot events and pause/resume
 - **MQ2EQBC** *(optional)* — alternative to DanNet for group broadcast
@@ -41,7 +41,7 @@ In the EverQuest chat window, type:
 /lua run e9loot
 ```
 
-On your very first run, a **Setup dialog** will appear asking you to choose your bot
+On your very first run, a **Setup dialog** will appear asking you to choose your automation
 framework (RGMercs, E3, KissAssist, or None) and broadcast channel (DanNet, EQBC, or
 None). These can be changed later from the main panel.
 
@@ -60,7 +60,7 @@ Once running, a small panel appears with:
 - **Settings** — Integration, Broadcast, Weapon Mode, Ranged Slot, Loot Range, Use Warp, Done Looting
 - **History** — opens the loot history window showing every item decision this session
 - **List Editor** — opens the item list manager to add/remove items from all loot categories
-- **Status bar** — shows nearby corpse count and current state: `Running`, `Paused`, or `Combat`
+- **Status** — shows nearby corpse count and current state: `Running`, `Paused`, or `Combat`
 
 The **minimize button** (top-right of the panel) collapses e9loot into a small overlay
 showing just the enable toggle and status. A red border on the mini window means your
