@@ -377,7 +377,7 @@ function Panel.Render()
 
         -- Two-column settings table
         if ImGui.BeginTable('##settings', 2, 0) then
-            ImGui.TableSetupColumn('##lbl', ImGuiTableColumnFlags.WidthFixed,   90)
+            ImGui.TableSetupColumn('##lbl', ImGuiTableColumnFlags.WidthFixed,  120)
             ImGui.TableSetupColumn('##ctl', ImGuiTableColumnFlags.WidthStretch)
 
             -- Weapon Mode
@@ -472,7 +472,7 @@ function Panel.Render()
             -- Done Looting
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
-            ImGui.Text('Done Looting')
+            ImGui.Text('Share Done Looting')
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.PushTextWrapPos(280)
