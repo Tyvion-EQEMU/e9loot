@@ -1,11 +1,12 @@
 -- Main ImGui panel: header, pause/resume, two-column settings, history, mini-mode
 
 local mq     = require('mq')
-local Icons  = require('mq.ICONS')
-local Corpse = require('e9loot.core.corpse')
-local Mini   = require('e9loot.ui.mini')
-local Logger = require('e9loot.utils.logger')
+local Icons   = require('mq.ICONS')
+local Corpse  = require('e9loot.core.corpse')
+local Mini    = require('e9loot.ui.mini')
+local Logger  = require('e9loot.utils.logger')
 local Widgets = require('e9loot.ui.widgets')
+local Credits = require('e9loot.ui.credits')
 
 local Panel = {}
 
@@ -297,6 +298,9 @@ function Panel.Render()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
             ImGui.TextDisabled('by ' .. _version._author)
             ImGui.EndGroup()
+            local btnW = 70
+            ImGui.SetCursorPosX(select(1, ImGui.GetContentRegionMax()) - btnW)
+            if ImGui.Button('Credits', btnW, 16) then Credits.Open() end
             ImGui.Spacing()
             ImGui.Separator()
             ImGui.Spacing()
@@ -585,6 +589,7 @@ function Panel.Render()
     renderHistory()
     _editor.Render()
     _setup.Render()
+    Credits.Render()
 end
 
 return Panel
