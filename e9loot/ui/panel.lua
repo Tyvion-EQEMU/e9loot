@@ -451,10 +451,8 @@ function Panel.Render()
             ImGui.Text('Use Warp')
             ImGui.TableNextColumn()
             local useWarp = _config:Get('UseWarp')
-            local newUseWarp, _ = ImGui.Checkbox('##usewarp', useWarp)
-            if newUseWarp ~= useWarp then
-                _config:SetAndSave('UseWarp', newUseWarp)
-            end
+            local newUseWarp, warpChanged = Widgets.Toggle('##usewarp', useWarp)
+            if warpChanged then _config:SetAndSave('UseWarp', newUseWarp) end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.Text('MQ2RWarp.dll required')
@@ -467,10 +465,8 @@ function Panel.Render()
             ImGui.Text('Done Looting')
             ImGui.TableNextColumn()
             local announceDone = _config:Get('AnnounceDone')
-            local newAnnounceDone, _ = ImGui.Checkbox('##announcedone', announceDone)
-            if newAnnounceDone ~= announceDone then
-                _config:SetAndSave('AnnounceDone', newAnnounceDone)
-            end
+            local newAnnounceDone, doneChanged = Widgets.Toggle('##announcedone', announceDone)
+            if doneChanged then _config:SetAndSave('AnnounceDone', newAnnounceDone) end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.PushTextWrapPos(280)
