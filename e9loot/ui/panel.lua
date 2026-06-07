@@ -57,7 +57,7 @@ local _panelOpen = true
 -- History state
 local _histOpen           = false
 local _histFilter         = ''
-local _histDecisionFilter = { keep=false, sell=false, destroy=false, skip=false }
+local _histDecisionFilter = { keep=false, bank=false, sell=false, destroy=false, skip=false }
 
 -- Restart modal
 local _wantRestartModal = false
@@ -67,6 +67,7 @@ local _miniMode = false
 
 local DECISION_COLORS = {
     keep    = { 0.3, 1.0, 0.3, 1.0 },
+    bank    = { 0.3, 0.7, 1.0, 1.0 },
     sell    = { 1.0, 0.8, 0.2, 1.0 },
     destroy = { 0.6, 0.6, 0.6, 1.0 },
     skip    = { 0.5, 0.5, 0.5, 0.7 },
@@ -75,13 +76,14 @@ local DECISION_COLORS = {
 -- Active / inactive button colors for decision filter toggles
 local FILTER_BTNCOLS = {
     keep    = { a={ 0.20, 0.75, 0.20, 1.0 }, i={ 0.07, 0.26, 0.07, 1.0 } },
+    bank    = { a={ 0.20, 0.55, 0.85, 1.0 }, i={ 0.07, 0.19, 0.30, 1.0 } },
     sell    = { a={ 0.82, 0.62, 0.10, 1.0 }, i={ 0.28, 0.21, 0.04, 1.0 } },
     destroy = { a={ 0.60, 0.60, 0.60, 1.0 }, i={ 0.20, 0.20, 0.20, 1.0 } },
     skip    = { a={ 0.80, 0.80, 0.80, 1.0 }, i={ 0.24, 0.24, 0.24, 1.0 } },
 }
 
-local DECISION_ORDER  = { 'keep', 'sell', 'destroy', 'skip' }
-local DECISION_LABELS = { keep='Keep', sell='Sell', destroy='Destroy', skip='Skip' }
+local DECISION_ORDER  = { 'keep', 'bank', 'sell', 'destroy', 'skip' }
+local DECISION_LABELS = { keep='Keep', bank='Bank', sell='Sell', destroy='Destroy', skip='Skip' }
 
 -----------------------------------------------------------------------
 -- History window
@@ -128,10 +130,10 @@ local function renderHistory()
         ImGui.Separator()
 
         local history = _loot.GetHistory()
-        local kept, sold, destroyed = 0, 0, 0
+        local kept, banked, sold, destroyed = 0, 0, 0, 0
 
-        local anyDecision = _histDecisionFilter.keep or _histDecisionFilter.sell
-            or _histDecisionFilter.destroy or _histDecisionFilter.skip
+        local anyDecision = _histDecisionFilter.keep or _histDecisionFilter.bank
+            or _histDecisionFilter.sell or _histDecisionFilter.destroy or _histDecisionFilter.skip
 
         if ImGui.BeginTable('##histtbl', 6,
             bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
@@ -148,8 +150,9 @@ local function renderHistory()
             ImGui.TableHeadersRow()
 
             for i, entry in ipairs(history) do
-                if     entry.decision == 'keep'    then kept      = kept    + 1
-                elseif entry.decision == 'sell'    then sold      = sold    + 1
+                if     entry.decision == 'keep'    then kept      = kept     + 1
+                elseif entry.decision == 'bank'    then banked    = banked   + 1
+                elseif entry.decision == 'sell'    then sold      = sold     + 1
                 elseif entry.decision == 'destroy' then destroyed = destroyed + 1
                 end
 
@@ -177,7 +180,7 @@ local function renderHistory()
                     ImGui.TextColored(col[1], col[2], col[3], col[4], (entry.decision or ''):upper())
 
                     ImGui.TableNextColumn()
-                    local canInspect = entry.decision == 'keep' or entry.decision == 'sell'
+                    local canInspect = entry.decision == 'keep' or entry.decision == 'bank' or entry.decision == 'sell'
                     ImGui.TextColored(col[1], col[2], col[3], col[4], entry.name)
                     if canInspect then
                         local rmin = ImGui.GetItemRectMinVec()
@@ -207,7 +210,7 @@ local function renderHistory()
         end
 
         ImGui.TextDisabled(string.format(
-            'Session: %d kept  |  %d sold  |  %d destroyed', kept, sold, destroyed))
+            'Session: %d kept  |  %d banked  |  %d sold  |  %d destroyed', kept, banked, sold, destroyed))
     end
 
     ImGui.End()
@@ -445,6 +448,31 @@ function Panel.Render()
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 ImGui.Text('Ctrl+Click to type a value')
+                ImGui.EndTooltip()
+            end
+
+            -- Trash Sell Threshold
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Trash Sell (pp)')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped('Loot and sell any unlisted item worth at least this much at a vendor. Set to 0 to disable.')
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local curTrash = _config:Get('TrashPrice')
+            local newTrash, trashChanged = ImGui.InputInt('##trashprice', curTrash, 1, 10)
+            if trashChanged then
+                if newTrash < 0 then newTrash = 0 end
+                _config:SetAndSave('TrashPrice', newTrash)
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.Text(curTrash == 0 and 'Disabled — set above 0 to enable' or string.format('Selling items worth %dpp+', curTrash))
                 ImGui.EndTooltip()
             end
 

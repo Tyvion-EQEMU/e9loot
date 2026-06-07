@@ -119,7 +119,7 @@ local function evaluateItem(item)
     local isNoDrop    = item.NoDrop() == true
 
     if item.Stackable() or item.Tradeskills() then
-        if trashPrice > 0 and val >= trashPrice then return DECISION.SELL, 'trash-sell' end
+        if trashPrice > 0 and val >= trashPrice * 1000 then return DECISION.SELL, 'trash-sell' end
         if isNoDrop then return DECISION.SKIP, 'nodrop-worthless' end
         return DECISION.SKIP, 'worthless-stack'
     end
@@ -135,7 +135,7 @@ local function evaluateItem(item)
     -- Not an upgrade: no-drop items can't be picked up to destroy, so leave them
     if isNoDrop then return DECISION.SKIP, 'nodrop-no-upgrade' end
 
-    if trashPrice > 0 and val >= trashPrice then return DECISION.SELL, 'sell-value' end
+    if trashPrice > 0 and val >= trashPrice * 1000 then return DECISION.SELL, 'sell-value' end
 
     return DECISION.SKIP, 'no-match'
 end
