@@ -594,6 +594,13 @@ function Panel.Render()
 
                 ImGui.TableNextRow()
                 ImGui.TableNextColumn(); ImGui.Text('Log Level')
+                if ImGui.IsItemHovered() then
+                    ImGui.BeginTooltip()
+                    ImGui.PushTextWrapPos(280)
+                    ImGui.TextWrapped('How much detail do you want in the console window?')
+                    ImGui.PopTextWrapPos()
+                    ImGui.EndTooltip()
+                end
                 ImGui.TableNextColumn(); ImGui.SetNextItemWidth(-1)
                 local levelIdx = _config:Get('LogLevel') or 3
                 local newLevelIdx, levelChanged = ImGui.Combo('##loglevel', levelIdx,
