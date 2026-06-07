@@ -13,7 +13,8 @@ local DATA = {
     Inspirations = {
         'Enine',
         'Grimmier',
-        'Derple & Algar',
+        'Derple',
+        'Algar',
     },
 }
 
@@ -32,7 +33,7 @@ local function renderName(name)
     for i = 1, len do
         local v   = math.floor(math.sin(0.4 * (cw + i)) * 80 + 160)
         local col = IM_COL32(v, v, v, 255)
-        if i > 1 then ImGui.SameLine() end
+        if i > 1 then ImGui.SameLine(0, 1) end
         ImGui.PushStyleColor(ImGuiCol.Text, col)
         ImGui.Text(name:sub(i, i))
         ImGui.PopStyleColor()
