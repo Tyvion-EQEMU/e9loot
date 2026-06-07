@@ -5,6 +5,7 @@ local Icons  = require('mq.ICONS')
 local Corpse = require('e9loot.core.corpse')
 local Mini   = require('e9loot.ui.mini')
 local Logger = require('e9loot.utils.logger')
+local Widgets = require('e9loot.ui.widgets')
 
 local Panel = {}
 
@@ -543,8 +544,8 @@ function Panel.Render()
                 ImGui.TableNextColumn(); ImGui.Text('Log to File')
                 ImGui.TableNextColumn()
                 local logToFile = _config:Get('LogToFile')
-                local newLogToFile = ImGui.Checkbox('##logtofile', logToFile)
-                if newLogToFile ~= logToFile then _config:SetAndSave('LogToFile', newLogToFile) end
+                local newLogToFile, fileChanged = Widgets.Toggle('##logtofile', logToFile)
+                if fileChanged then _config:SetAndSave('LogToFile', newLogToFile) end
                 if ImGui.IsItemHovered() then
                     ImGui.BeginTooltip()
                     ImGui.Text('Writes to ConsoleLogs_<Server>_<Char>.log')
@@ -552,11 +553,11 @@ function Panel.Render()
                 end
 
                 ImGui.TableNextRow()
-                ImGui.TableNextColumn(); ImGui.Text('Timestamps')
+                ImGui.TableNextColumn(); ImGui.Text('Show Timestamps')
                 ImGui.TableNextColumn()
                 local logTs = _config:Get('LogTimestamps')
-                local newLogTs = ImGui.Checkbox('##logts', logTs)
-                if newLogTs ~= logTs then _config:SetAndSave('LogTimestamps', newLogTs) end
+                local newLogTs, tsChanged = Widgets.Toggle('##logts', logTs)
+                if tsChanged then _config:SetAndSave('LogTimestamps', newLogTs) end
 
                 ImGui.EndTable()
             end

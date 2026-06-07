@@ -1,7 +1,7 @@
 -- Mini overlay: no title bar, animated running/paused toggle, logo click to restore main window
 
 local mq     = require('mq')
-local ImAnim = require('ImAnim')
+local Widgets = require('e9loot.ui.widgets')
 
 local Mini = {}
 
@@ -9,50 +9,6 @@ local _config  = nil
 local _loot    = nil
 local _version = nil
 local _logoTex = nil
-
-local _INST_ID  = ImHashStr('e9mini_toggle')
-local _THUMB_CH = ImHashStr('e9mini_thumb')
-local _BG_CH    = ImHashStr('e9mini_bg')
-
-local COL_ON   = ImVec4(0.18, 0.70, 0.18, 1.0)
-local COL_OFF  = ImVec4(0.65, 0.14, 0.14, 1.0)
-local COL_KNOB = ImVec4(1.00, 1.00, 1.00, 1.0)
-
-local function getDt()
-    local dt = ImGui.GetIO().DeltaTime
-    if dt <= 0 then dt = 1/60 end
-    if dt > 0.1 then dt = 0.1 end
-    return dt
-end
-
-local function renderToggle(value)
-    local dt  = getDt()
-    local dl  = ImGui.GetWindowDrawList()
-    local pos = ImGui.GetCursorScreenPosVec()
-    local w, h = 32, 16
-
-    if ImGui.InvisibleButton('##e9mini_tgl', ImVec2(w, h)) then
-        value = not value
-        _loot.SetEnabled(value)
-    end
-
-    local target = value and 1.0 or 0.0
-    local thumb  = ImAnim.TweenFloat(_INST_ID, _THUMB_CH, target, 0.25,
-        ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
-    local bg     = ImAnim.TweenColor(_INST_ID, _BG_CH, value and COL_ON or COL_OFF, 0.2,
-        ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade, IamColorSpace.OKLAB, dt)
-
-    local r  = h * 0.5
-    dl:AddRectFilled(pos, ImVec2(pos.x + w, pos.y + h),
-        ImGui.ColorConvertFloat4ToU32(bg), r)
-
-    local tx = pos.x + r + thumb * (w - h)
-    local ty = pos.y + r
-    local tr = r - 2.5
-    dl:AddCircleFilled(ImVec2(tx + 1, ty + 1.5), tr, IM_COL32(0, 0, 0, 35))
-    dl:AddCircleFilled(ImVec2(tx, ty),            tr, ImGui.ColorConvertFloat4ToU32(COL_KNOB))
-    dl:AddCircle(ImVec2(tx, ty),                  tr, IM_COL32(0, 0, 0, 60), 32, 0.5)
-end
 
 function Mini.Init(config, loot, version)
     _config  = config
@@ -96,9 +52,10 @@ function Mini.Render(onClose)
     ImGui.BeginGroup()
         ImGui.Text('E9 Loot')
 
-        local enabled   = _config:Get('LootEnabled')
-        local inCombat  = _loot.IsInCombat()
-        renderToggle(enabled)
+        local enabled  = _config:Get('LootEnabled')
+        local inCombat = _loot.IsInCombat()
+        local newEnabled, toggled = Widgets.Toggle('##e9loot_enable', enabled)
+        if toggled then _loot.SetEnabled(newEnabled) end
         ImGui.SameLine()
         if not enabled then
             ImGui.TextColored(1.0, 0.4, 0.4, 1.0, 'Paused')
