@@ -352,7 +352,7 @@ function Loot.Init(cfg, lists, framework, channel)
             end
         elseif payload.type == 'reload_lists' then
             _lists.LoadAll()
-            Logger.Debug('Lists reloaded via group broadcast from %s', payload.from or '?')
+            Logger.Info('Lists reloaded via group broadcast from %s', payload.from or '?')
         end
     end)
 end
