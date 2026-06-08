@@ -323,6 +323,68 @@ function Loot.GetHistory()
     return _history
 end
 
+function Loot.ScanBankItems()
+    local results = {}
+    for bag = 1, 10 do
+        local bagSlot = mq.TLO.InvSlot('pack' .. bag).Item
+        if bagSlot and bagSlot.ID() and bagSlot.ID() > 0 then
+            local size = bagSlot.Container()
+            if size and size > 0 then
+                for slot = 1, size do
+                    local item = bagSlot.Item(slot)
+                    if item and item.ID() and item.ID() > 0 then
+                        local name = item.Name() or ''
+                        local id   = item.ID()
+                        if _lists.bank and _lists.bank:Has(name, id) then
+                            results[#results + 1] = { name=name, id=id, bag=bag, slot=slot }
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return results
+end
+
+function Loot.BankStuff(items)
+    mq.cmdf('/nomodkey /click right target')
+    mq.delay(2000, function() return mq.TLO.Window('BigBankWnd').Open() end)
+
+    if not mq.TLO.Window('BigBankWnd').Open() then
+        Logger.Warn('BankStuff: bank window did not open — target a banker first')
+        printf('\are9loot: Bank window did not open. Target a banker and try again.')
+        return
+    end
+
+    local count = 0
+    for _, entry in ipairs(items) do
+        mq.cmdf('/shift /itemnotify in pack%d %d leftmouseup', entry.bag, entry.slot)
+        mq.delay(2000, function() return mq.TLO.Cursor.ID() ~= nil and mq.TLO.Cursor.ID() > 0 end)
+
+        if mq.TLO.Cursor.ID() and mq.TLO.Cursor.ID() > 0 then
+            mq.cmdf('/notify BigBankWnd BIGB_AutoButton leftmouseup')
+            mq.delay(1000, function() return not mq.TLO.Cursor.ID() or mq.TLO.Cursor.ID() == 0 end)
+
+            if mq.TLO.Cursor.ID() and mq.TLO.Cursor.ID() > 0 then
+                mq.cmd('/autoinventory')
+                Logger.Warn('BankStuff: bank may be full — inventoried %s', entry.name)
+            else
+                count = count + 1
+                Logger.Info('BankStuff: deposited %s', entry.name)
+            end
+        else
+            Logger.Warn('BankStuff: could not pick up %s (bag %d slot %d)', entry.name, entry.bag, entry.slot)
+        end
+    end
+
+    if mq.TLO.Window('BigBankWnd').Open() then
+        mq.TLO.Window('BigBankWnd').DoClose()
+    end
+
+    printf('\age9loot: BankStuff complete \xe2\x80\x94 deposited %d/%d item(s)', count, #items)
+    Logger.Info('BankStuff: deposited %d/%d item(s)', count, #items)
+end
+
 function Loot.Init(cfg, lists, framework, channel)
     _config    = cfg
     _lists     = lists

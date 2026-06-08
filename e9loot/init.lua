@@ -15,9 +15,10 @@ local Logger  = require('e9loot.utils.logger')
 local Lists   = require('e9loot.lists.init')
 local Loot    = require('e9loot.core.loot')
 local Corpse  = require('e9loot.core.corpse')
-local Setup   = require('e9loot.ui.setup')
-local Editor  = require('e9loot.ui.editor')
-local Panel   = require('e9loot.ui.panel')
+local Setup       = require('e9loot.ui.setup')
+local Editor      = require('e9loot.ui.editor')
+local BankConfirm = require('e9loot.ui.bankconfirm')
+local Panel       = require('e9loot.ui.panel')
 
 -- Framework adapter map
 local FRAMEWORK_ADAPTERS = {
@@ -98,6 +99,8 @@ mq.bind('/e9loot', function(subcmd, ...)
     elseif subcmd == 'disable' then
         Loot.SetEnabled(false)
         printf('\are9loot disabled')
+    elseif subcmd == 'bankstuff' then
+        BankConfirm.Open(Loot)
     elseif subcmd == 'reload' then
         Lists.LoadAll()
         printf('\age9loot: lists reloaded')
@@ -135,7 +138,7 @@ mq.bind('/e9loot', function(subcmd, ...)
         channel:Broadcast({ type='set_announcedone', value=newVal })
         printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\aye9loot commands: loot | bankstuff | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
@@ -149,6 +152,7 @@ end
 -----------------------------------------------------------------------
 mq.imgui.init('e9loot', function()
     Panel.Render()
+    BankConfirm.Render()
 end)
 
 -----------------------------------------------------------------------
