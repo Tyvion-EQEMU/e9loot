@@ -46,6 +46,10 @@ function Editor.IsOpen()
     return _open
 end
 
+function Editor.Close()
+    _open = false
+end
+
 local function renderTab(listName)
     local lst       = _lists[listName]
     local filterKey = '##filter_' .. listName

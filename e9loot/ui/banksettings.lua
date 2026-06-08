@@ -16,6 +16,10 @@ function BankSettings.IsOpen()
     return _open
 end
 
+function BankSettings.Close()
+    _open = false
+end
+
 local function renderVendorSection()
     ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), 'Vendor')
     ImGui.Separator()

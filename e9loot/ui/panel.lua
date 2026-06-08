@@ -582,19 +582,21 @@ function Panel.Render()
 
         ImGui.SameLine()
 
+        local editorOpen = _editor.IsOpen()
+        if editorOpen then ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.72, 0.20, 1.0)) end
         if ImGui.Button('List Editor', 95, 0) then
-            if not _editor.IsOpen() then
-                _editor.Open(_config._lists, _channel)
-            end
+            if editorOpen then _editor.Close() else _editor.Open(_config._lists, _channel) end
         end
+        if editorOpen then ImGui.PopStyleColor() end
 
         ImGui.SameLine()
 
+        local bankOpen = _bankSettings.IsOpen()
+        if bankOpen then ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.72, 0.20, 1.0)) end
         if ImGui.Button('Bank & Vendor', 95, 0) then
-            if not _bankSettings.IsOpen() then
-                _bankSettings.Open(_config)
-            end
+            if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
         end
+        if bankOpen then ImGui.PopStyleColor() end
 
         ImGui.Spacing()
         if ImGui.CollapsingHeader('System Settings') then
