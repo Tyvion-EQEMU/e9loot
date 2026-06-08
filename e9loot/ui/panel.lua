@@ -330,12 +330,6 @@ function Panel.Render()
             if ImGui.IsItemClicked(0) then
                 os.execute('start "" "https://github.com/Tyvion-EQEMU"')
             end
-            ImGui.SameLine(0, 4)
-            ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), '<Fireballs Deep>')
-            if ImGui.IsItemHovered() then ImGui.SetMouseCursor(ImGuiMouseCursor.Hand) end
-            if ImGui.IsItemClicked(0) then
-                os.execute('start "" "https://discord.gg/FNvq2hCtBX"')
-            end
             local btnW = 60
             ImGui.SetCursorPosX(select(1, ImGui.GetContentRegionMax()) - btnW)
             ImGui.Button('Credits', btnW, 0)
