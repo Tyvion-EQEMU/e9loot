@@ -4,9 +4,20 @@ local mq = require('mq')
 
 local BankConfirm = {}
 
-local _open  = false
-local _items = {}
-local _loot  = nil
+local _open     = false
+local _items    = {}
+local _loot     = nil
+local _iconAnim = nil
+
+local EQ_ICON_OFFSET = 500
+local ICON_SIZE      = 40
+
+local function getIconAnim()
+    if not _iconAnim then
+        _iconAnim = mq.FindTextureAnimation('A_DragItem')
+    end
+    return _iconAnim
+end
 
 function BankConfirm.Open(loot)
     _loot  = loot
@@ -61,10 +72,20 @@ function BankConfirm.Render()
                         local item = mq.TLO.InvSlot('pack' .. e.bag).Item.Item(e.slot)
                         if item and item.ID() and item.ID() > 0 then
                             ImGui.BeginTooltip()
-                            ImGui.PushTextWrapPos(300)
 
+                            -- Icon + name header
+                            local iconId = item.Icon()
+                            local anim   = getIconAnim()
+                            if iconId and iconId > 0 and anim then
+                                anim:SetTextureCell(iconId - EQ_ICON_OFFSET)
+                                ImGui.DrawTextureAnimation(anim, ICON_SIZE, ICON_SIZE)
+                                ImGui.SameLine()
+                                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (ICON_SIZE - ImGui.GetTextLineHeight()) * 0.5)
+                            end
                             ImGui.TextColored(ImVec4(1.0, 1.0, 0.4, 1.0), item.Name() or e.name)
+
                             ImGui.Separator()
+                            ImGui.PushTextWrapPos(300)
 
                             local itype = item.Type()
                             if itype then ImGui.Text('Type:   ' .. itype) end
@@ -96,6 +117,12 @@ function BankConfirm.Render()
                             local wt = item.Weight()
                             if wt and wt > 0 then
                                 ImGui.Text(('Weight: %.1f'):format(wt))
+                            end
+
+                            local loreText = item.LoreText and item.LoreText() or nil
+                            if loreText and loreText ~= '' then
+                                ImGui.Spacing()
+                                ImGui.TextDisabled(loreText)
                             end
 
                             ImGui.PopTextWrapPos()
