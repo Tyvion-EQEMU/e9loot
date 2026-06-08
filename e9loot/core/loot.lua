@@ -415,15 +415,52 @@ local function consolidateCoins()
         mq.TLO.Me.Silver() or 0,   mq.TLO.Me.Copper() or 0)
 end
 
-function Loot.ConsolidateOnly()
+local BANK_INTERACT_DIST = 10  -- max distance to right-click a banker
+local BANK_NAV_TIMEOUT   = 15  -- seconds before giving up on nav
+
+local function openBankWindow()
+    local tgt = mq.TLO.Target
+    if not tgt or not tgt.ID() or tgt.ID() == 0 then
+        Logger.Warn('openBankWindow: no target — target a banker first')
+        printf('\are9loot: No target. Target a banker and try again.')
+        return false
+    end
+
+    -- Nav to banker if too far away
+    local dist = tgt.Distance() or 999
+    if dist > BANK_INTERACT_DIST then
+        Logger.Info('openBankWindow: %.1f units away, navigating to banker', dist)
+        mq.cmd('/nav target')
+        local deadline = os.clock() + BANK_NAV_TIMEOUT
+        while os.clock() < deadline do
+            mq.delay(250)
+            dist = mq.TLO.Target.Distance() or 999
+            if dist <= BANK_INTERACT_DIST then break end
+            if not mq.TLO.Navigation.Active() then break end
+        end
+        mq.cmd('/nav stop')
+
+        if (mq.TLO.Target.Distance() or 999) > BANK_INTERACT_DIST + 5 then
+            Logger.Warn('openBankWindow: could not reach banker (%.1f units)', mq.TLO.Target.Distance() or 999)
+            printf('\are9loot: Could not navigate close enough to banker.')
+            return false
+        end
+    end
+
     mq.cmdf('/nomodkey /click right target')
     mq.delay(2000, function() return mq.TLO.Window('BigBankWnd').Open() end)
 
     if not mq.TLO.Window('BigBankWnd').Open() then
-        Logger.Warn('ConsolidateOnly: bank window did not open — target a banker first')
-        printf('\are9loot: Bank window did not open. Target a banker and try again.')
-        return
+        Logger.Warn('openBankWindow: bank window did not open')
+        printf('\are9loot: Bank window did not open. Make sure the banker is targeted.')
+        return false
     end
+
+    return true
+end
+
+function Loot.ConsolidateOnly()
+    if not openBankWindow() then return end
 
     consolidateCoins()
 
@@ -433,14 +470,7 @@ function Loot.ConsolidateOnly()
 end
 
 function Loot.BankStuff(items)
-    mq.cmdf('/nomodkey /click right target')
-    mq.delay(2000, function() return mq.TLO.Window('BigBankWnd').Open() end)
-
-    if not mq.TLO.Window('BigBankWnd').Open() then
-        Logger.Warn('BankStuff: bank window did not open — target a banker first')
-        printf('\are9loot: Bank window did not open. Target a banker and try again.')
-        return
-    end
+    if not openBankWindow() then return end
 
     local count = 0
     for _, entry in ipairs(items) do
