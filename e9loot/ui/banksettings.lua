@@ -29,7 +29,7 @@ local function renderBankSection()
     ImGui.Spacing()
 
     if ImGui.BeginTable('##bankopts', 2, 0) then
-        ImGui.TableSetupColumn('##blbl', ImGuiTableColumnFlags.WidthFixed,  160)
+        ImGui.TableSetupColumn('##blbl', ImGuiTableColumnFlags.WidthFixed,  150)
         ImGui.TableSetupColumn('##bctl', ImGuiTableColumnFlags.WidthStretch)
 
         -- Auto Consolidate Coins
@@ -66,12 +66,13 @@ local function renderBankSection()
     end
 end
 
-local VENDOR_H = 58
+local VENDOR_H = 72
+local BANK_H   = 100
 
 function BankSettings.Render()
     if not _open or not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(340, 210), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(238, 215), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Bank & Vendor', _open, ImGuiWindowFlags.None)
     _open = open
 
@@ -82,7 +83,7 @@ function BankSettings.Render()
 
         ImGui.Spacing()
 
-        ImGui.BeginChild('##bank_sect', ImVec2(-1, 0), ImGuiChildFlags.Border)
+        ImGui.BeginChild('##bank_sect', ImVec2(-1, BANK_H), ImGuiChildFlags.Border)
         renderBankSection()
         ImGui.EndChild()
     end

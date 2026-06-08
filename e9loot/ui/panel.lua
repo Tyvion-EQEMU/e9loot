@@ -323,7 +323,23 @@ function Panel.Render()
             ImGui.SameLine()
             ImGui.BeginGroup()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
-            ImGui.TextDisabled('by ' .. _version._author)
+            local linkLabel = '<Fireballs Deep>'
+            ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), linkLabel)
+            if ImGui.IsItemHovered() then
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+            end
+            if ImGui.IsItemClicked(0) then
+                os.execute('start "" "https://discord.gg/FNvq2hCtBX"')
+            end
+            ImGui.TextDisabled('by ')
+            ImGui.SameLine(0, 0)
+            ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), 'Tyvion')
+            if ImGui.IsItemHovered() then
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+            end
+            if ImGui.IsItemClicked(0) then
+                os.execute('start "" "https://github.com/Tyvion-EQEMU"')
+            end
             local btnW = 60
             ImGui.SetCursorPosX(select(1, ImGui.GetContentRegionMax()) - btnW)
             ImGui.Button('Credits', btnW, 0)
