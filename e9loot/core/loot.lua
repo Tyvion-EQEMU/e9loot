@@ -336,7 +336,10 @@ function Loot.ScanBankItems()
                     if item and item.ID() and item.ID() > 0 then
                         local name = item.Name() or ''
                         local id   = item.ID()
-                        if _lists.bank and _lists.bank:Has(name, id) then
+                        local isBank = (_lists.bank    and _lists.bank:Has(name, id))
+                                    or (_lists.astrial and _lists.astrial:Has(name, id))
+                                    or (_lists.deva    and _lists.deva:Has(name, id))
+                        if isBank then
                             results[#results + 1] = { name=name, id=id, bag=bag, slot=slot }
                         end
                     end
