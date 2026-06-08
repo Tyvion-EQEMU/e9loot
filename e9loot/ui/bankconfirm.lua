@@ -4,10 +4,11 @@ local mq = require('mq')
 
 local BankConfirm = {}
 
-local _open     = false
-local _items    = {}
-local _loot     = nil
-local _iconAnim = nil
+local _open         = false
+local _items        = {}
+local _loot         = nil
+local _iconAnim     = nil
+local _pendingItems = nil  -- set by Bank All button, consumed by main loop
 
 local EQ_ICON_OFFSET = 500
 local ICON_SIZE      = 40
@@ -27,6 +28,12 @@ end
 
 function BankConfirm.IsOpen()
     return _open
+end
+
+function BankConfirm.ConsumePending()
+    local items = _pendingItems
+    _pendingItems = nil
+    return items
 end
 
 function BankConfirm.Render()
@@ -146,8 +153,8 @@ function BankConfirm.Render()
             ImGui.EndChild()
 
             if ImGui.Button('Bank All') then
+                _pendingItems = _items
                 _open = false
-                _loot.BankStuff(_items)
             end
             ImGui.SameLine()
             if ImGui.Button('Rescan') then

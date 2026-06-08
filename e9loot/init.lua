@@ -170,6 +170,12 @@ while true do
     mq.doevents()
     channel:Tick()
 
+    -- BankStuff: executed from main loop so mq.delay is allowed
+    local bankItems = BankConfirm.ConsumePending()
+    if bankItems then
+        Loot.BankStuff(bankItems)
+    end
+
     -- Zone change: clear corpse done-set
     local curZone = mq.TLO.Zone.ID()
     if curZone and curZone ~= lastZone then
