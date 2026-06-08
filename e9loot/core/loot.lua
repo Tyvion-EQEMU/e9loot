@@ -347,36 +347,56 @@ function Loot.ScanBankItems()
 end
 
 local function consolidateCoins()
-    local function moneyBtn(slot)
-        mq.cmdf('/shift /notify BigBankWnd BIGB_Money%d leftmouseup', slot)
+    -- Coins live in InventoryWindow (IW_Money0=PP,1=GP,2=SP,3=CP)
+    local invOpen = mq.TLO.Window('InventoryWindow').Open()
+    if not invOpen then
+        mq.cmd('/keypress INVENTORY')
+        mq.delay(500, function() return mq.TLO.Window('InventoryWindow').Open() end)
+    end
+
+    if not mq.TLO.Window('InventoryWindow').Open() then
+        Logger.Warn('ConsolidateCoins: inventory window did not open, skipping')
+        return
+    end
+
+    local function pickup(slot)
+        mq.cmdf('/shift /notify InventoryWindow IW_Money%d leftmouseup', slot)
+        mq.delay(300)
+    end
+    local function drop(slot)
+        mq.cmdf('/notify InventoryWindow IW_Money%d leftmouseup', slot)
         mq.delay(250)
     end
 
     -- Copper: pick up all, chain PP→GP→SP, return remainder
     if (mq.TLO.Me.Copper() or 0) >= 10 then
-        moneyBtn(3)
+        pickup(3)
         mq.delay(400, function() return (mq.TLO.Me.CursorCopper() or 0) > 0 end)
         if (mq.TLO.Me.CursorCopper() or 0) > 0 then
-            moneyBtn(0); moneyBtn(1); moneyBtn(2); moneyBtn(3)
+            drop(0); drop(1); drop(2); drop(3)
         end
     end
 
     -- Silver: pick up all, chain PP→GP, return remainder
     if (mq.TLO.Me.Silver() or 0) >= 10 then
-        moneyBtn(2)
+        pickup(2)
         mq.delay(400, function() return (mq.TLO.Me.CursorSilver() or 0) > 0 end)
         if (mq.TLO.Me.CursorSilver() or 0) > 0 then
-            moneyBtn(0); moneyBtn(1); moneyBtn(2)
+            drop(0); drop(1); drop(2)
         end
     end
 
     -- Gold: pick up all, convert to PP, return remainder
     if (mq.TLO.Me.Gold() or 0) >= 10 then
-        moneyBtn(1)
+        pickup(1)
         mq.delay(400, function() return (mq.TLO.Me.CursorGold() or 0) > 0 end)
         if (mq.TLO.Me.CursorGold() or 0) > 0 then
-            moneyBtn(0); moneyBtn(1)
+            drop(0); drop(1)
         end
+    end
+
+    if not invOpen then
+        mq.cmd('/keypress INVENTORY')
     end
 
     Logger.Info('ConsolidateCoins: PP:%d GP:%d SP:%d CP:%d',
