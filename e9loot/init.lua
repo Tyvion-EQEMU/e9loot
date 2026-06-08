@@ -15,10 +15,11 @@ local Logger  = require('e9loot.utils.logger')
 local Lists   = require('e9loot.lists.init')
 local Loot    = require('e9loot.core.loot')
 local Corpse  = require('e9loot.core.corpse')
-local Setup       = require('e9loot.ui.setup')
-local Editor      = require('e9loot.ui.editor')
-local BankConfirm = require('e9loot.ui.bankconfirm')
-local Panel       = require('e9loot.ui.panel')
+local Setup        = require('e9loot.ui.setup')
+local Editor       = require('e9loot.ui.editor')
+local BankConfirm  = require('e9loot.ui.bankconfirm')
+local BankSettings = require('e9loot.ui.banksettings')
+local Panel        = require('e9loot.ui.panel')
 
 -- Framework adapter map
 local FRAMEWORK_ADAPTERS = {
@@ -81,7 +82,7 @@ Loot.Init(Config, Lists, framework, channel)
 -- Wire panel (pass lists ref into config for editor access)
 Config._lists = Lists.All()
 
-Panel.Init(Config, Loot, Setup, Editor, framework, FRAMEWORK_ADAPTERS, channel, Version)
+Panel.Init(Config, Loot, Setup, Editor, BankSettings, framework, FRAMEWORK_ADAPTERS, channel, Version)
 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)

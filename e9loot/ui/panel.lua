@@ -10,14 +10,15 @@ local Credits = require('e9loot.ui.credits')
 
 local Panel = {}
 
-local _config    = nil
-local _loot      = nil
-local _setup     = nil
-local _editor    = nil
-local _framework = nil
-local _adapters  = nil
-local _channel   = nil
-local _version   = nil
+local _config       = nil
+local _loot         = nil
+local _setup        = nil
+local _editor       = nil
+local _bankSettings = nil
+local _framework    = nil
+local _adapters     = nil
+local _channel      = nil
+local _version      = nil
 
 -- Weapon mode
 local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
@@ -233,15 +234,16 @@ end
 -----------------------------------------------------------------------
 -- Panel API
 -----------------------------------------------------------------------
-function Panel.Init(config, loot, setup, editor, framework, adapters, channel, version)
-    _config    = config
-    _loot      = loot
-    _setup     = setup
-    _editor    = editor
-    _framework = framework
-    _adapters  = adapters
-    _channel   = channel
-    _version   = version
+function Panel.Init(config, loot, setup, editor, bankSettings, framework, adapters, channel, version)
+    _config       = config
+    _loot         = loot
+    _setup        = setup
+    _editor       = editor
+    _bankSettings = bankSettings
+    _framework    = framework
+    _adapters     = adapters
+    _channel      = channel
+    _version      = version
     _histOpen  = config:Get('HistoryOpen')
     _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
 
@@ -272,6 +274,7 @@ function Panel.Render()
         renderHistory()
         _editor.Render()
         _setup.Render()
+        _bankSettings.Render()
         return
     end
 
@@ -579,6 +582,14 @@ function Panel.Render()
             end
         end
 
+        ImGui.SameLine()
+
+        if ImGui.Button('Bank & Vendor', 95, 0) then
+            if not _bankSettings.IsOpen() then
+                _bankSettings.Open(_config)
+            end
+        end
+
         ImGui.Spacing()
         if ImGui.CollapsingHeader('System Settings') then
             if ImGui.BeginTable('##syssettings', 2, 0) then
@@ -717,6 +728,7 @@ function Panel.Render()
     renderHistory()
     _editor.Render()
     _setup.Render()
+    _bankSettings.Render()
 end
 
 return Panel
