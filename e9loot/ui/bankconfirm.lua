@@ -8,7 +8,8 @@ local _open         = false
 local _items        = {}
 local _loot         = nil
 local _iconAnim     = nil
-local _pendingItems = nil  -- set by Bank All button, consumed by main loop
+local _pendingItems       = nil   -- set by Bank All button, consumed by main loop
+local _pendingConsolidate = false -- set by Consolidate Coins button, consumed by main loop
 
 local EQ_ICON_OFFSET = 500
 local ICON_SIZE      = 40
@@ -36,6 +37,12 @@ function BankConfirm.ConsumePending()
     return items
 end
 
+function BankConfirm.ConsumePendingConsolidate()
+    local pending = _pendingConsolidate
+    _pendingConsolidate = false
+    return pending
+end
+
 function BankConfirm.Render()
     if not _open then return end
 
@@ -50,6 +57,11 @@ function BankConfirm.Render()
             ImGui.Spacing()
             if ImGui.Button('Rescan') then
                 _items = _loot.ScanBankItems()
+            end
+            ImGui.SameLine()
+            if ImGui.Button('Consolidate Coins') then
+                _pendingConsolidate = true
+                _open = false
             end
             ImGui.SameLine()
             if ImGui.Button('Close') then
@@ -159,6 +171,11 @@ function BankConfirm.Render()
             ImGui.SameLine()
             if ImGui.Button('Rescan') then
                 _items = _loot.ScanBankItems()
+            end
+            ImGui.SameLine()
+            if ImGui.Button('Consolidate Coins') then
+                _pendingConsolidate = true
+                _open = false
             end
             ImGui.SameLine()
             if ImGui.Button('Cancel') then

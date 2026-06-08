@@ -415,6 +415,23 @@ local function consolidateCoins()
         mq.TLO.Me.Silver() or 0,   mq.TLO.Me.Copper() or 0)
 end
 
+function Loot.ConsolidateOnly()
+    mq.cmdf('/nomodkey /click right target')
+    mq.delay(2000, function() return mq.TLO.Window('BigBankWnd').Open() end)
+
+    if not mq.TLO.Window('BigBankWnd').Open() then
+        Logger.Warn('ConsolidateOnly: bank window did not open — target a banker first')
+        printf('\are9loot: Bank window did not open. Target a banker and try again.')
+        return
+    end
+
+    consolidateCoins()
+
+    if mq.TLO.Window('BigBankWnd').Open() then
+        mq.TLO.Window('BigBankWnd').DoClose()
+    end
+end
+
 function Loot.BankStuff(items)
     mq.cmdf('/nomodkey /click right target')
     mq.delay(2000, function() return mq.TLO.Window('BigBankWnd').Open() end)

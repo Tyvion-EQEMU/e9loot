@@ -185,10 +185,12 @@ while true do
     mq.doevents()
     channel:Tick()
 
-    -- BankStuff: executed from main loop so mq.delay is allowed
+    -- BankStuff / ConsolidateOnly: executed from main loop so mq.delay is allowed
     local bankItems = BankConfirm.ConsumePending()
     if bankItems then
         Loot.BankStuff(bankItems)
+    elseif BankConfirm.ConsumePendingConsolidate() then
+        Loot.ConsolidateOnly()
     end
 
     -- Zone change: clear corpse done-set
