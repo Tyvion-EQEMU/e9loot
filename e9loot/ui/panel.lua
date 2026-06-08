@@ -78,7 +78,7 @@ local function actionButton(label, w, isActive)
     if ImGui.IsItemHovered() then
         local bmin = ImGui.GetItemRectMinVec()
         local bmax = ImGui.GetItemRectMaxVec()
-        Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y))
+        Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y), isActive)
     end
     return clicked
 end

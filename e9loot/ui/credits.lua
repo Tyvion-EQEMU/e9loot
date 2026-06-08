@@ -57,7 +57,7 @@ local function perimeterPoint(pos, size, t)
     end
 end
 
-local function snakeDraw(pos, size, lineW)
+local function snakeDraw(pos, size, lineW, dark)
     if size.x < 4 or size.y < 4 then return end
     local phase = (os.clock() / 1.5) % 1.0
     local dl    = ImGui.GetForegroundDrawList()
@@ -69,18 +69,24 @@ local function snakeDraw(pos, size, lineW)
         if dist < TAIL then
             local bright = 1.0 - (dist / TAIL)
             bright = bright * bright
-            local v   = math.min(255, math.floor(bright * 220 + 55))
             local a   = math.floor(bright * 255)
+            local col
+            if dark then
+                col = IM_COL32(0, 0, 0, a)
+            else
+                local v = math.min(255, math.floor(bright * 220 + 55))
+                col = IM_COL32(v, v, v, a)
+            end
             local p1  = perimeterPoint(pos, size, t1)
             local p2  = perimeterPoint(pos, size, (i + 1) / STEPS)
-            dl:AddLine(p1, p2, IM_COL32(v, v, v, a), lineW)
+            dl:AddLine(p1, p2, col, lineW)
         end
     end
 end
 
--- Called from panel.lua with the button's screen rect
-function Credits.DrawSnake(pos, size)
-    snakeDraw(pos, size, 2.0)
+-- Called from panel.lua with the button's screen rect. Pass dark=true for a black snake.
+function Credits.DrawSnake(pos, size, dark)
+    snakeDraw(pos, size, 2.0, dark)
 end
 
 -----------------------------------------------------------------------
