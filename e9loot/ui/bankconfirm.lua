@@ -69,6 +69,12 @@ function BankConfirm.Render()
                     ImGui.TableNextColumn()
                     ImGui.Text(e.name)
                     if ImGui.IsItemHovered() then
+                        if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
+                            local found = mq.TLO.FindItem('=' .. e.name)
+                            if found and found.ID() and found.ID() > 0 then
+                                found.Inspect()
+                            end
+                        end
                         local item = mq.TLO.InvSlot('pack' .. e.bag).Item.Item(e.slot)
                         if item and item.ID() and item.ID() > 0 then
                             ImGui.BeginTooltip()
