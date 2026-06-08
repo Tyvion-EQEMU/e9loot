@@ -84,6 +84,9 @@ Config._lists = Lists.All()
 
 Panel.Init(Config, Loot, Setup, Editor, BankSettings, framework, FRAMEWORK_ADAPTERS, channel, Version)
 
+-- Shared state accessed by both the bind handler and the main loop
+local _pendingAutoBank = nil
+
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)
     subcmd = (subcmd or ''):lower()
@@ -178,9 +181,8 @@ end)
 -----------------------------------------------------------------------
 -- Main loop
 -----------------------------------------------------------------------
-local LOOT_INTERVAL  = 5000  -- ms between automatic loot sweeps
-local lastLootTime   = 0
-local _pendingAutoBank = nil  -- items queued by bankstuff when BankAutoDeposit=true
+local LOOT_INTERVAL = 5000  -- ms between automatic loot sweeps
+local lastLootTime  = 0
 local lastZone      = mq.TLO.Zone.ID()
 
 printf('\age9loot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
