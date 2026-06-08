@@ -463,7 +463,9 @@ function Loot.BankStuff(items)
         end
     end
 
-    consolidateCoins()
+    if _config:Get('AutoConsolidateCoins') then
+        consolidateCoins()
+    end
 
     if mq.TLO.Window('BigBankWnd').Open() then
         mq.TLO.Window('BigBankWnd').DoClose()

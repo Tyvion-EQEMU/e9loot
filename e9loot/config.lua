@@ -69,6 +69,9 @@ Config.Defaults = {
     AnnounceGroup = false,    -- broadcast loot events to group channel
     AnnounceDone  = true,     -- send /g Done Looting after a sweep clears all corpses
 
+    -- Vendor / Bank behaviour
+    AutoConsolidateCoins = true,  -- consolidate CP/SP/GP→PP automatically after BankStuff deposit
+
     -- Debug / logging (per-character)
     LogLevel      = 3,        -- 1=Error 2=Warn 3=Info 4=Debug
     LogToFile     = false,
@@ -93,8 +96,9 @@ local SHARED_KEYS = {
     LootCorpses   = true,
     LootPets      = true,
     LootGroup     = true,
-    AnnounceGroup = true,
-    AnnounceDone  = true,
+    AnnounceGroup        = true,
+    AnnounceDone         = true,
+    AutoConsolidateCoins = true,
 }
 
 -- Live config table — starts as a copy of defaults, then overwritten by INI
