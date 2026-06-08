@@ -153,6 +153,21 @@ end
 mq.imgui.init('e9loot', function()
     Panel.Render()
     BankConfirm.Render()
+    if Loot.IsCoinWarning() then
+        local io   = ImGui.GetIO()
+        local winW = 420
+        local winH = 64
+        ImGui.SetNextWindowPos(ImVec2((io.DisplaySize.x - winW) * 0.5, (io.DisplaySize.y - winH) * 0.5), ImGuiCond.Always)
+        ImGui.SetNextWindowSize(ImVec2(winW, winH), ImGuiCond.Always)
+        ImGui.Begin('##coinwarn', nil, bit32.bor(
+            ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoMove,
+            ImGuiWindowFlags.NoSavedSettings, ImGuiWindowFlags.NoInputs,
+            ImGuiWindowFlags.NoNav))
+        ImGui.Spacing()
+        ImGui.SetCursorPosX(14)
+        ImGui.TextColored(ImVec4(1.0, 0.75, 0.0, 1.0), 'Consolidating coins \xe2\x80\x94 do not touch the mouse until this closes!')
+        ImGui.End()
+    end
 end)
 
 -----------------------------------------------------------------------

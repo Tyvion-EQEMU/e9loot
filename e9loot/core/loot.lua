@@ -14,9 +14,10 @@ local _config
 local _lists
 local _framework
 local _channel
-local _logFile   = nil
-local _looting   = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
-local _inCombat  = false  -- true while combat suppresses looting; never affects LootEnabled
+local _logFile      = nil
+local _looting      = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
+local _inCombat     = false  -- true while combat suppresses looting; never affects LootEnabled
+local _coinWarning  = false  -- true while coin consolidation is running; read by imgui callback
 
 local DECISION = {
     KEEP    = 'keep',
@@ -346,7 +347,14 @@ function Loot.ScanBankItems()
     return results
 end
 
+function Loot.IsCoinWarning()
+    return _coinWarning
+end
+
 local function consolidateCoins()
+    _coinWarning = true
+    mq.delay(400)  -- let imgui render the warning before mouse operations begin
+
     -- Coins live in InventoryWindow (IW_Money0=PP,1=GP,2=SP,3=CP)
     local invOpen = mq.TLO.Window('InventoryWindow').Open()
     if not invOpen then
@@ -356,6 +364,7 @@ local function consolidateCoins()
 
     if not mq.TLO.Window('InventoryWindow').Open() then
         Logger.Warn('ConsolidateCoins: inventory window did not open, skipping')
+        _coinWarning = false
         return
     end
 
@@ -398,6 +407,8 @@ local function consolidateCoins()
     if not invOpen then
         mq.cmd('/keypress INVENTORY')
     end
+
+    _coinWarning = false
 
     Logger.Info('ConsolidateCoins: PP:%d GP:%d SP:%d CP:%d',
         mq.TLO.Me.Platinum() or 0, mq.TLO.Me.Gold() or 0,
