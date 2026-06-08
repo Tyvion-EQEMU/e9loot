@@ -157,7 +157,7 @@ mq.imgui.init('e9loot', function()
         local io   = ImGui.GetIO()
         local winW = 420
         local winH = 64
-        ImGui.SetNextWindowPos(ImVec2((io.DisplaySize.x - winW) * 0.5, (io.DisplaySize.y - winH) * 0.5), ImGuiCond.Always)
+        ImGui.SetNextWindowPos(ImVec2((io.DisplaySize.x - winW) * 0.5, io.DisplaySize.y * 0.3), ImGuiCond.Always)
         ImGui.SetNextWindowSize(ImVec2(winW, winH), ImGuiCond.Always)
         ImGui.Begin('##coinwarn', nil, bit32.bor(
             ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoMove,
