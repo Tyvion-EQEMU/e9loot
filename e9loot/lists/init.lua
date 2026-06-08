@@ -3,7 +3,7 @@
 local Lists = {}
 
 local modules = {
-    'currency', 'quest', 'event', 'lore', 'astrial',
+    'sell', 'quest', 'event', 'lore', 'astrial',
     'tiered', 'beasts', 'deva', 'specials',
     'keep', 'bank',      -- explicit keep/bank override lists
     'destroy', 'skip',   -- explicit user override lists (highest eval priority)

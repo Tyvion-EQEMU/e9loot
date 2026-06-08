@@ -102,7 +102,7 @@ local function evaluateItem(item)
     if _lists.bank    and _lists.bank:Has(name, id)    then return DECISION.BANK,    'bank-list'    end
 
     -- Named category lists
-    if _lists.currency:Has(name, id)  then return DECISION.SELL, 'currency'  end
+    if _lists.sell:Has(name, id)      then return DECISION.SELL, 'sell-list' end
     if _lists.quest:Has(name, id)     then return DECISION.KEEP, 'quest'     end
     if _lists.event:Has(name, id)     then return DECISION.KEEP, 'event'     end
     if _lists.lore:Has(name, id)      then return DECISION.KEEP, 'lore'      end

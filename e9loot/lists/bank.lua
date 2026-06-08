@@ -4,4 +4,6 @@ local Base = require('e9loot.lists._base')
 
 return Base.new('bank', {
     { name='Epic Gemstone of Immortality' },
+    { name='Astrial Token' },
+    { name='Deva Token' },
 })

@@ -9,12 +9,15 @@ local _lists  = nil
 local _filter = {}
 
 local TAB_ORDER = {
-    'currency', 'quest', 'event', 'lore', 'astrial',
+    'keep', 'bank', 'sell',
+    'quest', 'event', 'lore', 'astrial',
     'tiered', 'beasts', 'deva', 'specials',
     'destroy', 'skip',
 }
 local TAB_LABELS = {
-    currency = 'Currency',
+    keep     = 'Keep',
+    bank     = 'Bank',
+    sell     = 'Sell',
     quest    = 'Quest',
     event    = 'Event',
     lore     = 'Lore',
