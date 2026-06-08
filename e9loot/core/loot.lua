@@ -346,6 +346,44 @@ function Loot.ScanBankItems()
     return results
 end
 
+local function consolidateCoins()
+    local function moneyBtn(slot)
+        mq.cmdf('/shift /notify BigBankWnd BIGB_Money%d leftmouseup', slot)
+        mq.delay(250)
+    end
+
+    -- Copper: pick up all, chain PP→GP→SP, return remainder
+    if (mq.TLO.Me.Copper() or 0) >= 10 then
+        moneyBtn(3)
+        mq.delay(400, function() return (mq.TLO.Me.CursorCopper() or 0) > 0 end)
+        if (mq.TLO.Me.CursorCopper() or 0) > 0 then
+            moneyBtn(0); moneyBtn(1); moneyBtn(2); moneyBtn(3)
+        end
+    end
+
+    -- Silver: pick up all, chain PP→GP, return remainder
+    if (mq.TLO.Me.Silver() or 0) >= 10 then
+        moneyBtn(2)
+        mq.delay(400, function() return (mq.TLO.Me.CursorSilver() or 0) > 0 end)
+        if (mq.TLO.Me.CursorSilver() or 0) > 0 then
+            moneyBtn(0); moneyBtn(1); moneyBtn(2)
+        end
+    end
+
+    -- Gold: pick up all, convert to PP, return remainder
+    if (mq.TLO.Me.Gold() or 0) >= 10 then
+        moneyBtn(1)
+        mq.delay(400, function() return (mq.TLO.Me.CursorGold() or 0) > 0 end)
+        if (mq.TLO.Me.CursorGold() or 0) > 0 then
+            moneyBtn(0); moneyBtn(1)
+        end
+    end
+
+    Logger.Info('ConsolidateCoins: PP:%d GP:%d SP:%d CP:%d',
+        mq.TLO.Me.Platinum() or 0, mq.TLO.Me.Gold() or 0,
+        mq.TLO.Me.Silver() or 0,   mq.TLO.Me.Copper() or 0)
+end
+
 function Loot.BankStuff(items)
     mq.cmdf('/nomodkey /click right target')
     mq.delay(2000, function() return mq.TLO.Window('BigBankWnd').Open() end)
@@ -376,6 +414,8 @@ function Loot.BankStuff(items)
             Logger.Warn('BankStuff: could not pick up %s (bag %d slot %d)', entry.name, entry.bag, entry.slot)
         end
     end
+
+    consolidateCoins()
 
     if mq.TLO.Window('BigBankWnd').Open() then
         mq.TLO.Window('BigBankWnd').DoClose()
