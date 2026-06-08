@@ -418,7 +418,37 @@ end
 local BANK_INTERACT_DIST = 10  -- max distance to right-click a banker
 local BANK_NAV_TIMEOUT   = 15  -- seconds before giving up on nav
 
+-- Known banker NPC names to search when no target is set
+local KNOWN_BANKERS = {
+    'gordon gekko',
+    'a bank broker',
+    'a banker',
+    'a bank teller',
+}
+
+local function findAndTargetBanker()
+    for _, name in ipairs(KNOWN_BANKERS) do
+        local sp = mq.TLO.Spawn(('npc "%s"'):format(name))
+        if sp and sp.ID() and sp.ID() > 0 then
+            Logger.Info('openBankWindow: found banker "%s" (id %d), targeting', name, sp.ID())
+            mq.cmdf('/target id %d', sp.ID())
+            mq.delay(500, function() return mq.TLO.Target.ID() == sp.ID() end)
+            if mq.TLO.Target.ID() == sp.ID() then return true end
+        end
+    end
+    return false
+end
+
 local function openBankWindow()
+    -- Auto-target a known banker if nothing is targeted
+    if not mq.TLO.Target.ID() or mq.TLO.Target.ID() == 0 then
+        if not findAndTargetBanker() then
+            Logger.Warn('openBankWindow: no target and no known banker found in zone')
+            printf('\are9loot: No target and no banker found in zone. Target a banker and try again.')
+            return false
+        end
+    end
+
     local tgt = mq.TLO.Target
     if not tgt or not tgt.ID() or tgt.ID() == 0 then
         Logger.Warn('openBankWindow: no target — target a banker first')
