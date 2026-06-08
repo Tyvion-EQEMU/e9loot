@@ -350,6 +350,9 @@ function Loot.Init(cfg, lists, framework, channel)
             if type(payload.value) == 'boolean' then
                 _config:SetAndSave('AnnounceDone', payload.value)
             end
+        elseif payload.type == 'reload_lists' then
+            _lists.LoadAll()
+            Logger.Debug('Lists reloaded via group broadcast from %s', payload.from or '?')
         end
     end)
 end

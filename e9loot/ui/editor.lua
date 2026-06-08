@@ -4,9 +4,10 @@ local mq = require('mq')
 
 local Editor = {}
 
-local _open   = false
-local _lists  = nil
-local _filter = {}
+local _open    = false
+local _lists   = nil
+local _channel = nil
+local _filter  = {}
 
 local TAB_ORDER = {
     'keep', 'bank', 'sell',
@@ -42,9 +43,10 @@ local function initWorking(listName)
     _filter[listName]  = ''
 end
 
-function Editor.Open(lists)
-    _lists = lists
-    _open  = true
+function Editor.Open(lists, channel)
+    _lists   = lists
+    _channel = channel
+    _open    = true
     for _, name in ipairs(TAB_ORDER) do
         initWorking(name)
     end
@@ -84,7 +86,7 @@ local function renderTab(listName)
 
     ImGui.SameLine()
 
-    if ImGui.Button('Save##' .. listName) then
+    if ImGui.Button('Update For All##' .. listName) then
         lst._byName  = {}
         lst._byId    = {}
         lst._ordered = {}
@@ -92,6 +94,16 @@ local function renderTab(listName)
             lst:_add(e.name, e.id, false)
         end
         lst:Save()
+        if _channel then
+            _channel:Broadcast({ type='reload_lists' })
+        end
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.PushTextWrapPos(260)
+        ImGui.TextWrapped('Save this list and signal all group toons to reload it immediately')
+        ImGui.PopTextWrapPos()
+        ImGui.EndTooltip()
     end
 
     ImGui.SameLine()

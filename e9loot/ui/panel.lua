@@ -575,7 +575,7 @@ function Panel.Render()
 
         if ImGui.Button('List Editor', 95, 0) then
             if not _editor.IsOpen() then
-                _editor.Open(_config._lists)
+                _editor.Open(_config._lists, _channel)
             end
         end
 
