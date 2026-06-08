@@ -2,8 +2,8 @@
 
 e9loot stores settings in two INI files in your MacroQuest config directory:
 
-- `e9loot_shared.ini` — group-wide settings; one file shared across all characters
-- `<CharacterName>_e9loot.ini` — per-character overrides
+- `SharedSettings_<Server>.ini` — group-wide settings; one file shared across all characters
+- `CharSettings_<Server>_<CharName>.ini` — per-character overrides
 
 You rarely need to edit these directly. All settings are accessible from the main panel
 or via the `/e9loot set` command.
@@ -15,7 +15,7 @@ or via the `/e9loot set` command.
 **Setting:** `Framework`  
 **Shared:** Yes  
 **Options:** `None` | `RG Mercs` | `E3` | `Kiss Assist`  
-**Location:** System Settings (collapsed section below History / List Editor)
+**Location:** System Settings (collapsed section in the main panel)
 
 Which bot framework e9loot works alongside. When a loot sweep starts, e9loot pauses
 the framework so it doesn't interfere with movement to corpses, then resumes it when
@@ -30,11 +30,12 @@ Set to `None` if you are running e9loot standalone without a bot framework.
 **Setting:** `Channel`  
 **Shared:** Yes  
 **Options:** `None` | `DanNet` | `EQBC`  
-**Location:** System Settings (collapsed section below History / List Editor)
+**Location:** System Settings (collapsed section in the main panel)
 
 The network channel used to share loot events and group pause/resume commands across
 characters. With DanNet or EQBC enabled, loot history from all group members appears
-in each character's history window, and **Pause All / Resume All** buttons work.
+in each character's history window, and **Shift+Click** on the Running/Paused button
+broadcasts pause/resume to the whole group.
 
 Requires the corresponding MQ2 plugin to be loaded (MQ2DanNet or MQ2EQBC).
 
@@ -98,8 +99,9 @@ Use **Ctrl+Click** on the slider in the panel to type an exact value.
 **Shared:** Yes  
 **Default:** `true`
 
-When enabled, e9loot uses `/warp target` (MQ2RWarp) to teleport directly to a corpse.
-When disabled, it uses `/nav` to walk there. Requires **MQ2RWarp.dll** to be loaded.
+When enabled, e9loot uses `/warp target` (MQ2RWarp) to teleport directly to a corpse
+or banker. When disabled, it uses `/nav` to walk there. Requires **MQ2RWarp.dll** to
+be loaded.
 
 ---
 
@@ -148,8 +150,38 @@ worth less than this value that aren't on any keep list are left on the corpse. 
 **Shared:** No (per-character)  
 **Default:** `true`
 
-Whether this character is currently looting. Controlled by the **Pause / Resume** buttons
-in the panel. Saved per-character so each toon can be individually paused.
+Whether this character is currently looting. Controlled by the **Running/Paused** toggle
+button in the panel (click to toggle; Shift+Click broadcasts to the whole group). Saved
+per-character so each toon can be individually paused.
+
+---
+
+## Auto Consolidate Coins
+
+**Setting:** `AutoConsolidateCoins`  
+**Shared:** Yes  
+**Default:** `true`  
+**Location:** Bank & Vendor settings pane
+
+When enabled, e9loot automatically converts all carried coins to the highest denomination
+(copper → silver → gold → platinum) after each BankStuff deposit. Requires the bank
+window to be open — this is why it runs as part of the bank visit rather than on demand.
+
+The **Consolidate Coins** button in the BankStuff confirmation window always runs
+regardless of this setting.
+
+---
+
+## Auto Deposit (Bank)
+
+**Setting:** `BankAutoDeposit`  
+**Shared:** No (per-character)  
+**Default:** `false`  
+**Location:** Bank & Vendor settings pane
+
+When enabled, `/e9loot bankstuff` skips the confirmation window and immediately deposits
+all `bank`, `astrial`, and `deva` items without prompting. Useful for characters on
+scheduled bank runs where you always want to deposit everything.
 
 ---
 

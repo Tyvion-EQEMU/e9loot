@@ -19,9 +19,17 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 | Command | Description |
 |---------|-------------|
 | `/e9loot loot` | Trigger an immediate loot sweep right now, regardless of the 5-second timer |
-| `/e9loot enable` | Resume looting (same as clicking Resume in the panel) |
-| `/e9loot disable` | Pause looting (same as clicking Pause in the panel) |
+| `/e9loot enable` | Resume looting (same as clicking the Running/Paused button in the panel) |
+| `/e9loot disable` | Pause looting (same as clicking the Running/Paused button in the panel) |
 | `/e9loot reload` | Reload all loot list files from disk without restarting the script |
+
+---
+
+## Banking
+
+| Command | Description |
+|---------|-------------|
+| `/e9loot bankstuff` | Open the bank confirmation window (or deposit immediately if Auto Deposit is on). Navigates to a nearby banker, then deposits all `bank`, `astrial`, and `deva` items from your bags. After depositing, automatically consolidates coins CP→PP if Auto Consolidate Coins is enabled. |
 
 ---
 
@@ -44,6 +52,9 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 |---------|-------------|
 | `/e9loot toggledone` | Toggle the "Done Looting" group announce on or off for all characters in the group simultaneously (broadcasts via DanNet/EQBC) |
 
+The **Running/Paused** button in the panel also supports group control: **Shift+Click** broadcasts
+pause or resume to all group members at once (requires DanNet or EQBC).
+
 ---
 
 ## Settings
@@ -65,6 +76,8 @@ Changes a config setting by name. Setting names are case-insensitive.
 /e9loot set warpdist 150
 /e9loot set lootpets true
 /e9loot set announcedone false
+/e9loot set autodeposit true
+/e9loot set autoconsolidatecoins false
 ```
 
 ### All Settable Keys
@@ -85,6 +98,8 @@ Changes a config setting by name. Setting names are case-insensitive.
 | `LootGroup` | boolean | `true`, `false` |
 | `AnnounceGroup` | boolean | `true`, `false` |
 | `AnnounceDone` | boolean | `true`, `false` |
+| `AutoConsolidateCoins` | boolean | `true`, `false` |
+| `BankAutoDeposit` | boolean | `true`, `false` |
 | `LogLevel` | number | `1` (Error), `2` (Warn), `3` (Info), `4` (Debug) |
 | `LogToFile` | boolean | `true`, `false` |
 | `LogTimestamps` | boolean | `true`, `false` |
