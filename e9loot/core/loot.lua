@@ -418,10 +418,12 @@ end
 local BANK_INTERACT_DIST = 10  -- max distance to right-click a banker
 local BANK_NAV_TIMEOUT   = 15  -- seconds before giving up on nav
 
--- Known banker NPC names to search when no target is set
+-- Known banker NPC names to search when no target is set (display names, case-insensitive)
 local KNOWN_BANKERS = {
-    'gordon gekko',
-    'a bank broker',
+    'Gordon Gekko',    -- Nexus
+    'Banker Ceridan',  -- Plane of Knowledge
+    'Banker Granger',  -- Plane of Knowledge
+    'a bank broker',   -- Guild Hall (a_bank_broker000 / a_bank_broker001 — nearest found)
     'a banker',
     'a bank teller',
 }
