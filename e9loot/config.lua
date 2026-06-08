@@ -70,7 +70,8 @@ Config.Defaults = {
     AnnounceDone  = true,     -- send /g Done Looting after a sweep clears all corpses
 
     -- Vendor / Bank behaviour
-    AutoConsolidateCoins = true,  -- consolidate CP/SP/GP→PP automatically after BankStuff deposit
+    AutoConsolidateCoins = true,   -- consolidate CP/SP/GP→PP automatically after BankStuff deposit
+    BankAutoDeposit      = false,  -- skip confirm window and deposit bank-list items immediately
 
     -- Debug / logging (per-character)
     LogLevel      = 3,        -- 1=Error 2=Warn 3=Info 4=Debug
@@ -99,6 +100,7 @@ local SHARED_KEYS = {
     AnnounceGroup        = true,
     AnnounceDone         = true,
     AutoConsolidateCoins = true,
+    BankAutoDeposit      = false,
 }
 
 -- Live config table — starts as a copy of defaults, then overwritten by INI

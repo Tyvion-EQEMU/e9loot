@@ -100,7 +100,11 @@ mq.bind('/e9loot', function(subcmd, ...)
         Loot.SetEnabled(false)
         printf('\are9loot disabled')
     elseif subcmd == 'bankstuff' then
-        BankConfirm.Open(Loot)
+        if Config:Get('BankAutoDeposit') then
+            _pendingAutoBank = Loot.ScanBankItems()
+        else
+            BankConfirm.Open(Loot)
+        end
     elseif subcmd == 'reload' then
         Lists.LoadAll()
         printf('\age9loot: lists reloaded')
@@ -173,8 +177,9 @@ end)
 -----------------------------------------------------------------------
 -- Main loop
 -----------------------------------------------------------------------
-local LOOT_INTERVAL = 5000  -- ms between automatic loot sweeps
-local lastLootTime  = 0
+local LOOT_INTERVAL  = 5000  -- ms between automatic loot sweeps
+local lastLootTime   = 0
+local _pendingAutoBank = nil  -- items queued by bankstuff when BankAutoDeposit=true
 local lastZone      = mq.TLO.Zone.ID()
 
 printf('\age9loot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
@@ -186,8 +191,9 @@ while true do
     channel:Tick()
 
     -- BankStuff / ConsolidateOnly: executed from main loop so mq.delay is allowed
-    local bankItems = BankConfirm.ConsumePending()
+    local bankItems = _pendingAutoBank or BankConfirm.ConsumePending()
     if bankItems then
+        _pendingAutoBank = nil
         Loot.BankStuff(bankItems)
     elseif BankConfirm.ConsumePendingConsolidate() then
         Loot.ConsolidateOnly()
