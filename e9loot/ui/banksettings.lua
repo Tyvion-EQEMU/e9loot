@@ -1,4 +1,4 @@
--- Bank & Vendor settings window: two-column bordered layout
+-- Bank & Vendor settings window: two stacked bordered sections
 
 local Widgets = require('e9loot.ui.widgets')
 
@@ -16,20 +16,20 @@ function BankSettings.IsOpen()
     return _open
 end
 
-local function renderVendorColumn()
+local function renderVendorSection()
     ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), 'Vendor')
     ImGui.Separator()
     ImGui.Spacing()
     ImGui.TextDisabled('No vendor settings yet.')
 end
 
-local function renderBankColumn()
+local function renderBankSection()
     ImGui.TextColored(ImVec4(0.30, 0.70, 1.0, 1.0), 'Bank')
     ImGui.Separator()
     ImGui.Spacing()
 
     if ImGui.BeginTable('##bankopts', 2, 0) then
-        ImGui.TableSetupColumn('##blbl', ImGuiTableColumnFlags.WidthFixed,  165)
+        ImGui.TableSetupColumn('##blbl', ImGuiTableColumnFlags.WidthFixed,  160)
         ImGui.TableSetupColumn('##bctl', ImGuiTableColumnFlags.WidthStretch)
 
         -- Auto Consolidate Coins
@@ -66,27 +66,24 @@ local function renderBankColumn()
     end
 end
 
+local VENDOR_H = 58
+
 function BankSettings.Render()
     if not _open or not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(520, 160), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(340, 210), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Bank & Vendor', _open, ImGuiWindowFlags.None)
     _open = open
 
     if shouldDraw then
-        local availW = select(1, ImGui.GetContentRegionAvail())
-        local availH = select(2, ImGui.GetContentRegionAvail())
-        local spacing = ImGui.GetStyle().ItemSpacing.x
-        local colW = (availW - spacing) * 0.5
-
-        ImGui.BeginChild('##vendor_col', ImVec2(colW, availH), ImGuiChildFlags.Border)
-        renderVendorColumn()
+        ImGui.BeginChild('##vendor_sect', ImVec2(-1, VENDOR_H), ImGuiChildFlags.Border)
+        renderVendorSection()
         ImGui.EndChild()
 
-        ImGui.SameLine()
+        ImGui.Spacing()
 
-        ImGui.BeginChild('##bank_col', ImVec2(colW, availH), ImGuiChildFlags.Border)
-        renderBankColumn()
+        ImGui.BeginChild('##bank_sect', ImVec2(-1, 0), ImGuiChildFlags.Border)
+        renderBankSection()
         ImGui.EndChild()
     end
 
