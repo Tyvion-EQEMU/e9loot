@@ -1,4 +1,6 @@
--- Loot list editor pop-out: tabbed ImGui window per list type, Add-from-Cursor, live filter, Save/Revert per tab
+-- Loot list editor: tabbed ImGui window per list type, Add-from-Cursor, live filter
+-- Changes are written to disk immediately on every add/remove (auto-save).
+-- "Reload for All" broadcasts a reload signal to group peers via channel.
 
 local mq = require('mq')
 
@@ -31,24 +33,12 @@ local TAB_LABELS = {
     skip     = 'Force Skip',
 }
 
-local _working = {}
-
-local function initWorking(listName)
-    local lst  = _lists[listName]
-    local copy = {}
-    for _, entry in ipairs(lst:Entries()) do
-        table.insert(copy, { name=entry.name, id=entry.id })
-    end
-    _working[listName] = copy
-    _filter[listName]  = ''
-end
-
 function Editor.Open(lists, channel)
     _lists   = lists
     _channel = channel
     _open    = true
     for _, name in ipairs(TAB_ORDER) do
-        initWorking(name)
+        _filter[name] = _filter[name] or ''
     end
 end
 
@@ -58,7 +48,6 @@ end
 
 local function renderTab(listName)
     local lst       = _lists[listName]
-    local work      = _working[listName]
     local filterKey = '##filter_' .. listName
 
     ImGui.SetNextItemWidth(200)
@@ -73,12 +62,8 @@ local function renderTab(listName)
         if cursor and cursor.ID() and cursor.ID() > 0 then
             local name = cursor.Name() or ''
             local id   = cursor.ID()   or 0
-            local found = false
-            for _, e in ipairs(work) do
-                if e.name:lower() == name:lower() then found = true; break end
-            end
-            if not found then
-                table.insert(work, { name=name, id=id })
+            if lst:Add(name, id) then
+                lst:Save()
             end
             mq.cmd('/autoinventory')
         end
@@ -86,14 +71,7 @@ local function renderTab(listName)
 
     ImGui.SameLine()
 
-    if ImGui.Button('Update For All##' .. listName) then
-        lst._byName  = {}
-        lst._byId    = {}
-        lst._ordered = {}
-        for _, e in ipairs(work) do
-            lst:_add(e.name, e.id, false)
-        end
-        lst:Save()
+    if ImGui.Button('Reload for All##' .. listName) then
         if _channel then
             _channel:Broadcast({ type='reload_lists' })
         end
@@ -101,7 +79,7 @@ local function renderTab(listName)
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.PushTextWrapPos(260)
-        ImGui.TextWrapped('Save this list and signal all group toons to reload it immediately')
+        ImGui.TextWrapped('Signal all group toons to reload their lists from disk')
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
     end
@@ -110,7 +88,6 @@ local function renderTab(listName)
 
     if ImGui.Button('Revert##' .. listName) then
         lst:Load()
-        initWorking(listName)
     end
 
     ImGui.Separator()
@@ -127,8 +104,9 @@ local function renderTab(listName)
         ImGui.TableSetupColumn('',     ImGuiTableColumnFlags.WidthFixed,  22)
         ImGui.TableHeadersRow()
 
+        local entries  = lst:Entries()
         local toRemove = nil
-        for i, entry in ipairs(work) do
+        for i, entry in ipairs(entries) do
             if filterLow == '' or entry.name:lower():find(filterLow, 1, true) then
                 ImGui.TableNextRow()
 
@@ -156,13 +134,14 @@ local function renderTab(listName)
 
                 ImGui.TableNextColumn()
                 if ImGui.SmallButton('X##' .. listName .. i) then
-                    toRemove = i
+                    toRemove = entry.name
                 end
             end
         end
 
         if toRemove then
-            table.remove(work, toRemove)
+            lst:Remove(toRemove)
+            lst:Save()
         end
 
         ImGui.EndTable()
