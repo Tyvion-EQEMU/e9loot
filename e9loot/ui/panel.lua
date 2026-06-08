@@ -63,6 +63,26 @@ local _histDecisionFilter = { keep=false, bank=false, sell=false, destroy=false,
 -- Restart modal
 local _wantRestartModal = false
 
+-- Shared gold used for active-state buttons and author link
+local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
+
+-- Renders a button that turns gold when active, shows a snake border on hover
+-- instead of a colour change, and returns true when clicked.
+local function actionButton(label, w, isActive)
+    local col = isActive and BUTTON_GOLD or ImGui.GetStyleColorVec4(ImGuiCol.Button)
+    ImGui.PushStyleColor(ImGuiCol.Button,        col)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, col)
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive,  col)
+    local clicked = ImGui.Button(label, w, 0)
+    ImGui.PopStyleColor(3)
+    if ImGui.IsItemHovered() then
+        local bmin = ImGui.GetItemRectMinVec()
+        local bmax = ImGui.GetItemRectMaxVec()
+        Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y))
+    end
+    return clicked
+end
+
 -- Mini mode
 local _miniMode = false
 
@@ -325,7 +345,7 @@ function Panel.Render()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
             ImGui.TextDisabled('by ')
             ImGui.SameLine(0, 0)
-            ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), 'Tyvion')
+            ImGui.TextColored(BUTTON_GOLD, 'Tyvion')
             if ImGui.IsItemHovered() then ImGui.SetMouseCursor(ImGuiMouseCursor.Hand) end
             if ImGui.IsItemClicked(0) then
                 os.execute('start "" "https://github.com/Tyvion-EQEMU"')
@@ -574,8 +594,7 @@ function Panel.Render()
         ImGui.Spacing()
 
         -- Action buttons
-        local histLabel = _histOpen and 'History [on]' or 'History'
-        if ImGui.Button(histLabel, 95, 0) then
+        if actionButton('History', 95, _histOpen) then
             _histOpen = not _histOpen
             _config:SetAndSave('HistoryOpen', _histOpen)
         end
@@ -583,20 +602,16 @@ function Panel.Render()
         ImGui.SameLine()
 
         local editorOpen = _editor.IsOpen()
-        if editorOpen then ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.72, 0.20, 1.0)) end
-        if ImGui.Button('List Editor', 95, 0) then
+        if actionButton('List Editor', 95, editorOpen) then
             if editorOpen then _editor.Close() else _editor.Open(_config._lists, _channel) end
         end
-        if editorOpen then ImGui.PopStyleColor() end
 
         ImGui.SameLine()
 
         local bankOpen = _bankSettings.IsOpen()
-        if bankOpen then ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.72, 0.20, 1.0)) end
-        if ImGui.Button('Bank & Vendor', 95, 0) then
+        if actionButton('Bank & Vendor', 95, bankOpen) then
             if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
         end
-        if bankOpen then ImGui.PopStyleColor() end
 
         ImGui.Spacing()
         if ImGui.CollapsingHeader('System Settings') then
