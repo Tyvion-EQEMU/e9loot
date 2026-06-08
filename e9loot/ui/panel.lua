@@ -366,55 +366,33 @@ function Panel.Render()
         end
 
         local enabled = _config:Get('LootEnabled')
+        local availW  = select(1, ImGui.GetContentRegionAvail())
 
-        -- Pause / Resume with state labels
-        ImGui.PushStyleColor(ImGuiCol.Button,
-            enabled and 0.72 or 0.28,
-            enabled and 0.22 or 0.12,
-            enabled and 0.12 or 0.08,
-            1.0)
-        if ImGui.Button(enabled and 'Pause' or 'Paused', 100, 0) then
-            _loot.SetEnabled(false)
+        -- Single wide toggle button: green when running, red when paused
+        if enabled then
+            ImGui.PushStyleColor(ImGuiCol.Button,        0.16, 0.50, 0.16, 1.0)
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.22, 0.62, 0.22, 1.0)
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive,  0.22, 0.62, 0.22, 1.0)
+        else
+            ImGui.PushStyleColor(ImGuiCol.Button,        0.60, 0.16, 0.16, 1.0)
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.72, 0.22, 0.22, 1.0)
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive,  0.72, 0.22, 0.22, 1.0)
         end
-        ImGui.PopStyleColor()
 
-        ImGui.SameLine()
-
-        ImGui.PushStyleColor(ImGuiCol.Button,
-            enabled and 0.12 or 0.15,
-            enabled and 0.28 or 0.60,
-            enabled and 0.10 or 0.12,
-            1.0)
-        if ImGui.Button(enabled and 'Running' or 'Resume', 100, 0) then
-            _loot.SetEnabled(true)
+        if ImGui.Button(enabled and 'Running' or 'Paused', availW, 0) then
+            local newVal = not enabled
+            _loot.SetEnabled(newVal)
+            if ImGui.GetIO().KeyShift and _channel then
+                _channel:Broadcast({ type='set_enabled', value=newVal })
+            end
         end
-        ImGui.PopStyleColor()
+        ImGui.PopStyleColor(3)
 
-        -- Group pause / resume (static labels — no cross-toon state awareness)
-        if _channel and mq.TLO.Me.Grouped() then
-            ImGui.PushStyleColor(ImGuiCol.Button,
-                enabled and 0.60 or 0.22,
-                enabled and 0.18 or 0.10,
-                enabled and 0.10 or 0.06,
-                1.0)
-            if ImGui.Button('Pause All', 100, 0) then
-                _channel:Broadcast({ type='set_enabled', value=false })
-                _loot.SetEnabled(false)
-            end
-            ImGui.PopStyleColor()
-
-            ImGui.SameLine()
-
-            ImGui.PushStyleColor(ImGuiCol.Button,
-                enabled and 0.10 or 0.12,
-                enabled and 0.22 or 0.50,
-                enabled and 0.08 or 0.10,
-                1.0)
-            if ImGui.Button('Resume All', 100, 0) then
-                _channel:Broadcast({ type='set_enabled', value=true })
-                _loot.SetEnabled(true)
-            end
-            ImGui.PopStyleColor()
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text('Click: Pause / Unpause')
+            ImGui.Text('Shift+Click: Pause All / Unpause All')
+            ImGui.EndTooltip()
         end
 
         ImGui.Spacing()

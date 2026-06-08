@@ -96,7 +96,7 @@ function Credits.RenderTooltip()
     local cx  = io.DisplaySize.x * 0.5
     local cy  = io.DisplaySize.y * 0.33
     ImGui.SetNextWindowPos(ImVec2(cx, cy), ImGuiCond.Always, ImVec2(0.5, 0.5))
-    ImGui.SetNextWindowSize(ImVec2(220, 0), ImGuiCond.Always)
+    ImGui.SetNextWindowSize(ImVec2(250, 0), ImGuiCond.Always)
     ImGui.BeginTooltip()
 
     if ImGui.CollapsingHeader('Developed By', ImGuiTreeNodeFlags.DefaultOpen) then
@@ -107,7 +107,7 @@ function Credits.RenderTooltip()
 
     ImGui.Spacing()
 
-    if ImGui.CollapsingHeader('Acknowledgments', ImGuiTreeNodeFlags.DefaultOpen) then
+    if ImGui.CollapsingHeader('Credits & Acknowledgements', ImGuiTreeNodeFlags.DefaultOpen) then
         for _, name in ipairs(DATA.Inspirations) do
             renderName(name)
         end
