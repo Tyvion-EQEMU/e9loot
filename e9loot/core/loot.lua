@@ -426,23 +426,29 @@ local function openBankWindow()
         return false
     end
 
-    -- Nav to banker if too far away
+    -- Move to banker if too far away
     local dist = tgt.Distance() or 999
     if dist > BANK_INTERACT_DIST then
-        Logger.Info('openBankWindow: %.1f units away, navigating to banker', dist)
-        mq.cmd('/nav target')
-        local deadline = os.clock() + BANK_NAV_TIMEOUT
-        while os.clock() < deadline do
-            mq.delay(250)
-            dist = mq.TLO.Target.Distance() or 999
-            if dist <= BANK_INTERACT_DIST then break end
-            if not mq.TLO.Navigation.Active() then break end
+        if _config:Get('UseWarp') then
+            Logger.Info('openBankWindow: %.1f units away, warping to banker', dist)
+            mq.cmd('/warp target')
+            mq.delay(500)
+        else
+            Logger.Info('openBankWindow: %.1f units away, navigating to banker', dist)
+            mq.cmd('/nav target')
+            local deadline = os.clock() + BANK_NAV_TIMEOUT
+            while os.clock() < deadline do
+                mq.delay(250)
+                dist = mq.TLO.Target.Distance() or 999
+                if dist <= BANK_INTERACT_DIST then break end
+                if not mq.TLO.Navigation.Active() then break end
+            end
+            mq.cmd('/nav stop')
         end
-        mq.cmd('/nav stop')
 
         if (mq.TLO.Target.Distance() or 999) > BANK_INTERACT_DIST + 5 then
             Logger.Warn('openBankWindow: could not reach banker (%.1f units)', mq.TLO.Target.Distance() or 999)
-            printf('\are9loot: Could not navigate close enough to banker.')
+            printf('\are9loot: Could not get close enough to banker.')
             return false
         end
     end
