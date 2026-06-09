@@ -63,8 +63,27 @@ local _histDecisionFilter = { keep=false, bank=false, sell=false, destroy=false,
 -- Restart modal
 local _wantRestartModal = false
 
+-- Dev Info window
+local _devInfoOpen = false
+
 -- Shared gold used for active-state buttons and author link
 local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
+
+-- Build notes — update this block each release; no UI changes needed
+local BUILD_NOTES = [[
+v0.8.0 Beta  —  2026-06-09
+
+  • Sell Stuff: confirm window with solo/group views, Status All, Sell All broadcast
+  • Restock: per-toon item lists, confirm window, per-item broadcast, Restock All
+  • Bank Stuff: Consolidate All broadcasts coin consolidation to group
+  • Quick-action buttons (Sell Stuff | Bank Stuff | Restock) in main panel
+  • Group broadcasts: *_all and *_status_request/response message types
+  • Build tag ([Beta]/[Stable]/[Dev]) in header with barber-pole animation
+  • Vendor Settings button (renamed from Bank & Vendor)
+  • All confirm windows: primary action left, Cancel right
+]]
+
+local REPO_URL = 'https://github.com/Tyvion-EQEMU/e9loot'
 
 -- 64x64 square button: silver face, black text, rounded corners, snake border on hover.
 local function squareActionButton(label, size)
@@ -310,6 +329,45 @@ local function renderHistory()
 end
 
 -----------------------------------------------------------------------
+-- Dev Info window
+-----------------------------------------------------------------------
+local function renderDevInfo()
+    if not _devInfoOpen then return end
+
+    ImGui.SetNextWindowSize(ImVec2(430, 360), ImGuiCond.FirstUseEver)
+    local open, shouldDraw = ImGui.Begin('e9loot Dev Info', _devInfoOpen, ImGuiWindowFlags.None)
+    _devInfoOpen = open
+
+    if shouldDraw then
+        ImGui.TextColored(BUTTON_GOLD, "What's New")
+        ImGui.Separator()
+        ImGui.Spacing()
+        ImGui.BeginChild('##devnotes', ImVec2(0, 170), true, ImGuiWindowFlags.None)
+        ImGui.TextWrapped(BUILD_NOTES)
+        ImGui.EndChild()
+
+        ImGui.Spacing()
+
+        ImGui.TextColored(BUTTON_GOLD, 'Feedback & Bug Reports')
+        ImGui.Separator()
+        ImGui.Spacing()
+        ImGui.TextWrapped(
+            'Found a bug or have a suggestion? Open an issue on GitHub. ' ..
+            'A helpful report includes: character name, zone, what happened, ' ..
+            'and what you expected instead.')
+        ImGui.Spacing()
+        ImGui.SetNextItemWidth(-88)
+        ImGui.InputText('##repourl', REPO_URL, ImGuiInputTextFlags.ReadOnly)
+        ImGui.SameLine()
+        if ImGui.Button('Copy URL', 83, 0) then
+            ImGui.SetClipboardText(REPO_URL)
+        end
+    end
+
+    ImGui.End()
+end
+
+-----------------------------------------------------------------------
 -- Panel API
 -----------------------------------------------------------------------
 function Panel.Init(config, loot, setup, editor, bankSettings, framework, adapters, channel, version)
@@ -350,6 +408,7 @@ function Panel.Render()
     if _miniMode then
         Mini.Render(function() _miniMode = false end)
         renderHistory()
+        renderDevInfo()
         _editor.Render()
         _setup.Render()
         _bankSettings.Render()
@@ -400,7 +459,15 @@ function Panel.Render()
             end
             ImGui.SameLine()
             ImGui.BeginGroup()
-            ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
+            local verStr = string.format('%s  v%s', _version._AppName, _version._version)
+            ImGui.Text(verStr)
+            if ImGui.IsItemHovered() then
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+                ImGui.BeginTooltip()
+                ImGui.TextDisabled("What's New / Dev Info")
+                ImGui.EndTooltip()
+            end
+            if ImGui.IsItemClicked(0) then _devInfoOpen = not _devInfoOpen end
             if _version._buildTag then
                 ImGui.SameLine()
                 -- Barber-pole: each character's phase offset by its index so the
@@ -918,6 +985,7 @@ function Panel.Render()
     ImGui.End()
 
     renderHistory()
+    renderDevInfo()
     _editor.Render()
     _setup.Render()
     _bankSettings.Render()
