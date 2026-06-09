@@ -403,10 +403,18 @@ function Panel.Render()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
             if _version._buildTag then
                 ImGui.SameLine()
-                local ph = (math.sin(os.clock() * (math.pi / 2.0)) + 1.0) * 0.5
-                ImGui.TextColored(
-                    ImVec4(1.0, 0.72 + 0.28 * ph, 0.20 + 0.80 * ph, 1.0),
-                    '[' .. _version._buildTag .. ']')
+                -- Barber-pole: each character's phase offset by its index so the
+                -- gold→white highlight sweeps diagonally across the tag text.
+                local tag   = '[' .. _version._buildTag .. ']'
+                local t     = os.clock() * 0.5   -- stripe speed (cycles/sec)
+                local pitch = 0.12               -- phase offset per character
+                for i = 1, #tag do
+                    local w = (math.sin((t - i * pitch) * math.pi * 2) + 1.0) * 0.5
+                    if i > 1 then ImGui.SameLine(0, 1) end
+                    ImGui.TextColored(
+                        ImVec4(1.0, 0.72 + 0.28 * w, 0.20 + 0.80 * w, 1.0),
+                        tag:sub(i, i))
+                end
             end
             ImGui.TextDisabled('by ')
             ImGui.SameLine(0, 0)
@@ -785,7 +793,7 @@ function Panel.Render()
         local baseX = ImGui.GetCursorPosX()
         local baseY = ImGui.GetCursorPosY()
 
-        ImGui.SetWindowFontScale(1.3)
+        ImGui.SetWindowFontScale(1.15)
 
         ImGui.SetCursorPos(ImVec2(baseX + gap, baseY))
         if squareActionButton('Sell\nStuff', btnSz) then mq.cmd('/e9loot sellstuff') end
@@ -800,7 +808,7 @@ function Panel.Render()
                 ImGui.TextDisabled('No sell-list items found in bags')
             end
             ImGui.EndTooltip()
-            ImGui.SetWindowFontScale(1.3)
+            ImGui.SetWindowFontScale(1.15)
         end
 
         ImGui.SetCursorPos(ImVec2(baseX + gap * 2 + btnSz, baseY))
@@ -816,7 +824,7 @@ function Panel.Render()
                 ImGui.TextDisabled('No bank-list items found in bags')
             end
             ImGui.EndTooltip()
-            ImGui.SetWindowFontScale(1.3)
+            ImGui.SetWindowFontScale(1.15)
         end
 
         ImGui.SetCursorPos(ImVec2(baseX + gap * 3 + btnSz * 2, baseY))
@@ -832,7 +840,7 @@ function Panel.Render()
                 ImGui.TextDisabled('All items stocked!')
             end
             ImGui.EndTooltip()
-            ImGui.SetWindowFontScale(1.3)
+            ImGui.SetWindowFontScale(1.15)
         end
 
         ImGui.SetWindowFontScale(1.0)

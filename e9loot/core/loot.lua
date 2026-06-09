@@ -17,6 +17,8 @@ local _channel
 local _restock                = nil
 local _restockStatusResponses = {}
 local _pendingRestockAll      = false
+local _sellStatusResponses    = {}
+local _bankStatusResponses    = {}
 local _logFile      = nil
 local _looting      = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
 local _inCombat     = false  -- true while combat suppresses looting; never affects LootEnabled
@@ -831,6 +833,18 @@ function Loot.ClearRestockStatusResponses() _restockStatusResponses = {} end
 function Loot.StoreRestockStatusResponse(name, needs)
     _restockStatusResponses[name] = { needs = needs }
 end
+
+function Loot.GetSellStatusResponses()   return _sellStatusResponses end
+function Loot.ClearSellStatusResponses() _sellStatusResponses = {} end
+function Loot.StoreSellStatusResponse(name, items)
+    _sellStatusResponses[name] = { items = items }
+end
+
+function Loot.GetBankStatusResponses()   return _bankStatusResponses end
+function Loot.ClearBankStatusResponses() _bankStatusResponses = {} end
+function Loot.StoreBankStatusResponse(name, items)
+    _bankStatusResponses[name] = { items = items }
+end
 function Loot.ConsumePendingRestockAll()
     if _pendingRestockAll then _pendingRestockAll = false; return true end
     return false
@@ -921,6 +935,55 @@ function Loot.Init(cfg, lists, framework, channel, restock)
                 if mq.TLO.Me.CombatState() ~= 'COMBAT' then
                     _pendingRestockAll = true
                 end
+            end
+        elseif payload.type == 'sell_status_request' then
+            if payload.from ~= mq.TLO.Me.CleanName() then
+                local myItems = Loot.ScanSellItems()
+                local parts = {}
+                for _, item in ipairs(myItems) do
+                    parts[#parts+1] = item.name .. '|' .. item.value
+                end
+                _channel:Broadcast({
+                    type  = 'sell_status_response',
+                    from  = mq.TLO.Me.CleanName(),
+                    items = table.concat(parts, ';'),
+                })
+            end
+        elseif payload.type == 'sell_status_response' then
+            if payload.from ~= mq.TLO.Me.CleanName() then
+                local items = {}
+                if payload.items and payload.items ~= '' then
+                    for entry in payload.items:gmatch('[^;]+') do
+                        local name, value = entry:match('^(.+)|(-?%d+)$')
+                        if name then
+                            items[#items+1] = { name=name, value=tonumber(value) or 0 }
+                        end
+                    end
+                end
+                _sellStatusResponses[payload.from] = { items=items }
+            end
+        elseif payload.type == 'bank_status_request' then
+            if payload.from ~= mq.TLO.Me.CleanName() then
+                local myItems = Loot.ScanBankItems()
+                local parts = {}
+                for _, item in ipairs(myItems) do
+                    parts[#parts+1] = item.name
+                end
+                _channel:Broadcast({
+                    type  = 'bank_status_response',
+                    from  = mq.TLO.Me.CleanName(),
+                    items = table.concat(parts, ';'),
+                })
+            end
+        elseif payload.type == 'bank_status_response' then
+            if payload.from ~= mq.TLO.Me.CleanName() then
+                local items = {}
+                if payload.items and payload.items ~= '' then
+                    for name in payload.items:gmatch('[^;]+') do
+                        items[#items+1] = { name=name }
+                    end
+                end
+                _bankStatusResponses[payload.from] = { items=items }
             end
         end
     end)

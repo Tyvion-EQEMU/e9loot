@@ -249,7 +249,23 @@ while true do
         printf('\age9loot: broadcasting %s x%d to group', bcast.name, bcast.qty)
     end
 
-    -- Status All: scan self + broadcast request so other toons respond
+    -- Sell Status All: scan self + broadcast request so other toons respond
+    if SellConfirm.ConsumePendingSellStatusRequest() then
+        local myName  = mq.TLO.Me.CleanName()
+        local myItems = Loot.ScanSellItems()
+        Loot.StoreSellStatusResponse(myName, myItems)
+        channel:Broadcast({ type='sell_status_request', from=myName })
+    end
+
+    -- Bank Status All: scan self + broadcast request so other toons respond
+    if BankConfirm.ConsumePendingBankStatusRequest() then
+        local myName  = mq.TLO.Me.CleanName()
+        local myItems = Loot.ScanBankItems()
+        Loot.StoreBankStatusResponse(myName, myItems)
+        channel:Broadcast({ type='bank_status_request', from=myName })
+    end
+
+    -- Restock Status All: scan self + broadcast request so other toons respond
     if RestockConfirm.ConsumePendingStatusRequest() then
         local myName  = mq.TLO.Me.CleanName()
         local all     = Loot.ScanRestockNeeds(Restock)
