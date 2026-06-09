@@ -268,14 +268,31 @@ local function renderSoloFooter()
     if ImGui.Button('Rescan') then _rows = _loot.ScanRestockNeeds(_restockList) end
     ImGui.SameLine()
     if ImGui.Button('Close') then _open = false end
+
+    -- Right-align Status All | Restock All
+    local maxX      = select(1, ImGui.GetContentRegionMax())
+    local itemSp    = ImGui.GetStyle().ItemSpacing.x
+    local statusW   = 80
+    local restockW  = 90
     ImGui.SameLine()
-    if ImGui.Button('Status All') then
+    ImGui.SetCursorPosX(maxX - restockW - itemSp - statusW)
+    if ImGui.Button('Status All', statusW, 0) then
         _groupView = true
         _pendingStatusRequest = true
         if _loot then _loot.ClearRestockStatusResponses() end
     end
     ImGui.SameLine()
-    restockAllButton()
+    if ImGui.Button('Restock All', restockW, 0) then
+        _pendingRestockAll = true
+        _open = false
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text('Restock All')
+        ImGui.TextDisabled('Sends all group toons running e9loot to restock immediately.')
+        ImGui.TextDisabled('Ignores the Auto Restock setting \xe2\x80\x94 no review window shown.')
+        ImGui.EndTooltip()
+    end
 end
 
 -- -----------------------------------------------------------------------
@@ -353,8 +370,13 @@ local function renderGroupFooter()
     end
     ImGui.SameLine()
     if ImGui.Button('Close') then _open = false end
+
+    -- Right-align Solo
+    local maxX  = select(1, ImGui.GetContentRegionMax())
+    local soloW = 50
     ImGui.SameLine()
-    if ImGui.Button('Solo') then _groupView = false end
+    ImGui.SetCursorPosX(maxX - soloW)
+    if ImGui.Button('Solo', soloW, 0) then _groupView = false end
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.TextDisabled('Return to Solo Status')

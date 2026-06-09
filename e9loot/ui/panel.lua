@@ -66,20 +66,20 @@ local _wantRestartModal = false
 -- Shared gold used for active-state buttons and author link
 local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 
--- 64x64 square button with rounded corners and snake border on hover.
+-- 64x64 square button: silver face, black text, rounded corners, snake border on hover.
 local function squareActionButton(label, size)
-    local col = ImGui.GetStyleColorVec4(ImGuiCol.Button)
-    ImGui.PushStyleColor(ImGuiCol.Button,        col)
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, col)
-    ImGui.PushStyleColor(ImGuiCol.ButtonActive,  col)
+    ImGui.PushStyleColor(ImGuiCol.Button,        ImVec4(0.78, 0.78, 0.82, 1.0))
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImVec4(0.86, 0.86, 0.90, 1.0))
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive,  ImVec4(0.68, 0.68, 0.72, 1.0))
+    ImGui.PushStyleColor(ImGuiCol.Text,          ImVec4(0.0,  0.0,  0.0,  1.0))
     ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 10)
     local clicked = ImGui.Button(label, size, size)
     ImGui.PopStyleVar()
-    ImGui.PopStyleColor(3)
+    ImGui.PopStyleColor(4)
     if ImGui.IsItemHovered() then
         local bmin = ImGui.GetItemRectMinVec()
         local bmax = ImGui.GetItemRectMaxVec()
-        Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y), false)
+        Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y), false, 10)
     end
     return clicked
 end
@@ -774,16 +774,18 @@ function Panel.Render()
             end
         end
 
-        -- Quick-action buttons: Sell Stuff | Bank Stuff | Restock
+        -- Quick-action buttons: Sell Stuff | Bank Stuff | Restock — equally spread
         ImGui.Spacing()
         ImGui.Separator()
         ImGui.Spacing()
 
-        local btnSz  = 64
-        local avail  = select(1, ImGui.GetContentRegionAvail())
-        local totalW = btnSz * 3 + ImGui.GetStyle().ItemSpacing.x * 2
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + math.max(0, (avail - totalW) * 0.5))
+        local btnSz = 64
+        local avail = select(1, ImGui.GetContentRegionAvail())
+        local gap   = math.max(4, (avail - btnSz * 3) / 4)
+        local baseX = ImGui.GetCursorPosX()
+        local baseY = ImGui.GetCursorPosY()
 
+        ImGui.SetCursorPos(ImVec2(baseX + gap, baseY))
         if squareActionButton('Sell\nStuff', btnSz) then mq.cmd('/e9loot sellstuff') end
         if ImGui.IsItemHovered() then
             refreshActionCounts()
@@ -797,8 +799,7 @@ function Panel.Render()
             ImGui.EndTooltip()
         end
 
-        ImGui.SameLine()
-
+        ImGui.SetCursorPos(ImVec2(baseX + gap * 2 + btnSz, baseY))
         if squareActionButton('Bank\nStuff', btnSz) then mq.cmd('/e9loot bankstuff') end
         if ImGui.IsItemHovered() then
             refreshActionCounts()
@@ -812,8 +813,7 @@ function Panel.Render()
             ImGui.EndTooltip()
         end
 
-        ImGui.SameLine()
-
+        ImGui.SetCursorPos(ImVec2(baseX + gap * 3 + btnSz * 2, baseY))
         if squareActionButton('Restock', btnSz) then mq.cmd('/e9loot restock') end
         if ImGui.IsItemHovered() then
             refreshActionCounts()
@@ -827,6 +827,8 @@ function Panel.Render()
             ImGui.EndTooltip()
         end
 
+        -- Advance cursor below all three buttons so EndChild renders correctly
+        ImGui.SetCursorPosY(baseY + btnSz + ImGui.GetStyle().ItemSpacing.y)
         ImGui.Spacing()
 
         ImGui.EndChild()
