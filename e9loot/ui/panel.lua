@@ -660,7 +660,7 @@ function Panel.Render()
         ImGui.SameLine()
 
         local bankOpen = _bankSettings.IsOpen()
-        if actionButton('Bank & Vendor', 95, bankOpen) then
+        if actionButton('Vendor Settings', 115, bankOpen) then
             if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
         end
 
