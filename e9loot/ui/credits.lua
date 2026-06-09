@@ -13,8 +13,8 @@ local DATA = {
     Inspirations = {
         'Enine',
         'Grimmier',
-        'Derple',
         'Algar',
+        'Derple',
     },
 }
 

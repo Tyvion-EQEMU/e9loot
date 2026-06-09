@@ -14,6 +14,7 @@ local _config
 local _lists
 local _framework
 local _channel
+local _restock                = nil
 local _restockStatusResponses = {}
 local _pendingRestockAll      = false
 local _logFile      = nil
@@ -817,6 +818,14 @@ function Loot.BankStuff(items)
     Logger.Info('BankStuff: deposited %d/%d item(s)', count, #items)
 end
 
+function Loot.GetRestockNeedCount()
+    if not _restock then return 0 end
+    local needs = Loot.ScanRestockNeeds(_restock)
+    local count = 0
+    for _, r in ipairs(needs) do if r.need > 0 then count = count + 1 end end
+    return count
+end
+
 function Loot.GetRestockStatusResponses()  return _restockStatusResponses end
 function Loot.ClearRestockStatusResponses() _restockStatusResponses = {} end
 function Loot.StoreRestockStatusResponse(name, needs)
@@ -832,6 +841,7 @@ function Loot.Init(cfg, lists, framework, channel, restock)
     _lists     = lists
     _framework = framework
     _channel   = channel
+    _restock   = restock
 
     openLog()
 

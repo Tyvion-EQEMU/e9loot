@@ -66,6 +66,24 @@ local _wantRestartModal = false
 -- Shared gold used for active-state buttons and author link
 local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 
+-- 64x64 square button with rounded corners and snake border on hover.
+local function squareActionButton(label, size)
+    local col = ImGui.GetStyleColorVec4(ImGuiCol.Button)
+    ImGui.PushStyleColor(ImGuiCol.Button,        col)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, col)
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive,  col)
+    ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 10)
+    local clicked = ImGui.Button(label, size, size)
+    ImGui.PopStyleVar()
+    ImGui.PopStyleColor(3)
+    if ImGui.IsItemHovered() then
+        local bmin = ImGui.GetItemRectMinVec()
+        local bmax = ImGui.GetItemRectMaxVec()
+        Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y), false)
+    end
+    return clicked
+end
+
 -- Renders a button that turns gold when active, shows a snake border on hover
 -- instead of a colour change, and returns true when clicked.
 local function actionButton(label, w, isActive)
@@ -81,6 +99,19 @@ local function actionButton(label, w, isActive)
         Credits.DrawSnake(bmin, ImVec2(bmax.x - bmin.x, bmax.y - bmin.y), isActive)
     end
     return clicked
+end
+
+-- Quick-action button scan cache (throttled to avoid per-frame TLO spam)
+local _actionCounts     = { sell=0, bank=0, restock=0 }
+local _actionCountsTime = 0
+
+local function refreshActionCounts()
+    local now = os.clock()
+    if now - _actionCountsTime < 3.0 then return end
+    _actionCountsTime = now
+    _actionCounts.sell    = #_loot.ScanSellItems()
+    _actionCounts.bank    = #_loot.ScanBankItems()
+    _actionCounts.restock = _loot.GetRestockNeedCount()
 end
 
 -- Mini mode
@@ -325,7 +356,7 @@ function Panel.Render()
         return
     end
 
-    ImGui.SetNextWindowSize(ImVec2(340, 380), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(340, 520), ImGuiCond.FirstUseEver)
     local _lootEnabled = _config:Get('LootEnabled')
     local _inCombat    = _loot.IsInCombat()
     if not _lootEnabled then
@@ -370,6 +401,13 @@ function Panel.Render()
             ImGui.SameLine()
             ImGui.BeginGroup()
             ImGui.Text(string.format('%s  v%s', _version._AppName, _version._version))
+            if _version._buildTag then
+                ImGui.SameLine()
+                local ph = (math.sin(os.clock() * (math.pi / 2.0)) + 1.0) * 0.5
+                ImGui.TextColored(
+                    ImVec4(1.0, 0.72 + 0.28 * ph, 0.20 + 0.80 * ph, 1.0),
+                    '[' .. _version._buildTag .. ']')
+            end
             ImGui.TextDisabled('by ')
             ImGui.SameLine(0, 0)
             ImGui.TextColored(BUTTON_GOLD, 'Tyvion')
@@ -735,6 +773,61 @@ function Panel.Render()
                 Logger.GetConsole():Render(ImVec2(conW, 180))
             end
         end
+
+        -- Quick-action buttons: Sell Stuff | Bank Stuff | Restock
+        ImGui.Spacing()
+        ImGui.Separator()
+        ImGui.Spacing()
+
+        local btnSz  = 64
+        local avail  = select(1, ImGui.GetContentRegionAvail())
+        local totalW = btnSz * 3 + ImGui.GetStyle().ItemSpacing.x * 2
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + math.max(0, (avail - totalW) * 0.5))
+
+        if squareActionButton('Sell\nStuff', btnSz) then mq.cmd('/e9loot sellstuff') end
+        if ImGui.IsItemHovered() then
+            refreshActionCounts()
+            ImGui.BeginTooltip()
+            ImGui.Text('Sell Stuff')
+            if _actionCounts.sell > 0 then
+                ImGui.TextDisabled(_actionCounts.sell .. ' item(s) in bags queued to sell')
+            else
+                ImGui.TextDisabled('No sell-list items found in bags')
+            end
+            ImGui.EndTooltip()
+        end
+
+        ImGui.SameLine()
+
+        if squareActionButton('Bank\nStuff', btnSz) then mq.cmd('/e9loot bankstuff') end
+        if ImGui.IsItemHovered() then
+            refreshActionCounts()
+            ImGui.BeginTooltip()
+            ImGui.Text('Bank Stuff')
+            if _actionCounts.bank > 0 then
+                ImGui.TextDisabled(_actionCounts.bank .. ' item(s) in bags ready to deposit')
+            else
+                ImGui.TextDisabled('No bank-list items found in bags')
+            end
+            ImGui.EndTooltip()
+        end
+
+        ImGui.SameLine()
+
+        if squareActionButton('Restock', btnSz) then mq.cmd('/e9loot restock') end
+        if ImGui.IsItemHovered() then
+            refreshActionCounts()
+            ImGui.BeginTooltip()
+            ImGui.Text('Restock')
+            if _actionCounts.restock > 0 then
+                ImGui.TextDisabled(_actionCounts.restock .. ' item(s) below target quantity')
+            else
+                ImGui.TextDisabled('All items stocked!')
+            end
+            ImGui.EndTooltip()
+        end
+
+        ImGui.Spacing()
 
         ImGui.EndChild()
 

@@ -5,9 +5,10 @@ local imgui  = require('ImGui')
 
 -- Version block — single source of truth
 local Version = {
-    _AppName = 'e9loot',
-    _version = '0.8.0',
-    _author  = 'Tyvion',
+    _AppName  = 'e9loot',
+    _version  = '0.8.0',
+    _author   = 'Tyvion',
+    _buildTag = 'Beta',   -- change to Stable / Dev / RC as needed per branch
 }
 
 local Config   = require('e9loot.config')
