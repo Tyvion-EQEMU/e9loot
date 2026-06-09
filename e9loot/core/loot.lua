@@ -850,8 +850,8 @@ function Loot.Init(cfg, lists, framework, channel, restock)
         elseif payload.type == 'restock_set' then
             if restock and payload.name and payload.qty then
                 restock.Set(payload.name, payload.qty)
-                printf('\age9loot: restock list updated by %s \xe2\x80\x94 %s x%d',
-                    payload.from or '?', payload.name, payload.qty)
+                groupAnnounce(('restock list updated by %s \xe2\x80\x94 %s x%d'):format(
+                    payload.from or '?', payload.name, payload.qty))
             end
         end
     end)
