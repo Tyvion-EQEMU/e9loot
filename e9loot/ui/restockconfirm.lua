@@ -85,7 +85,7 @@ function RestockConfirm.Render()
     if #_rows == 0 then
         ImGui.Spacing()
         ImGui.TextDisabled('No items in restock list. Add items below.')
-    elseif ImGui.BeginTable('##restocktbl', 7,
+    elseif ImGui.BeginTable('##restocktbl', 6,
         bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                   ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
         ImVec2(0, -1)) then
@@ -95,8 +95,7 @@ function RestockConfirm.Render()
         ImGui.TableSetupColumn('Have',  ImGuiTableColumnFlags.WidthFixed, 42)
         ImGui.TableSetupColumn('Want',  ImGuiTableColumnFlags.WidthFixed, 80)
         ImGui.TableSetupColumn('Need',  ImGuiTableColumnFlags.WidthFixed, 42)
-        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 28)  -- broadcast arrow
-        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 28)  -- broadcast FA icon
+        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 28)  -- broadcast
         ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 18)  -- remove
         ImGui.TableHeadersRow()
 
@@ -117,7 +116,7 @@ function RestockConfirm.Render()
                 -- fill remaining columns so borders render cleanly
                 ImGui.TableNextColumn(); ImGui.TableNextColumn()
                 ImGui.TableNextColumn(); ImGui.TableNextColumn()
-                ImGui.TableNextColumn(); ImGui.TableNextColumn()
+                ImGui.TableNextColumn()
             end
 
             ImGui.TableNextRow()
@@ -165,21 +164,9 @@ function RestockConfirm.Render()
                 ImGui.TextColored(ImVec4(0.4, 0.7, 0.4, 0.8), '—')
             end
 
-            -- Broadcast button A: unicode arrow →
+            -- Broadcast (fa-share)
             ImGui.TableNextColumn()
-            if ImGui.SmallButton('\xe2\x86\x92##bca_' .. r.name) then
-                _pendingBroadcast = { name = r.name, qty = r.want }
-            end
-            if ImGui.IsItemHovered() then
-                ImGui.BeginTooltip()
-                ImGui.Text(('Share with group: %s x%d'):format(r.name, r.want))
-                ImGui.TextDisabled('Adds or updates this entry on all toons running e9loot')
-                ImGui.EndTooltip()
-            end
-
-            -- Broadcast button B: Font Awesome share/upload icon
-            ImGui.TableNextColumn()
-            if ImGui.SmallButton('\xef\x80\xae##bcb_' .. r.name) then
+            if ImGui.SmallButton('\xef\x81\xa4##bc_' .. r.name) then
                 _pendingBroadcast = { name = r.name, qty = r.want }
             end
             if ImGui.IsItemHovered() then

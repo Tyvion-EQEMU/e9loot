@@ -22,7 +22,6 @@ local BankConfirm     = require('e9loot.ui.bankconfirm')
 local SellConfirm     = require('e9loot.ui.sellconfirm')
 local RestockConfirm  = require('e9loot.ui.restockconfirm')
 local BankSettings    = require('e9loot.ui.banksettings')
-local IconTest        = require('e9loot.ui.icontest')   -- TEMP: remove after icon pick
 local Panel           = require('e9loot.ui.panel')
 
 -- Framework adapter map
@@ -133,8 +132,6 @@ mq.bind('/e9loot', function(subcmd, ...)
         else
             RestockConfirm.Open(Loot, Restock)
         end
-    elseif subcmd == 'icontest' then
-        IconTest.Open()
     elseif subcmd == 'reload' then
         Lists.LoadAll()
         printf('\age9loot: lists reloaded')
@@ -186,7 +183,6 @@ end
 -----------------------------------------------------------------------
 mq.imgui.init('e9loot', function()
     Panel.Render()
-    IconTest.Render()   -- TEMP
     BankConfirm.Render()
     SellConfirm.Render()
     RestockConfirm.Render()
