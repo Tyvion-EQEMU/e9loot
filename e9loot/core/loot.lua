@@ -878,18 +878,34 @@ function Loot.Init(cfg, lists, framework, channel, restock)
             -- Only respond if request came from another toon (requester handles self)
             if restock and payload.from ~= mq.TLO.Me.CleanName() then
                 local all   = Loot.ScanRestockNeeds(restock)
-                local needs = {}
+                local parts = {}
                 for _, r in ipairs(all) do
-                    if r.need > 0 then needs[#needs+1] = r end
+                    if r.need > 0 then
+                        parts[#parts+1] = r.name .. '|' .. r.have .. '|' .. r.want .. '|' .. r.need
+                    end
                 end
                 _channel:Broadcast({
                     type  = 'restock_status_response',
                     from  = mq.TLO.Me.CleanName(),
-                    needs = needs,
+                    needs = table.concat(parts, ';'),
                 })
             end
         elseif payload.type == 'restock_status_response' then
-            Loot.StoreRestockStatusResponse(payload.from, payload.needs or {})
+            local needs = {}
+            if payload.needs and payload.needs ~= '' then
+                for entry in payload.needs:gmatch('[^;]+') do
+                    local name, have, want, need = entry:match('^(.+)|(%d+)|(%d+)|(%d+)$')
+                    if name then
+                        needs[#needs+1] = {
+                            name = name,
+                            have = tonumber(have),
+                            want = tonumber(want),
+                            need = tonumber(need),
+                        }
+                    end
+                end
+            end
+            Loot.StoreRestockStatusResponse(payload.from, needs)
         elseif payload.type == 'restock_all' then
             if restock and payload.from ~= mq.TLO.Me.CleanName() then
                 if mq.TLO.Me.CombatState() ~= 'COMBAT' then

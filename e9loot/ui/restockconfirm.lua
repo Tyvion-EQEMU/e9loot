@@ -1,26 +1,34 @@
--- Restock confirmation / management window: edit the restock list, review inventory
--- counts, and trigger a buy run at Costco (or any targeted vendor).
+-- Restock confirmation / management window.
+-- Solo view: edit this toon's restock list and trigger a buy run.
+-- Group view: see all toons' needs side-by-side; trigger Restock All.
 
 local mq = require('mq')
 
 local RestockConfirm = {}
 
 local _open         = false
-local _rows         = {}   -- {name, want, have, need} — refreshed on open/rescan
+local _rows         = {}   -- {name, want, have, need} — solo view, refreshed on open/rescan
 local _loot         = nil
 local _restockList  = nil
-local _pendingItems         = nil    -- consumed by main loop to trigger RestockStuff
-local _pendingBroadcast     = nil    -- consumed by main loop to broadcast one item to group
-local _pendingStatusRequest = false  -- consumed by main loop to open Status All window
-local _pendingRestockAll    = false  -- consumed by main loop to broadcast Restock All
+local _groupView    = false  -- false = solo view, true = group view
+
+local _pendingItems         = nil    -- consumed by main loop → RestockStuff
+local _pendingBroadcast     = nil    -- consumed by main loop → broadcast one item
+local _pendingStatusRequest = false  -- consumed by main loop → scan self + broadcast status request
+local _pendingRestockAll    = false  -- consumed by main loop → broadcast Restock All
 
 local _addName = ''
 local _addQty  = 1
+
+-- -----------------------------------------------------------------------
+-- Exports
+-- -----------------------------------------------------------------------
 
 function RestockConfirm.Open(loot, restockList)
     _loot        = loot
     _restockList = restockList
     _rows        = loot.ScanRestockNeeds(restockList)
+    _groupView   = false
     _open        = true
 end
 
@@ -50,7 +58,10 @@ function RestockConfirm.ConsumePendingRestockAll()
     return false
 end
 
--- Returns a sorted copy of _rows: need > 0 first (alpha), satisfied last (alpha)
+-- -----------------------------------------------------------------------
+-- Helpers
+-- -----------------------------------------------------------------------
+
 local function sortedRows()
     local display = {}
     for _, r in ipairs(_rows) do display[#display+1] = r end
@@ -63,21 +74,34 @@ local function sortedRows()
     return display
 end
 
-function RestockConfirm.Render()
-    if not _open then return end
+local GOLD = ImVec4(1.0, 0.75, 0.2, 1.0)
+local GREEN = ImVec4(0.4, 0.7, 0.4, 0.8)
+local GREEN_B = ImVec4(0.4, 0.8, 0.4, 1.0)
+local DIM = ImVec4(0.35, 0.35, 0.35, 1.0)
 
-    ImGui.SetNextWindowSize(ImVec2(620, 400), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Restock', _open, ImGuiWindowFlags.None)
-    _open = open
+local function restockAllButton()
+    if ImGui.Button('Restock All') then
+        _pendingRestockAll = true
+        _open = false
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text('Restock All')
+        ImGui.TextDisabled('Sends all group toons running e9loot to restock immediately.')
+        ImGui.TextDisabled('Ignores the Auto Restock setting \xe2\x80\x94 no review window shown.')
+        ImGui.EndTooltip()
+    end
+end
 
-    if not shouldDraw then ImGui.End(); return end
+-- -----------------------------------------------------------------------
+-- Solo view rendering
+-- -----------------------------------------------------------------------
 
-    -- Count summary
+local function renderSoloHeader()
     local totalNeed, totalOk = 0, 0
     for _, r in ipairs(_rows) do
         if r.need > 0 then totalNeed = totalNeed + 1 else totalOk = totalOk + 1 end
     end
-
     if totalNeed > 0 then
         ImGui.Text(('%d need restocking'):format(totalNeed))
         ImGui.SameLine()
@@ -87,122 +111,104 @@ function RestockConfirm.Render()
         ImGui.SameLine()
         ImGui.TextDisabled(('  %d items'):format(totalOk))
     end
+end
 
-    ImGui.Separator()
-
-    -- Reserve space for add-row + buttons at the bottom
-    local footerH = ImGui.GetTextLineHeight() * 2 + ImGui.GetStyle().ItemSpacing.y * 4 + 8
-    ImGui.BeginChild('##restocklist', ImVec2(0, -footerH), ImGuiChildFlags.None)
-
+local function renderSoloTable()
     if #_rows == 0 then
         ImGui.Spacing()
         ImGui.TextDisabled('No items in restock list. Add items below.')
-    elseif ImGui.BeginTable('##restocktbl', 6,
+        return
+    end
+
+    if not ImGui.BeginTable('##restocktbl', 6,
         bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                   ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
-        ImVec2(0, -1)) then
+        ImVec2(0, -1)) then return end
 
-        ImGui.TableSetupScrollFreeze(0, 1)
-        ImGui.TableSetupColumn('Item',  ImGuiTableColumnFlags.WidthStretch)
-        ImGui.TableSetupColumn('Have',  ImGuiTableColumnFlags.WidthFixed, 42)
-        ImGui.TableSetupColumn('Want',  ImGuiTableColumnFlags.WidthFixed, 80)
-        ImGui.TableSetupColumn('Need',  ImGuiTableColumnFlags.WidthFixed, 42)
-        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 28)  -- broadcast
-        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 18)  -- remove
-        ImGui.TableHeadersRow()
+    ImGui.TableSetupScrollFreeze(0, 1)
+    ImGui.TableSetupColumn('Item',  ImGuiTableColumnFlags.WidthStretch)
+    ImGui.TableSetupColumn('Have',  ImGuiTableColumnFlags.WidthFixed, 42)
+    ImGui.TableSetupColumn('Want',  ImGuiTableColumnFlags.WidthFixed, 80)
+    ImGui.TableSetupColumn('Need',  ImGuiTableColumnFlags.WidthFixed, 42)
+    ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 28)  -- broadcast
+    ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 18)  -- remove
+    ImGui.TableHeadersRow()
 
-        local display      = sortedRows()
-        local drewDivider  = false
+    local display     = sortedRows()
+    local drewDivider = false
 
-        for _, r in ipairs(display) do
-            local isSatisfied = r.need == 0
+    for _, r in ipairs(display) do
+        local isSatisfied = r.need == 0
 
-            -- Group divider between needs and satisfied
-            if isSatisfied and not drewDivider then
-                drewDivider = true
-                ImGui.TableNextRow()
-                ImGui.TableNextColumn()
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.35, 0.35, 0.35, 1.0)
-                ImGui.Text('\xe2\x94\x80\xe2\x94\x80 satisfied \xe2\x94\x80\xe2\x94\x80')
-                ImGui.PopStyleColor()
-                -- fill remaining columns so borders render cleanly
-                ImGui.TableNextColumn(); ImGui.TableNextColumn()
-                ImGui.TableNextColumn(); ImGui.TableNextColumn()
-                ImGui.TableNextColumn()
-            end
-
+        if isSatisfied and not drewDivider then
+            drewDivider = true
             ImGui.TableNextRow()
-
-            -- Item name (clickable inspect)
             ImGui.TableNextColumn()
-            if isSatisfied then
-                ImGui.TextColored(ImVec4(0.4, 0.7, 0.4, 0.8), r.name)
-            else
-                ImGui.Text(r.name)
-            end
-            if ImGui.IsItemHovered() then
-                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
-                if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
-                    local found = mq.TLO.FindItem('=' .. r.name)
-                    if found and found.ID() and found.ID() > 0 then
-                        found.Inspect()
-                    end
-                end
-            end
-
-            -- Have
+            ImGui.PushStyleColor(ImGuiCol.Text, DIM.x, DIM.y, DIM.z, DIM.w)
+            ImGui.Text('\xe2\x94\x80\xe2\x94\x80 satisfied \xe2\x94\x80\xe2\x94\x80')
+            ImGui.PopStyleColor()
+            ImGui.TableNextColumn(); ImGui.TableNextColumn()
+            ImGui.TableNextColumn(); ImGui.TableNextColumn()
             ImGui.TableNextColumn()
-            if isSatisfied then
-                ImGui.TextColored(ImVec4(0.4, 0.7, 0.4, 0.8), tostring(r.have))
-            else
-                ImGui.Text(tostring(r.have))
-            end
+        end
 
-            -- Want (InputInt, step=0 hides arrows so single-click activates typing)
-            ImGui.TableNextColumn()
-            ImGui.SetNextItemWidth(-1)
-            local newWant, wantChanged = ImGui.InputInt('##want_' .. r.name, r.want, 0, 0)
-            if wantChanged and newWant >= 1 then
-                _restockList.Set(r.name, newWant)
-                r.want = newWant
-                r.need = math.max(0, newWant - r.have)
-            end
+        ImGui.TableNextRow()
 
-            -- Need
-            ImGui.TableNextColumn()
-            if r.need > 0 then
-                ImGui.TextColored(ImVec4(1.0, 0.75, 0.2, 1.0), tostring(r.need))
-            else
-                ImGui.TextColored(ImVec4(0.4, 0.7, 0.4, 0.8), '—')
-            end
-
-            -- Broadcast (fa-share)
-            ImGui.TableNextColumn()
-            if ImGui.SmallButton('\xef\x81\xa4##bc_' .. r.name) then
-                _pendingBroadcast = { name = r.name, qty = r.want }
-            end
-            if ImGui.IsItemHovered() then
-                ImGui.BeginTooltip()
-                ImGui.Text(('Share with group: %s x%d'):format(r.name, r.want))
-                ImGui.TextDisabled('Adds or updates this entry on all toons running e9loot')
-                ImGui.EndTooltip()
-            end
-
-            -- Remove button
-            ImGui.TableNextColumn()
-            if ImGui.SmallButton('\xc3\x97##rm_' .. r.name) then
-                _restockList.Remove(r.name)
-                _rows = _loot.ScanRestockNeeds(_restockList)
-                break  -- _rows changed; restart render next frame
+        -- Item (clickable inspect)
+        ImGui.TableNextColumn()
+        if isSatisfied then ImGui.TextColored(GREEN, r.name) else ImGui.Text(r.name) end
+        if ImGui.IsItemHovered() then
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+            if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
+                local found = mq.TLO.FindItem('=' .. r.name)
+                if found and found.ID() and found.ID() > 0 then found.Inspect() end
             end
         end
 
-        ImGui.EndTable()
+        -- Have
+        ImGui.TableNextColumn()
+        if isSatisfied then ImGui.TextColored(GREEN, tostring(r.have)) else ImGui.Text(tostring(r.have)) end
+
+        -- Want (single-click InputInt)
+        ImGui.TableNextColumn()
+        ImGui.SetNextItemWidth(-1)
+        local newWant, wantChanged = ImGui.InputInt('##want_' .. r.name, r.want, 0, 0)
+        if wantChanged and newWant >= 1 then
+            _restockList.Set(r.name, newWant)
+            r.want = newWant
+            r.need = math.max(0, newWant - r.have)
+        end
+
+        -- Need
+        ImGui.TableNextColumn()
+        if r.need > 0 then ImGui.TextColored(GOLD, tostring(r.need))
+        else ImGui.TextColored(GREEN, '\xe2\x80\x94') end
+
+        -- Broadcast (fa-share)
+        ImGui.TableNextColumn()
+        if ImGui.SmallButton('\xef\x81\xa4##bc_' .. r.name) then
+            _pendingBroadcast = { name = r.name, qty = r.want }
+        end
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text(('Share with group: %s x%d'):format(r.name, r.want))
+            ImGui.TextDisabled('Adds or updates this entry on all toons running e9loot')
+            ImGui.EndTooltip()
+        end
+
+        -- Remove
+        ImGui.TableNextColumn()
+        if ImGui.SmallButton('\xc3\x97##rm_' .. r.name) then
+            _restockList.Remove(r.name)
+            _rows = _loot.ScanRestockNeeds(_restockList)
+            break
+        end
     end
 
-    ImGui.EndChild()
+    ImGui.EndTable()
+end
 
-    -- Add-item row
+local function renderSoloAddRow()
     ImGui.SetNextItemWidth(180)
     local newName, _ = ImGui.InputText('##addname', _addName)
     _addName = newName
@@ -239,10 +245,9 @@ function RestockConfirm.Render()
         ImGui.EndTooltip()
     end
     if not hasCursor then ImGui.EndDisabled() end
+end
 
-    ImGui.Separator()
-
-    -- Action buttons
+local function renderSoloFooter()
     local needItems = {}
     for _, r in ipairs(_rows) do
         if r.need > 0 then needItems[#needItems+1] = r end
@@ -260,31 +265,133 @@ function RestockConfirm.Render()
     end
 
     ImGui.SameLine()
-    if ImGui.Button('Rescan') then
-        _rows = _loot.ScanRestockNeeds(_restockList)
-    end
+    if ImGui.Button('Rescan') then _rows = _loot.ScanRestockNeeds(_restockList) end
     ImGui.SameLine()
-    if ImGui.Button('Close') then
-        _open = false
-    end
-
+    if ImGui.Button('Close') then _open = false end
     ImGui.SameLine()
     if ImGui.Button('Status All') then
+        _groupView = true
         _pendingStatusRequest = true
+        if _loot then _loot.ClearRestockStatusResponses() end
+    end
+    ImGui.SameLine()
+    restockAllButton()
+end
+
+-- -----------------------------------------------------------------------
+-- Group view rendering
+-- -----------------------------------------------------------------------
+
+local function renderGroupHeader()
+    ImGui.TextColored(GOLD, 'All Characters \xe2\x80\x94 Status')
+end
+
+local function renderGroupTable()
+    local responses = _loot and _loot.GetRestockStatusResponses() or {}
+    local charCount = 0
+    for _ in pairs(responses) do charCount = charCount + 1 end
+
+    if charCount == 0 then
+        ImGui.Spacing()
+        ImGui.TextDisabled('Waiting for responses\xe2\x80\xa6 click Rescan to retry.')
+        return
     end
 
-    ImGui.SameLine()
-    if ImGui.Button('Restock All') then
-        _pendingRestockAll = true
-        _open = false
+    if not ImGui.BeginTable('##grouptbl', 5,
+        bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
+                  ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
+        ImVec2(0, -1)) then return end
+
+    ImGui.TableSetupScrollFreeze(0, 1)
+    ImGui.TableSetupColumn('Character', ImGuiTableColumnFlags.WidthFixed,  110)
+    ImGui.TableSetupColumn('Item',      ImGuiTableColumnFlags.WidthStretch)
+    ImGui.TableSetupColumn('Have',      ImGuiTableColumnFlags.WidthFixed,   42)
+    ImGui.TableSetupColumn('Want',      ImGuiTableColumnFlags.WidthFixed,   42)
+    ImGui.TableSetupColumn('Need',      ImGuiTableColumnFlags.WidthFixed,   42)
+    ImGui.TableHeadersRow()
+
+    local chars = {}
+    for name in pairs(responses) do chars[#chars+1] = name end
+    table.sort(chars, function(a, b) return a:lower() < b:lower() end)
+
+    for _, charName in ipairs(chars) do
+        local needs = responses[charName].needs or {}
+
+        if #needs == 0 then
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.TextColored(GREEN_B, charName)
+            ImGui.TableNextColumn()
+            ImGui.TextColored(ImVec4(0.4, 0.8, 0.4, 0.7), 'all stocked \xe2\x9c\x93')
+            ImGui.TableNextColumn(); ImGui.TableNextColumn(); ImGui.TableNextColumn()
+        else
+            for i, r in ipairs(needs) do
+                ImGui.TableNextRow()
+                ImGui.TableNextColumn()
+                if i == 1 then ImGui.TextColored(GOLD, charName) end
+                ImGui.TableNextColumn()
+                ImGui.Text(r.name)
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(r.have))
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(r.want))
+                ImGui.TableNextColumn()
+                ImGui.TextColored(GOLD, tostring(r.need))
+            end
+        end
     end
+
+    ImGui.EndTable()
+end
+
+local function renderGroupFooter()
+    restockAllButton()
+    ImGui.SameLine()
+    if ImGui.Button('Rescan') then
+        _pendingStatusRequest = true
+        if _loot then _loot.ClearRestockStatusResponses() end
+    end
+    ImGui.SameLine()
+    if ImGui.Button('Close') then _open = false end
+    ImGui.SameLine()
+    if ImGui.Button('Solo') then _groupView = false end
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
-        ImGui.Text('Restock All')
-        ImGui.TextDisabled('Sends all group toons running e9loot to restock immediately.')
-        ImGui.TextDisabled('Ignores the Auto Restock setting \xe2\x80\x94 no review window shown.')
+        ImGui.TextDisabled('Return to Solo Status')
         ImGui.EndTooltip()
     end
+end
+
+-- -----------------------------------------------------------------------
+-- Main render
+-- -----------------------------------------------------------------------
+
+function RestockConfirm.Render()
+    if not _open then return end
+
+    ImGui.SetNextWindowSize(ImVec2(620, 400), ImGuiCond.FirstUseEver)
+    local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Restock', _open, ImGuiWindowFlags.None)
+    _open = open
+    if not shouldDraw then ImGui.End(); return end
+
+    if _groupView then renderGroupHeader() else renderSoloHeader() end
+
+    ImGui.Separator()
+
+    -- Reserve footer: group view has no add-row so it needs less space
+    local footerH = _groupView
+        and (ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y * 2 + 8)
+        or  (ImGui.GetTextLineHeight() * 2 + ImGui.GetStyle().ItemSpacing.y * 4 + 8)
+
+    ImGui.BeginChild('##restocklist', ImVec2(0, -footerH), ImGuiChildFlags.None)
+    if _groupView then renderGroupTable() else renderSoloTable() end
+    ImGui.EndChild()
+
+    if not _groupView then renderSoloAddRow() end
+
+    ImGui.Separator()
+
+    if _groupView then renderGroupFooter() else renderSoloFooter() end
 
     ImGui.End()
 end

@@ -22,7 +22,6 @@ local BankConfirm     = require('e9loot.ui.bankconfirm')
 local SellConfirm     = require('e9loot.ui.sellconfirm')
 local RestockConfirm  = require('e9loot.ui.restockconfirm')
 local BankSettings    = require('e9loot.ui.banksettings')
-local RestockStatus   = require('e9loot.ui.restockstatus')
 local Panel           = require('e9loot.ui.panel')
 
 -- Framework adapter map
@@ -184,7 +183,6 @@ end
 -----------------------------------------------------------------------
 mq.imgui.init('e9loot', function()
     Panel.Render()
-    RestockStatus.Render()
     BankConfirm.Render()
     SellConfirm.Render()
     RestockConfirm.Render()
@@ -250,26 +248,16 @@ while true do
         printf('\age9loot: broadcasting %s x%d to group', bcast.name, bcast.qty)
     end
 
-    -- Status All: open window + scan self + broadcast request to other toons
-    local function doRestockStatusRefresh()
-        local myName = mq.TLO.Me.CleanName()
-        local all    = Loot.ScanRestockNeeds(Restock)
+    -- Status All: scan self + broadcast request so other toons respond
+    if RestockConfirm.ConsumePendingStatusRequest() then
+        local myName  = mq.TLO.Me.CleanName()
+        local all     = Loot.ScanRestockNeeds(Restock)
         local myNeeds = {}
         for _, r in ipairs(all) do
             if r.need > 0 then myNeeds[#myNeeds+1] = r end
         end
         Loot.StoreRestockStatusResponse(myName, myNeeds)
         channel:Broadcast({ type='restock_status_request', from=myName })
-    end
-
-    if RestockConfirm.ConsumePendingStatusRequest() then
-        RestockStatus.Open(Loot)
-        doRestockStatusRefresh()
-    end
-
-    if RestockStatus.ConsumePendingRefresh() then
-        Loot.ClearRestockStatusResponses()
-        doRestockStatusRefresh()
     end
 
     -- Restock All: broadcast to group + trigger self immediately
