@@ -43,6 +43,20 @@ local function renderVendorSection()
         local autoSell, sellChanged = Widgets.Toggle('##autosell', _config:Get('SellAutoSell'))
         if sellChanged then _config:SetAndSave('SellAutoSell', autoSell) end
 
+        ImGui.TableNextRow()
+        ImGui.TableNextColumn()
+        ImGui.Text('Auto Restock')
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.PushTextWrapPos(280)
+            ImGui.TextWrapped('Skip the Restock confirmation window and buy items immediately when running /e9loot restock.')
+            ImGui.PopTextWrapPos()
+            ImGui.EndTooltip()
+        end
+        ImGui.TableNextColumn()
+        local autoRestock, restockChanged = Widgets.Toggle('##autorestock', _config:Get('RestockAutoRestock'))
+        if restockChanged then _config:SetAndSave('RestockAutoRestock', autoRestock) end
+
         ImGui.EndTable()
     end
 end
@@ -90,13 +104,13 @@ local function renderBankSection()
     end
 end
 
-local VENDOR_H = 100
+local VENDOR_H = 130
 local BANK_H   = 100
 
 function BankSettings.Render()
     if not _open or not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(238, 245), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(238, 275), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Bank & Vendor', _open, ImGuiWindowFlags.None)
     _open = open
 

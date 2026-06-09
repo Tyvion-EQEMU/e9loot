@@ -590,6 +590,31 @@ local function openMerchantWindow()
     return true
 end
 
+local function getTotalCopper()
+    return (mq.TLO.Me.Platinum() or 0) * 1000
+         + (mq.TLO.Me.Gold()     or 0) * 100
+         + (mq.TLO.Me.Silver()   or 0) * 10
+         + (mq.TLO.Me.Copper()   or 0)
+end
+
+local function formatCopperShort(cp)
+    if cp <= 0 then return '0p' end
+    local pp = math.floor(cp / 1000); cp = cp % 1000
+    local gp = math.floor(cp / 100);  cp = cp % 100
+    local sp = math.floor(cp / 10);   local c = cp % 10
+    local parts = {}
+    if pp > 0 then parts[#parts+1] = pp .. 'p' end
+    if gp > 0 then parts[#parts+1] = gp .. 'g' end
+    if sp > 0 then parts[#parts+1] = sp .. 's' end
+    if c  > 0 then parts[#parts+1] = c  .. 'c' end
+    return table.concat(parts, ' ')
+end
+
+local function groupAnnounce(msg)
+    printf('\age9loot | %s', msg)
+    if mq.TLO.Me.Grouped() then mq.cmdf('/g e9loot | %s', msg) end
+end
+
 function Loot.ScanSellItems()
     local results = {}
     for bag = 1, 10 do
@@ -622,6 +647,7 @@ end
 function Loot.SellStuff(items)
     if not openMerchantWindow() then return end
 
+    local copperBefore = getTotalCopper()
     local count = 0
     for _, entry in ipairs(items) do
         mq.cmdf('/itemnotify in pack%d %d leftmouseup', entry.bag, entry.slot)
@@ -654,8 +680,91 @@ function Loot.SellStuff(items)
         mq.TLO.Window('MerchantWnd').DoClose()
     end
 
-    printf('\age9loot: SellStuff complete \xe2\x80\x94 sold %d/%d item(s)', count, #items)
-    Logger.Info('SellStuff: sold %d/%d item(s)', count, #items)
+    local earned = formatCopperShort(getTotalCopper() - copperBefore)
+    local msg    = ('Sold: %s earned for %d item(s)'):format(earned, count)
+    groupAnnounce(msg)
+    Logger.Info('SellStuff: %s (%d/%d attempted)', msg, count, #items)
+end
+
+function Loot.ScanRestockNeeds(restockList)
+    local results = {}
+    for _, entry in ipairs(restockList.GetAll()) do
+        local have = mq.TLO.FindItemCount('=' .. entry.name)() or 0
+        results[#results+1] = {
+            name = entry.name,
+            want = entry.qty,
+            have = have,
+            need = math.max(0, entry.qty - have),
+        }
+    end
+    return results
+end
+
+function Loot.RestockStuff(items)
+    if not openMerchantWindow() then return end
+
+    local copperBefore = getTotalCopper()
+    local count        = 0
+    local boughtNames  = {}
+    for _, entry in ipairs(items) do
+        local itemName = entry.name
+        local needQty  = entry.need
+
+        -- Locate item in merchant list by exact name
+        mq.delay(500, function()
+            return mq.TLO.Window('MerchantWnd/MW_ItemList').List(('=%s'):format(itemName), 2)() ~= nil
+        end)
+        local rowNum = mq.TLO.Window('MerchantWnd/MW_ItemList').List(('=%s'):format(itemName), 2)() or -1
+
+        if rowNum <= 0 then
+            Logger.Warn('RestockStuff: %s not found in vendor list, skipping', itemName)
+            goto next_item
+        end
+
+        -- Select item
+        mq.TLO.Window('MerchantWnd/MW_ItemList').Select(rowNum)()
+        mq.delay(2000, function()
+            return (mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() or ''):lower() == itemName:lower()
+        end)
+
+        if (mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() or ''):lower() ~= itemName:lower() then
+            Logger.Warn('RestockStuff: failed to select %s in merchant window, skipping', itemName)
+            goto next_item
+        end
+
+        do
+            -- Click buy and handle the quantity dialog for stackable items
+            local haveBefore = mq.TLO.FindItemCount('=' .. itemName)() or 0
+            mq.TLO.Window('MerchantWnd/MW_Buy_Button').LeftMouseUp()
+            mq.delay(2000, function()
+                return mq.TLO.Window('QuantityWnd').Open()
+                    or (mq.TLO.FindItemCount('=' .. itemName)() or 0) > haveBefore
+            end)
+
+            if mq.TLO.Window('QuantityWnd').Open() then
+                mq.cmdf('/nomodkey /notify QuantityWnd QTYW_Slider newvalue %d', needQty)
+                mq.delay(200)
+                mq.cmdf('/nomodkey /notify QuantityWnd QTYW_Accept_Button leftmouseup')
+                mq.delay(1000)
+            end
+        end
+
+        count = count + 1
+        boughtNames[#boughtNames+1] = itemName
+        Logger.Info('RestockStuff: bought %s x%d', itemName, needQty)
+
+        ::next_item::
+    end
+
+    if mq.TLO.Window('MerchantWnd').Open() then
+        mq.TLO.Window('MerchantWnd').DoClose()
+    end
+
+    local spent = formatCopperShort(copperBefore - getTotalCopper())
+    local msg   = ('Restock Complete: %s spent for %s'):format(
+        spent, #boughtNames > 0 and table.concat(boughtNames, ', ') or 'nothing')
+    groupAnnounce(msg)
+    Logger.Info('RestockStuff: %s (%d/%d attempted)', msg, count, #items)
 end
 
 function Loot.ConsolidateOnly()

@@ -10,17 +10,19 @@ local Version = {
     _author  = 'Tyvion',
 }
 
-local Config  = require('e9loot.config')
-local Logger  = require('e9loot.utils.logger')
-local Lists   = require('e9loot.lists.init')
-local Loot    = require('e9loot.core.loot')
+local Config   = require('e9loot.config')
+local Logger   = require('e9loot.utils.logger')
+local Lists    = require('e9loot.lists.init')
+local Restock  = require('e9loot.lists.restock')
+local Loot     = require('e9loot.core.loot')
 local Corpse  = require('e9loot.core.corpse')
-local Setup        = require('e9loot.ui.setup')
-local Editor       = require('e9loot.ui.editor')
-local BankConfirm  = require('e9loot.ui.bankconfirm')
-local SellConfirm  = require('e9loot.ui.sellconfirm')
-local BankSettings = require('e9loot.ui.banksettings')
-local Panel        = require('e9loot.ui.panel')
+local Setup           = require('e9loot.ui.setup')
+local Editor          = require('e9loot.ui.editor')
+local BankConfirm     = require('e9loot.ui.bankconfirm')
+local SellConfirm     = require('e9loot.ui.sellconfirm')
+local RestockConfirm  = require('e9loot.ui.restockconfirm')
+local BankSettings    = require('e9loot.ui.banksettings')
+local Panel           = require('e9loot.ui.panel')
 
 -- Framework adapter map
 local FRAMEWORK_ADAPTERS = {
@@ -71,6 +73,7 @@ local channel   = CHANNEL_ADAPTERS[channelName]     or CHANNEL_ADAPTERS.none
 
 -- Load all lists from disk
 Lists.LoadAll()
+Restock.Load()
 
 -- Boot channel
 channel:Init()
@@ -88,6 +91,7 @@ Panel.Init(Config, Loot, Setup, Editor, BankSettings, framework, FRAMEWORK_ADAPT
 -- Shared state accessed by both the bind handler and the main loop
 local _pendingAutoBank = nil
 local _pendingSell     = nil
+local _pendingRestock  = nil
 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)
@@ -116,6 +120,17 @@ mq.bind('/e9loot', function(subcmd, ...)
             _pendingSell = Loot.ScanSellItems()
         else
             SellConfirm.Open(Loot)
+        end
+    elseif subcmd == 'restock' then
+        if Config:Get('RestockAutoRestock') then
+            local needs = Loot.ScanRestockNeeds(Restock)
+            local items = {}
+            for _, r in ipairs(needs) do
+                if r.need > 0 then items[#items+1] = r end
+            end
+            _pendingRestock = #items > 0 and items or nil
+        else
+            RestockConfirm.Open(Loot, Restock)
         end
     elseif subcmd == 'reload' then
         Lists.LoadAll()
@@ -154,7 +169,7 @@ mq.bind('/e9loot', function(subcmd, ...)
         channel:Broadcast({ type='set_announcedone', value=newVal })
         printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | bankstuff | sellstuff | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\aye9loot commands: loot | bankstuff | sellstuff | restock | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
@@ -170,6 +185,7 @@ mq.imgui.init('e9loot', function()
     Panel.Render()
     BankConfirm.Render()
     SellConfirm.Render()
+    RestockConfirm.Render()
     if Loot.IsCoinWarning() then
         local io   = ImGui.GetIO()
         local winW = 420
@@ -216,6 +232,13 @@ while true do
     if sellItems then
         _pendingSell = nil
         Loot.SellStuff(sellItems)
+    end
+
+    -- Restock: executed from main loop so mq.delay is allowed
+    local restockItems = _pendingRestock or RestockConfirm.ConsumePending()
+    if restockItems then
+        _pendingRestock = nil
+        Loot.RestockStuff(restockItems)
     end
 
     -- Zone change: clear corpse done-set
