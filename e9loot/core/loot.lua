@@ -815,7 +815,7 @@ function Loot.BankStuff(items)
     Logger.Info('BankStuff: deposited %d/%d item(s)', count, #items)
 end
 
-function Loot.Init(cfg, lists, framework, channel)
+function Loot.Init(cfg, lists, framework, channel, restock)
     _config    = cfg
     _lists     = lists
     _framework = framework
@@ -847,6 +847,12 @@ function Loot.Init(cfg, lists, framework, channel)
         elseif payload.type == 'reload_lists' then
             _lists.LoadAll()
             Logger.Info('Lists reloaded via group broadcast from %s', payload.from or '?')
+        elseif payload.type == 'restock_set' then
+            if restock and payload.name and payload.qty then
+                restock.Set(payload.name, payload.qty)
+                printf('\age9loot: restock list updated by %s \xe2\x80\x94 %s x%d',
+                    payload.from or '?', payload.name, payload.qty)
+            end
         end
     end)
 end

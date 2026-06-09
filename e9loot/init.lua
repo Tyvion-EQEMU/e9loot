@@ -81,7 +81,7 @@ channel:Init()
 mq.cmd('/hidecorpse looted')
 
 -- Boot core loot engine
-Loot.Init(Config, Lists, framework, channel)
+Loot.Init(Config, Lists, framework, channel, Restock)
 
 -- Wire panel (pass lists ref into config for editor access)
 Config._lists = Lists.All()
@@ -239,6 +239,13 @@ while true do
     if restockItems then
         _pendingRestock = nil
         Loot.RestockStuff(restockItems)
+    end
+
+    -- Restock broadcast: share one item+qty with all group toons
+    local bcast = RestockConfirm.ConsumePendingBroadcast()
+    if bcast then
+        channel:Broadcast({ type='restock_set', name=bcast.name, qty=bcast.qty, from=mq.TLO.Me.CleanName() })
+        printf('\age9loot: broadcasting %s x%d to group', bcast.name, bcast.qty)
     end
 
     -- Zone change: clear corpse done-set

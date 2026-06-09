@@ -9,7 +9,8 @@ local _open         = false
 local _rows         = {}   -- {name, want, have, need} — refreshed on open/rescan
 local _loot         = nil
 local _restockList  = nil
-local _pendingItems = nil  -- consumed by main loop to trigger RestockStuff
+local _pendingItems     = nil  -- consumed by main loop to trigger RestockStuff
+local _pendingBroadcast = nil  -- consumed by main loop to broadcast one item to group
 
 local _addName = ''
 local _addQty  = 1
@@ -29,6 +30,12 @@ function RestockConfirm.ConsumePending()
     local items = _pendingItems
     _pendingItems = nil
     return items
+end
+
+function RestockConfirm.ConsumePendingBroadcast()
+    local item = _pendingBroadcast
+    _pendingBroadcast = nil
+    return item
 end
 
 -- Returns a sorted copy of _rows: need > 0 first (alpha), satisfied last (alpha)
@@ -78,7 +85,7 @@ function RestockConfirm.Render()
     if #_rows == 0 then
         ImGui.Spacing()
         ImGui.TextDisabled('No items in restock list. Add items below.')
-    elseif ImGui.BeginTable('##restocktbl', 5,
+    elseif ImGui.BeginTable('##restocktbl', 6,
         bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                   ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
         ImVec2(0, -1)) then
@@ -88,7 +95,8 @@ function RestockConfirm.Render()
         ImGui.TableSetupColumn('Have',  ImGuiTableColumnFlags.WidthFixed, 42)
         ImGui.TableSetupColumn('Want',  ImGuiTableColumnFlags.WidthFixed, 80)
         ImGui.TableSetupColumn('Need',  ImGuiTableColumnFlags.WidthFixed, 42)
-        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 18)
+        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 20)  -- broadcast
+        ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 18)  -- remove
         ImGui.TableHeadersRow()
 
         local display      = sortedRows()
@@ -108,6 +116,7 @@ function RestockConfirm.Render()
                 -- fill remaining columns so borders render cleanly
                 ImGui.TableNextColumn(); ImGui.TableNextColumn()
                 ImGui.TableNextColumn(); ImGui.TableNextColumn()
+                ImGui.TableNextColumn()
             end
 
             ImGui.TableNextRow()
@@ -153,6 +162,18 @@ function RestockConfirm.Render()
                 ImGui.TextColored(ImVec4(1.0, 0.75, 0.2, 1.0), tostring(r.need))
             else
                 ImGui.TextColored(ImVec4(0.4, 0.7, 0.4, 0.8), '—')
+            end
+
+            -- Broadcast button
+            ImGui.TableNextColumn()
+            if ImGui.SmallButton('\xe2\x86\x92##bc_' .. r.name) then
+                _pendingBroadcast = { name = r.name, qty = r.want }
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.Text(('Share with group: %s x%d'):format(r.name, r.want))
+                ImGui.TextDisabled('Adds or updates this entry on all toons running e9loot')
+                ImGui.EndTooltip()
             end
 
             -- Remove button
