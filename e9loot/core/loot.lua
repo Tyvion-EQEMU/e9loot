@@ -849,9 +849,18 @@ function Loot.Init(cfg, lists, framework, channel, restock)
             Logger.Info('Lists reloaded via group broadcast from %s', payload.from or '?')
         elseif payload.type == 'restock_set' then
             if restock and payload.name and payload.qty then
+                local prevQty = restock.GetQty(payload.name)
                 restock.Set(payload.name, payload.qty)
-                groupAnnounce(('restock list updated by %s \xe2\x80\x94 %s x%d'):format(
-                    payload.from or '?', payload.name, payload.qty))
+                local status
+                if prevQty == nil then
+                    status = 'added'
+                elseif prevQty == payload.qty then
+                    status = 'no change'
+                else
+                    status = ('was x%d'):format(prevQty)
+                end
+                groupAnnounce(('restock from %s \xe2\x80\x94 %s x%d (%s)'):format(
+                    payload.from or '?', payload.name, payload.qty, status))
             end
         end
     end)

@@ -83,4 +83,10 @@ function Restock.Has(name)
     return _byName[(name or ''):lower()] ~= nil
 end
 
+function Restock.GetQty(name)
+    local idx = _byName[(name or ''):lower()]
+    if not idx then return nil end
+    return _entries[idx].qty
+end
+
 return Restock
