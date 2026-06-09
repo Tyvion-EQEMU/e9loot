@@ -137,10 +137,10 @@ function RestockConfirm.Render()
                 ImGui.Text(tostring(r.have))
             end
 
-            -- Want (DragInt — drag or Ctrl+Click to edit)
+            -- Want (InputInt, step=0 hides arrows so single-click activates typing)
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
-            local newWant, wantChanged = ImGui.DragInt('##want_' .. r.name, r.want, 1, 1, 9999, '%d')
+            local newWant, wantChanged = ImGui.InputInt('##want_' .. r.name, r.want, 0, 0)
             if wantChanged and newWant >= 1 then
                 _restockList.Set(r.name, newWant)
                 r.want = newWant

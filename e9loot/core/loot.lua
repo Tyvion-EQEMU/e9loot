@@ -536,12 +536,19 @@ local function findAndTargetVendor()
     return false
 end
 
-local function openMerchantWindow()
-    if not mq.TLO.Target.ID() or mq.TLO.Target.ID() == 0 then
+-- preferKnown=true: always search KNOWN_VENDORS first (used by restock so Costco
+-- is auto-targeted even when something else is targeted); falls back to current
+-- target if no known vendor is in the zone.
+local function openMerchantWindow(preferKnown)
+    local noTarget = not mq.TLO.Target.ID() or mq.TLO.Target.ID() == 0
+    if noTarget or preferKnown then
         if not findAndTargetVendor() then
-            Logger.Warn('openMerchantWindow: no target and no known vendor found in zone')
-            printf('\are9loot: No target and no vendor found. Target a vendor and try again.')
-            return false
+            if noTarget then
+                Logger.Warn('openMerchantWindow: no target and no known vendor found in zone')
+                printf('\are9loot: No target and no vendor found. Target a vendor and try again.')
+                return false
+            end
+            Logger.Info('openMerchantWindow: no known vendor in zone, using current target')
         end
     end
 
@@ -701,7 +708,7 @@ function Loot.ScanRestockNeeds(restockList)
 end
 
 function Loot.RestockStuff(items)
-    if not openMerchantWindow() then return end
+    if not openMerchantWindow(true) then return end
 
     local copperBefore = getTotalCopper()
     local count        = 0
