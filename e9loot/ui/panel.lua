@@ -126,7 +126,7 @@ end
 local function renderHistory()
     if not _histOpen then return end
 
-    ImGui.SetNextWindowSize(ImVec2(660, 400), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(820, 400), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot — Loot History', _histOpen,
         ImGuiWindowFlags.None)
     _histOpen = open
@@ -170,18 +170,19 @@ local function renderHistory()
         local anyDecision = _histDecisionFilter.keep or _histDecisionFilter.bank
             or _histDecisionFilter.sell or _histDecisionFilter.destroy or _histDecisionFilter.skip
 
-        if ImGui.BeginTable('##histtbl', 6,
+        if ImGui.BeginTable('##histtbl', 7,
             bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                       ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
             ImVec2(0, -22)) then
 
             ImGui.TableSetupScrollFreeze(0, 1)
-            ImGui.TableSetupColumn('Date',   ImGuiTableColumnFlags.WidthFixed,  42)
-            ImGui.TableSetupColumn('Time',   ImGuiTableColumnFlags.WidthFixed,  50)
-            ImGui.TableSetupColumn('Toon',   ImGuiTableColumnFlags.WidthFixed,  75)
-            ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed,  55)
-            ImGui.TableSetupColumn('Item',   ImGuiTableColumnFlags.WidthStretch)
-            ImGui.TableSetupColumn('Reason', ImGuiTableColumnFlags.WidthFixed, 100)
+            ImGui.TableSetupColumn('Date',     ImGuiTableColumnFlags.WidthFixed,  42)
+            ImGui.TableSetupColumn('Time',     ImGuiTableColumnFlags.WidthFixed,  50)
+            ImGui.TableSetupColumn('Toon',     ImGuiTableColumnFlags.WidthFixed,  75)
+            ImGui.TableSetupColumn('Action',   ImGuiTableColumnFlags.WidthFixed,  55)
+            ImGui.TableSetupColumn('Item',     ImGuiTableColumnFlags.WidthStretch)
+            ImGui.TableSetupColumn('Reason',   ImGuiTableColumnFlags.WidthFixed, 100)
+            ImGui.TableSetupColumn('Replaced', ImGuiTableColumnFlags.WidthFixed, 140)
             ImGui.TableHeadersRow()
 
             for i, entry in ipairs(history) do
@@ -238,6 +239,32 @@ local function renderHistory()
 
                     ImGui.TableNextColumn()
                     ImGui.TextDisabled(entry.reason or '')
+
+                    ImGui.TableNextColumn()
+                    if entry.replacedName then
+                        local rn = entry.replacedName
+                        ImGui.TextDisabled(rn)
+                        local rmin2 = ImGui.GetItemRectMinVec()
+                        local rmax2 = ImGui.GetItemRectMaxVec()
+                        ImGui.GetWindowDrawList():AddLine(
+                            ImVec2(rmin2.x, rmax2.y), rmax2,
+                            ImGui.ColorConvertFloat4ToU32(ImVec4(0.5, 0.5, 0.5, 0.7)), 1.0)
+                        if ImGui.IsItemHovered() then
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand)
+                            ImGui.BeginTooltip()
+                            ImGui.Text(rn)
+                            ImGui.TextDisabled('Click to inspect \xe2\x80\x94 check for augments')
+                            ImGui.EndTooltip()
+                            if ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
+                                local found = mq.TLO.FindItem('=' .. rn)
+                                if found and found.ID() and found.ID() > 0 then
+                                    found.Inspect()
+                                else
+                                    printf('\aye9loot: %s is not in your inventory', rn)
+                                end
+                            end
+                        end
+                    end
                 end
             end
 

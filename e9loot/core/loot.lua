@@ -53,10 +53,11 @@ local function openLog()
     end
 end
 
-local function writeLog(toon, decision, name, reason)
+local function writeLog(toon, decision, name, reason, replacedName)
     if not _logFile then return end
-    _logFile:write(string.format('[%s] %-14s %-8s %s (%s)\n',
-        os.date('%Y-%m-%d %H:%M:%S'), toon, decision:upper(), name, reason))
+    local tail = replacedName and (' [replaced: ' .. replacedName .. ']') or ''
+    _logFile:write(string.format('[%s] %-14s %-8s %s (%s)%s\n',
+        os.date('%Y-%m-%d %H:%M:%S'), toon, decision:upper(), name, reason, tail))
     _logFile:flush()
 end
 
@@ -68,7 +69,7 @@ local function pushHistory(entry)
     if #_history > HIST_MAX then
         table.remove(_history, HIST_MAX + 1)
     end
-    writeLog(entry.toon or '?', entry.decision, entry.name, entry.reason or '')
+    writeLog(entry.toon or '?', entry.decision, entry.name, entry.reason or '', entry.replacedName)
 end
 
 -----------------------------------------------------------------------
@@ -164,6 +165,7 @@ local function lootSlot(slotIndex)
     local decision, reason, equipSlot  = evaluateItem(item)
     local myToon                       = mq.TLO.Me.CleanName()
     local id                           = item.ID()
+    local replacedName, replacedId
 
     Logger.Debug('%s -> %s (%s)', name, decision, reason)
 
@@ -195,6 +197,12 @@ local function lootSlot(slotIndex)
 
     if decision == DECISION.KEEP then
         if equipSlot then
+            -- Capture what's currently equipped before the swap
+            local cur = mq.TLO.Me.Inventory(equipSlot)
+            if cur and cur.ID() and cur.ID() > 0 then
+                replacedName = cur.Name()
+                replacedId   = cur.ID()
+            end
             -- Swap new item into worn slot; old item comes to cursor
             mq.cmdf('/itemnotify %d leftmouseup', equipSlot)
             mq.delay(500)
@@ -227,16 +235,18 @@ local function lootSlot(slotIndex)
     end
 
     -- History + log (all decisions); broadcast for shared history panel on other toons
-    pushHistory({ date=os.date('%m/%d'), time=os.date('%H:%M:%S'), name=name, id=id, decision=decision, reason=reason, toon=myToon })
+    pushHistory({ date=os.date('%m/%d'), time=os.date('%H:%M:%S'), name=name, id=id, decision=decision, reason=reason, toon=myToon, replacedName=replacedName, replacedId=replacedId })
     _channel:Broadcast({
-        type     = 'loot_event',
-        name     = name,
-        id       = id,
-        decision = decision,
-        reason   = reason,
-        date     = os.date('%m/%d'),
-        time     = os.date('%H:%M:%S'),
-        toon     = myToon,
+        type         = 'loot_event',
+        name         = name,
+        id           = id,
+        decision     = decision,
+        reason       = reason,
+        date         = os.date('%m/%d'),
+        time         = os.date('%H:%M:%S'),
+        toon         = myToon,
+        replacedName = replacedName,
+        replacedId   = replacedId,
     })
 end
 
@@ -557,13 +567,15 @@ function Loot.Init(cfg, lists, framework, channel)
     channel:Observe(function(payload)
         if payload.type == 'loot_event' then
             pushHistory({
-                date     = payload.date or os.date('%m/%d'),
-                time     = payload.time or os.date('%H:%M:%S'),
-                name     = payload.name,
-                id       = payload.id or 0,
-                decision = payload.decision,
-                reason   = payload.reason,
-                toon     = payload.toon or payload.from,
+                date         = payload.date or os.date('%m/%d'),
+                time         = payload.time or os.date('%H:%M:%S'),
+                name         = payload.name,
+                id           = payload.id or 0,
+                decision     = payload.decision,
+                reason       = payload.reason,
+                toon         = payload.toon or payload.from,
+                replacedName = payload.replacedName,
+                replacedId   = payload.replacedId,
             })
         elseif payload.type == 'set_enabled' then
             if type(payload.value) == 'boolean' then
