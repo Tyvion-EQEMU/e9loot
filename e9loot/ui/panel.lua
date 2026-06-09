@@ -69,7 +69,10 @@ local _devInfoOpen = false
 -- Shared gold used for active-state buttons and author link
 local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 
--- Build notes — update this block each release; no UI changes needed
+-- Build notes — update this block each release; no UI changes needed.
+-- Format: first line is "vX.Y.Z Tag  —  YYYY-MM-DD", blank line, then
+-- bullet entries starting with "  • ". Prepend a new block for each release
+-- (older blocks stay for history) or trim if it gets too long.
 local BUILD_NOTES = [[
 v0.8.0 Beta  —  2026-06-09
 
