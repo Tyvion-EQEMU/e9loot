@@ -228,6 +228,20 @@ while true do
         Loot.ConsolidateOnly()
     end
 
+    -- Bank All: broadcast to group + trigger self immediately
+    if BankConfirm.ConsumePendingBankAll() then
+        local myName  = mq.TLO.Me.CleanName()
+        channel:Broadcast({ type='bank_all', from=myName })
+        local myItems = Loot.ScanBankItems()
+        if #myItems > 0 then _pendingAutoBank = myItems end
+    end
+
+    -- Bank All received from another toon's broadcast
+    if Loot.ConsumePendingBankAll() then
+        local myItems = Loot.ScanBankItems()
+        if #myItems > 0 then _pendingAutoBank = myItems end
+    end
+
     -- Consolidate All: broadcast to group + trigger self immediately
     if BankConfirm.ConsumePendingConsolidateAll() then
         channel:Broadcast({ type='consolidate_all', from=mq.TLO.Me.CleanName() })

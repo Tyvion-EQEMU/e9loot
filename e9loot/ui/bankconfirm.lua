@@ -12,6 +12,7 @@ local _loot       = nil
 local _iconAnim   = nil
 local _groupView  = false
 local _pendingItems          = nil
+local _pendingBankAll        = false
 local _pendingConsolidate    = false
 local _pendingConsolidateAll = false
 local _pendingStatusRequest  = false
@@ -54,6 +55,11 @@ end
 
 function BankConfirm.ConsumePendingConsolidateAll()
     if _pendingConsolidateAll then _pendingConsolidateAll = false; return true end
+    return false
+end
+
+function BankConfirm.ConsumePendingBankAll()
+    if _pendingBankAll then _pendingBankAll = false; return true end
     return false
 end
 
@@ -157,14 +163,14 @@ local function renderSoloTable()
 end
 
 local function renderSoloFooter()
-    local maxX   = select(1, ImGui.GetContentRegionMax())
-    local itemSp = ImGui.GetStyle().ItemSpacing.x
+    local maxX    = select(1, ImGui.GetContentRegionMax())
+    local itemSp  = ImGui.GetStyle().ItemSpacing.x
     local statusW = 80
-    local ccW     = 140
+    local bankAllW = 75
 
     if #_items > 0 then
-        -- Left: Bank All | Rescan | Cancel
-        if ImGui.Button('Bank All') then
+        -- Left: Bank Now (N) | Rescan | Cancel | Consolidate Coins
+        if ImGui.Button(('Bank Now (%d)'):format(#_items)) then
             _pendingItems = _items
             _open = false
         end
@@ -172,37 +178,41 @@ local function renderSoloFooter()
         if ImGui.Button('Rescan') then _items = _loot.ScanBankItems() end
         ImGui.SameLine()
         if ImGui.Button('Cancel') then _open = false end
-        -- Right: Status All | Consolidate Coins
         ImGui.SameLine()
-        ImGui.SetCursorPosX(maxX - ccW - itemSp - statusW)
-        if ImGui.Button('Status All', statusW, 0) then
-            _groupView = true
-            _pendingStatusRequest = true
-            if _loot then _loot.ClearBankStatusResponses() end
-        end
-        ImGui.SameLine()
-        if ImGui.Button('Consolidate Coins', ccW, 0) then
+        if ImGui.Button('Consolidate Coins') then
             _pendingConsolidate = true
             _open = false
         end
     else
-        -- Left: Rescan | Cancel
+        -- Left: Rescan | Cancel | Consolidate Coins
         if ImGui.Button('Rescan') then _items = _loot.ScanBankItems() end
         ImGui.SameLine()
         if ImGui.Button('Cancel') then _open = false end
-        -- Right: Status All | Consolidate Coins
         ImGui.SameLine()
-        ImGui.SetCursorPosX(maxX - ccW - itemSp - statusW)
-        if ImGui.Button('Status All', statusW, 0) then
-            _groupView = true
-            _pendingStatusRequest = true
-            if _loot then _loot.ClearBankStatusResponses() end
-        end
-        ImGui.SameLine()
-        if ImGui.Button('Consolidate Coins', ccW, 0) then
+        if ImGui.Button('Consolidate Coins') then
             _pendingConsolidate = true
             _open = false
         end
+    end
+    -- Right: Status All | Bank All (always shown)
+    local statusX = maxX - bankAllW - itemSp - statusW
+    ImGui.SameLine()
+    ImGui.SetCursorPosX(statusX)
+    if ImGui.Button('Status All', statusW, 0) then
+        _groupView = true
+        _pendingStatusRequest = true
+        if _loot then _loot.ClearBankStatusResponses() end
+    end
+    ImGui.SameLine()
+    if ImGui.Button('Bank All', bankAllW, 0) then
+        _pendingBankAll = true
+        _open = false
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text('Bank All')
+        ImGui.TextDisabled('Sends all group toons running e9loot to deposit immediately.')
+        ImGui.EndTooltip()
     end
 end
 
@@ -264,19 +274,28 @@ end
 local function renderGroupFooter()
     local maxX   = select(1, ImGui.GetContentRegionMax())
     local itemSp = ImGui.GetStyle().ItemSpacing.x
-    local ccAllW = 120
     local soloW  = 50
 
+    -- Left: Bank All | Rescan | Cancel | Consolidate All
+    if ImGui.Button('Bank All') then
+        _pendingBankAll = true
+        _open = false
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text('Bank All')
+        ImGui.TextDisabled('Sends all group toons running e9loot to deposit immediately.')
+        ImGui.EndTooltip()
+    end
+    ImGui.SameLine()
     if ImGui.Button('Rescan') then
         _pendingStatusRequest = true
         if _loot then _loot.ClearBankStatusResponses() end
     end
     ImGui.SameLine()
     if ImGui.Button('Cancel') then _open = false end
-    -- Right: Consolidate All | Solo
     ImGui.SameLine()
-    ImGui.SetCursorPosX(maxX - soloW - itemSp - ccAllW)
-    if ImGui.Button('Consolidate All', ccAllW, 0) then
+    if ImGui.Button('Consolidate All') then
         _pendingConsolidateAll = true
         _open = false
     end
@@ -286,7 +305,9 @@ local function renderGroupFooter()
         ImGui.TextDisabled('Sends all group toons running e9loot to consolidate coins.')
         ImGui.EndTooltip()
     end
+    -- Right: Solo
     ImGui.SameLine()
+    ImGui.SetCursorPosX(maxX - soloW)
     if ImGui.Button('Solo', soloW, 0) then _groupView = false end
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
