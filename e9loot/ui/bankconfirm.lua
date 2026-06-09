@@ -87,7 +87,7 @@ local function renderSoloTable()
         return
     end
 
-    if not ImGui.BeginTable('##banktbl', 4,
+    if not ImGui.BeginTable('##banktbl', 3,
         bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                   ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
         ImVec2(0, -1)) then return end
@@ -96,7 +96,6 @@ local function renderSoloTable()
     ImGui.TableSetupColumn('Item', ImGuiTableColumnFlags.WidthStretch)
     ImGui.TableSetupColumn('Bag',  ImGuiTableColumnFlags.WidthFixed, 40)
     ImGui.TableSetupColumn('Slot', ImGuiTableColumnFlags.WidthFixed, 40)
-    ImGui.TableSetupColumn('ID',   ImGuiTableColumnFlags.WidthFixed, 60)
     ImGui.TableHeadersRow()
 
     for _, e in ipairs(_items) do
@@ -156,7 +155,6 @@ local function renderSoloTable()
 
         ImGui.TableNextColumn(); ImGui.TextDisabled(tostring(e.bag))
         ImGui.TableNextColumn(); ImGui.TextDisabled(tostring(e.slot))
-        ImGui.TableNextColumn(); ImGui.TextDisabled(tostring(e.id))
     end
 
     ImGui.EndTable()
@@ -168,36 +166,19 @@ local function renderSoloFooter()
     local statusW = 80
     local bankAllW = 75
 
+    -- Row 1: primary actions left, Status All | Bank All right
     if #_items > 0 then
-        -- Left: Bank Now (N) | Rescan | Cancel | Consolidate Coins
         if ImGui.Button(('Bank Now (%d)'):format(#_items)) then
             _pendingItems = _items
             _open = false
         end
         ImGui.SameLine()
-        if ImGui.Button('Rescan') then _items = _loot.ScanBankItems() end
-        ImGui.SameLine()
-        if ImGui.Button('Cancel') then _open = false end
-        ImGui.SameLine()
-        if ImGui.Button('Consolidate Coins') then
-            _pendingConsolidate = true
-            _open = false
-        end
-    else
-        -- Left: Rescan | Cancel | Consolidate Coins
-        if ImGui.Button('Rescan') then _items = _loot.ScanBankItems() end
-        ImGui.SameLine()
-        if ImGui.Button('Cancel') then _open = false end
-        ImGui.SameLine()
-        if ImGui.Button('Consolidate Coins') then
-            _pendingConsolidate = true
-            _open = false
-        end
     end
-    -- Right: Status All | Bank All (always shown)
-    local statusX = maxX - bankAllW - itemSp - statusW
+    if ImGui.Button('Rescan') then _items = _loot.ScanBankItems() end
     ImGui.SameLine()
-    ImGui.SetCursorPosX(statusX)
+    if ImGui.Button('Cancel') then _open = false end
+    ImGui.SameLine()
+    ImGui.SetCursorPosX(maxX - bankAllW - itemSp - statusW)
     if ImGui.Button('Status All', statusW, 0) then
         _groupView = true
         _pendingStatusRequest = true
@@ -213,6 +194,12 @@ local function renderSoloFooter()
         ImGui.Text('Bank All')
         ImGui.TextDisabled('Sends all group toons running e9loot to deposit immediately.')
         ImGui.EndTooltip()
+    end
+
+    -- Row 2: utility action on its own line
+    if ImGui.Button('Consolidate Coins') then
+        _pendingConsolidate = true
+        _open = false
     end
 end
 
@@ -331,7 +318,8 @@ function BankConfirm.Render()
     if _groupView then renderGroupHeader() else renderSoloHeader() end
     ImGui.Separator()
 
-    local footerH = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y * 2 + 8
+    local lineH   = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y * 2 + 6
+    local footerH = _groupView and (lineH + 4) or (lineH * 2 + ImGui.GetStyle().ItemSpacing.y + 4)
     ImGui.BeginChild('##banklist', ImVec2(0, -footerH), ImGuiChildFlags.None)
     if _groupView then renderGroupTable() else renderSoloTable() end
     ImGui.EndChild()
