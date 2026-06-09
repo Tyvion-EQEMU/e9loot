@@ -12,6 +12,7 @@ local _loot        = nil
 local _iconAnim    = nil
 local _groupView   = false
 local _pendingItems          = nil
+local _pendingSellAll        = false
 local _pendingStatusRequest  = false
 
 local EQ_ICON_OFFSET = 500
@@ -59,6 +60,11 @@ end
 
 function SellConfirm.ConsumePendingSellStatusRequest()
     if _pendingStatusRequest then _pendingStatusRequest = false; return true end
+    return false
+end
+
+function SellConfirm.ConsumePendingSellAll()
+    if _pendingSellAll then _pendingSellAll = false; return true end
     return false
 end
 
@@ -158,10 +164,11 @@ local function renderSoloFooter()
     local maxX   = select(1, ImGui.GetContentRegionMax())
     local itemSp = ImGui.GetStyle().ItemSpacing.x
     local statusW = 80
+    local sellAllW = 75
 
     if #_items > 0 then
-        -- Left: Sell All | Rescan | Cancel
-        if ImGui.Button('Sell All') then
+        -- Left: Sell Now (N) | Rescan | Cancel
+        if ImGui.Button(('Sell Now (%d)'):format(#_items)) then
             _pendingItems = _items
             _open = false
         end
@@ -169,26 +176,48 @@ local function renderSoloFooter()
         if ImGui.Button('Rescan') then _items = _loot.ScanSellItems() end
         ImGui.SameLine()
         if ImGui.Button('Cancel') then _open = false end
-        -- Right: Status All
+        -- Right: Status All | Sell All
         ImGui.SameLine()
-        ImGui.SetCursorPosX(maxX - statusW)
+        ImGui.SetCursorPosX(maxX - sellAllW - itemSp - statusW)
         if ImGui.Button('Status All', statusW, 0) then
             _groupView = true
             _pendingStatusRequest = true
             if _loot then _loot.ClearSellStatusResponses() end
+        end
+        ImGui.SameLine()
+        if ImGui.Button('Sell All', sellAllW, 0) then
+            _pendingSellAll = true
+            _open = false
+        end
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text('Sell All')
+            ImGui.TextDisabled('Sends all group toons running e9loot to sell immediately.')
+            ImGui.EndTooltip()
         end
     else
         -- Left: Rescan | Cancel
         if ImGui.Button('Rescan') then _items = _loot.ScanSellItems() end
         ImGui.SameLine()
         if ImGui.Button('Cancel') then _open = false end
-        -- Right: Status All
+        -- Right: Status All | Sell All
         ImGui.SameLine()
-        ImGui.SetCursorPosX(maxX - statusW)
+        ImGui.SetCursorPosX(maxX - sellAllW - itemSp - statusW)
         if ImGui.Button('Status All', statusW, 0) then
             _groupView = true
             _pendingStatusRequest = true
             if _loot then _loot.ClearSellStatusResponses() end
+        end
+        ImGui.SameLine()
+        if ImGui.Button('Sell All', sellAllW, 0) then
+            _pendingSellAll = true
+            _open = false
+        end
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text('Sell All')
+            ImGui.TextDisabled('Sends all group toons running e9loot to sell immediately.')
+            ImGui.EndTooltip()
         end
     end
 end
@@ -253,15 +282,29 @@ local function renderGroupTable()
 end
 
 local function renderGroupFooter()
+    local maxX   = select(1, ImGui.GetContentRegionMax())
+    local itemSp = ImGui.GetStyle().ItemSpacing.x
+    local soloW  = 50
+
+    -- Left: Sell All | Rescan | Cancel
+    if ImGui.Button('Sell All') then
+        _pendingSellAll = true
+        _open = false
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text('Sell All')
+        ImGui.TextDisabled('Sends all group toons running e9loot to sell immediately.')
+        ImGui.EndTooltip()
+    end
+    ImGui.SameLine()
     if ImGui.Button('Rescan') then
         _pendingStatusRequest = true
         if _loot then _loot.ClearSellStatusResponses() end
     end
     ImGui.SameLine()
     if ImGui.Button('Cancel') then _open = false end
-
-    local maxX  = select(1, ImGui.GetContentRegionMax())
-    local soloW = 50
+    -- Right: Solo
     ImGui.SameLine()
     ImGui.SetCursorPosX(maxX - soloW)
     if ImGui.Button('Solo', soloW, 0) then _groupView = false end

@@ -246,6 +246,20 @@ while true do
         Loot.SellStuff(sellItems)
     end
 
+    -- Sell All: broadcast to group + trigger self immediately
+    if SellConfirm.ConsumePendingSellAll() then
+        local myName = mq.TLO.Me.CleanName()
+        channel:Broadcast({ type='sell_all', from=myName })
+        local myItems = Loot.ScanSellItems()
+        if #myItems > 0 then _pendingSell = myItems end
+    end
+
+    -- Sell All received from another toon's broadcast
+    if Loot.ConsumePendingSellAll() then
+        local myItems = Loot.ScanSellItems()
+        if #myItems > 0 then _pendingSell = myItems end
+    end
+
     -- Restock: executed from main loop so mq.delay is allowed
     local restockItems = _pendingRestock or RestockConfirm.ConsumePending()
     if restockItems then
