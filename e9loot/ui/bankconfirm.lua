@@ -58,13 +58,18 @@ function BankConfirm.Render()
             if ImGui.Button('Rescan') then
                 _items = _loot.ScanBankItems()
             end
+            local maxX0  = select(1, ImGui.GetContentRegionMax())
+            local itemSp0 = ImGui.GetStyle().ItemSpacing.x
+            local ccW0   = 140
+            local closeW0 = 60
             ImGui.SameLine()
-            if ImGui.Button('Consolidate Coins') then
+            ImGui.SetCursorPosX(maxX0 - closeW0 - itemSp0 - ccW0)
+            if ImGui.Button('Consolidate Coins', ccW0, 0) then
                 _pendingConsolidate = true
                 _open = false
             end
             ImGui.SameLine()
-            if ImGui.Button('Close') then
+            if ImGui.Button('Close', closeW0, 0) then
                 _open = false
             end
         else
@@ -164,21 +169,26 @@ function BankConfirm.Render()
             end
             ImGui.EndChild()
 
-            if ImGui.Button('Bank All') then
-                _pendingItems = _items
-                _open = false
-            end
-            ImGui.SameLine()
             if ImGui.Button('Rescan') then
                 _items = _loot.ScanBankItems()
             end
             ImGui.SameLine()
-            if ImGui.Button('Consolidate Coins') then
+            if ImGui.Button('Cancel') then
+                _open = false
+            end
+            local maxX   = select(1, ImGui.GetContentRegionMax())
+            local itemSp = ImGui.GetStyle().ItemSpacing.x
+            local ccW    = 140
+            local bankW  = 75
+            ImGui.SameLine()
+            ImGui.SetCursorPosX(maxX - bankW - itemSp - ccW)
+            if ImGui.Button('Consolidate Coins', ccW, 0) then
                 _pendingConsolidate = true
                 _open = false
             end
             ImGui.SameLine()
-            if ImGui.Button('Cancel') then
+            if ImGui.Button('Bank All', bankW, 0) then
+                _pendingItems = _items
                 _open = false
             end
         end

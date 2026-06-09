@@ -64,8 +64,11 @@ function SellConfirm.Render()
             if ImGui.Button('Rescan') then
                 _items = _loot.ScanSellItems()
             end
+            local maxX0 = select(1, ImGui.GetContentRegionMax())
+            local closeW0 = 60
             ImGui.SameLine()
-            if ImGui.Button('Close') then
+            ImGui.SetCursorPosX(maxX0 - closeW0)
+            if ImGui.Button('Close', closeW0, 0) then
                 _open = false
             end
         else
@@ -170,16 +173,19 @@ function SellConfirm.Render()
             end
             ImGui.EndChild()
 
-            if ImGui.Button('Sell All') then
-                _pendingItems = _items
-                _open = false
-            end
-            ImGui.SameLine()
             if ImGui.Button('Rescan') then
                 _items = _loot.ScanSellItems()
             end
             ImGui.SameLine()
             if ImGui.Button('Cancel') then
+                _open = false
+            end
+            local maxX   = select(1, ImGui.GetContentRegionMax())
+            local sellW  = 75
+            ImGui.SameLine()
+            ImGui.SetCursorPosX(maxX - sellW)
+            if ImGui.Button('Sell All', sellW, 0) then
+                _pendingItems = _items
                 _open = false
             end
         end

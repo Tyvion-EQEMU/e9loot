@@ -785,9 +785,12 @@ function Panel.Render()
         local baseX = ImGui.GetCursorPosX()
         local baseY = ImGui.GetCursorPosY()
 
+        ImGui.SetWindowFontScale(1.3)
+
         ImGui.SetCursorPos(ImVec2(baseX + gap, baseY))
         if squareActionButton('Sell\nStuff', btnSz) then mq.cmd('/e9loot sellstuff') end
         if ImGui.IsItemHovered() then
+            ImGui.SetWindowFontScale(1.0)
             refreshActionCounts()
             ImGui.BeginTooltip()
             ImGui.Text('Sell Stuff')
@@ -797,11 +800,13 @@ function Panel.Render()
                 ImGui.TextDisabled('No sell-list items found in bags')
             end
             ImGui.EndTooltip()
+            ImGui.SetWindowFontScale(1.3)
         end
 
         ImGui.SetCursorPos(ImVec2(baseX + gap * 2 + btnSz, baseY))
         if squareActionButton('Bank\nStuff', btnSz) then mq.cmd('/e9loot bankstuff') end
         if ImGui.IsItemHovered() then
+            ImGui.SetWindowFontScale(1.0)
             refreshActionCounts()
             ImGui.BeginTooltip()
             ImGui.Text('Bank Stuff')
@@ -811,11 +816,13 @@ function Panel.Render()
                 ImGui.TextDisabled('No bank-list items found in bags')
             end
             ImGui.EndTooltip()
+            ImGui.SetWindowFontScale(1.3)
         end
 
         ImGui.SetCursorPos(ImVec2(baseX + gap * 3 + btnSz * 2, baseY))
         if squareActionButton('Restock', btnSz) then mq.cmd('/e9loot restock') end
         if ImGui.IsItemHovered() then
+            ImGui.SetWindowFontScale(1.0)
             refreshActionCounts()
             ImGui.BeginTooltip()
             ImGui.Text('Restock')
@@ -825,7 +832,10 @@ function Panel.Render()
                 ImGui.TextDisabled('All items stocked!')
             end
             ImGui.EndTooltip()
+            ImGui.SetWindowFontScale(1.3)
         end
+
+        ImGui.SetWindowFontScale(1.0)
 
         -- Advance cursor below all three buttons so EndChild renders correctly
         ImGui.SetCursorPosY(baseY + btnSz + ImGui.GetStyle().ItemSpacing.y)
