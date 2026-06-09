@@ -807,6 +807,23 @@ function Panel.Render()
             else
                 ImGui.TextDisabled('No sell-list items found in bags')
             end
+            local sellResp = _loot.GetSellStatusResponses()
+            local sellHasGroup = next(sellResp) ~= nil
+            if sellHasGroup then
+                ImGui.Separator()
+                ImGui.TextDisabled('Last group scan:')
+                local chars = {}
+                for name in pairs(sellResp) do chars[#chars+1] = name end
+                table.sort(chars, function(a, b) return a:lower() < b:lower() end)
+                for _, name in ipairs(chars) do
+                    local n = #(sellResp[name].items or {})
+                    if n > 0 then
+                        ImGui.TextColored(BUTTON_GOLD, ('  %s: %d item(s)'):format(name, n))
+                    else
+                        ImGui.TextDisabled(('  %s: nothing to sell'):format(name))
+                    end
+                end
+            end
             ImGui.EndTooltip()
             ImGui.SetWindowFontScale(1.15)
         end
@@ -823,6 +840,23 @@ function Panel.Render()
             else
                 ImGui.TextDisabled('No bank-list items found in bags')
             end
+            local bankResp = _loot.GetBankStatusResponses()
+            local bankHasGroup = next(bankResp) ~= nil
+            if bankHasGroup then
+                ImGui.Separator()
+                ImGui.TextDisabled('Last group scan:')
+                local chars = {}
+                for name in pairs(bankResp) do chars[#chars+1] = name end
+                table.sort(chars, function(a, b) return a:lower() < b:lower() end)
+                for _, name in ipairs(chars) do
+                    local n = #(bankResp[name].items or {})
+                    if n > 0 then
+                        ImGui.TextColored(BUTTON_GOLD, ('  %s: %d item(s)'):format(name, n))
+                    else
+                        ImGui.TextDisabled(('  %s: nothing to bank'):format(name))
+                    end
+                end
+            end
             ImGui.EndTooltip()
             ImGui.SetWindowFontScale(1.15)
         end
@@ -838,6 +872,23 @@ function Panel.Render()
                 ImGui.TextDisabled(_actionCounts.restock .. ' item(s) below target quantity')
             else
                 ImGui.TextDisabled('All items stocked!')
+            end
+            local rstResp = _loot.GetRestockStatusResponses()
+            local rstHasGroup = next(rstResp) ~= nil
+            if rstHasGroup then
+                ImGui.Separator()
+                ImGui.TextDisabled('Last group scan:')
+                local chars = {}
+                for name in pairs(rstResp) do chars[#chars+1] = name end
+                table.sort(chars, function(a, b) return a:lower() < b:lower() end)
+                for _, name in ipairs(chars) do
+                    local n = #(rstResp[name].needs or {})
+                    if n > 0 then
+                        ImGui.TextColored(BUTTON_GOLD, ('  %s: %d item(s) needed'):format(name, n))
+                    else
+                        ImGui.TextDisabled(('  %s: all stocked'):format(name))
+                    end
+                end
             end
             ImGui.EndTooltip()
             ImGui.SetWindowFontScale(1.15)

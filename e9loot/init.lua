@@ -228,6 +228,17 @@ while true do
         Loot.ConsolidateOnly()
     end
 
+    -- Consolidate All: broadcast to group + trigger self immediately
+    if BankConfirm.ConsumePendingConsolidateAll() then
+        channel:Broadcast({ type='consolidate_all', from=mq.TLO.Me.CleanName() })
+        Loot.ConsolidateOnly()
+    end
+
+    -- Consolidate All received from another toon's broadcast
+    if Loot.ConsumePendingConsolidateAll() then
+        Loot.ConsolidateOnly()
+    end
+
     -- SellStuff: executed from main loop so mq.delay is allowed
     local sellItems = _pendingSell or SellConfirm.ConsumePending()
     if sellItems then

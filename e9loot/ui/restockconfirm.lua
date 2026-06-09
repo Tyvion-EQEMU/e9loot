@@ -391,7 +391,7 @@ end
 function RestockConfirm.Render()
     if not _open then return end
 
-    ImGui.SetNextWindowSize(ImVec2(620, 400), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(480, 400), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Restock', _open, ImGuiWindowFlags.None)
     _open = open
     if not shouldDraw then ImGui.End(); return end

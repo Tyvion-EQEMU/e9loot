@@ -84,7 +84,7 @@ local function renderSoloTable()
         return
     end
 
-    if not ImGui.BeginTable('##selltbl', 5,
+    if not ImGui.BeginTable('##selltbl', 4,
         bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg,
                   ImGuiTableFlags.ScrollY, ImGuiTableFlags.SizingStretchProp),
         ImVec2(0, -1)) then return end
@@ -94,7 +94,6 @@ local function renderSoloTable()
     ImGui.TableSetupColumn('Bag',   ImGuiTableColumnFlags.WidthFixed, 36)
     ImGui.TableSetupColumn('Slot',  ImGuiTableColumnFlags.WidthFixed, 36)
     ImGui.TableSetupColumn('Value', ImGuiTableColumnFlags.WidthFixed, 80)
-    ImGui.TableSetupColumn('ID',    ImGuiTableColumnFlags.WidthFixed, 56)
     ImGui.TableHeadersRow()
 
     for _, e in ipairs(_items) do
@@ -150,7 +149,6 @@ local function renderSoloTable()
         ImGui.TableNextColumn()
         if e.value > 0 then ImGui.Text(formatCopper(e.value))
         else ImGui.TextColored(ImVec4(0.6, 0.3, 0.3, 1.0), 'no value') end
-        ImGui.TableNextColumn(); ImGui.TextDisabled(tostring(e.id))
     end
 
     ImGui.EndTable()
@@ -159,28 +157,32 @@ end
 local function renderSoloFooter()
     local maxX   = select(1, ImGui.GetContentRegionMax())
     local itemSp = ImGui.GetStyle().ItemSpacing.x
-
-    if ImGui.Button('Rescan') then _items = _loot.ScanSellItems() end
-    ImGui.SameLine()
-    if ImGui.Button('Cancel') then _open = false end
+    local statusW = 80
 
     if #_items > 0 then
-        local statusW = 80
-        local sellW   = 75
+        -- Left: Sell All | Rescan | Cancel
+        if ImGui.Button('Sell All') then
+            _pendingItems = _items
+            _open = false
+        end
         ImGui.SameLine()
-        ImGui.SetCursorPosX(maxX - sellW - itemSp - statusW)
+        if ImGui.Button('Rescan') then _items = _loot.ScanSellItems() end
+        ImGui.SameLine()
+        if ImGui.Button('Cancel') then _open = false end
+        -- Right: Status All
+        ImGui.SameLine()
+        ImGui.SetCursorPosX(maxX - statusW)
         if ImGui.Button('Status All', statusW, 0) then
             _groupView = true
             _pendingStatusRequest = true
             if _loot then _loot.ClearSellStatusResponses() end
         end
-        ImGui.SameLine()
-        if ImGui.Button('Sell All', sellW, 0) then
-            _pendingItems = _items
-            _open = false
-        end
     else
-        local statusW = 80
+        -- Left: Rescan | Cancel
+        if ImGui.Button('Rescan') then _items = _loot.ScanSellItems() end
+        ImGui.SameLine()
+        if ImGui.Button('Cancel') then _open = false end
+        -- Right: Status All
         ImGui.SameLine()
         ImGui.SetCursorPosX(maxX - statusW)
         if ImGui.Button('Status All', statusW, 0) then
@@ -277,7 +279,7 @@ end
 function SellConfirm.Render()
     if not _open then return end
 
-    ImGui.SetNextWindowSize(ImVec2(500, 320), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(480, 320), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Sell Stuff', _open, ImGuiWindowFlags.None)
     _open = open
     if not shouldDraw then ImGui.End(); return end

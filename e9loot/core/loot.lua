@@ -19,6 +19,7 @@ local _restockStatusResponses = {}
 local _pendingRestockAll      = false
 local _sellStatusResponses    = {}
 local _bankStatusResponses    = {}
+local _pendingConsolidateAll  = false
 local _logFile      = nil
 local _looting      = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
 local _inCombat     = false  -- true while combat suppresses looting; never affects LootEnabled
@@ -845,6 +846,11 @@ function Loot.ClearBankStatusResponses() _bankStatusResponses = {} end
 function Loot.StoreBankStatusResponse(name, items)
     _bankStatusResponses[name] = { items = items }
 end
+
+function Loot.ConsumePendingConsolidateAll()
+    if _pendingConsolidateAll then _pendingConsolidateAll = false; return true end
+    return false
+end
 function Loot.ConsumePendingRestockAll()
     if _pendingRestockAll then _pendingRestockAll = false; return true end
     return false
@@ -984,6 +990,10 @@ function Loot.Init(cfg, lists, framework, channel, restock)
                     end
                 end
                 _bankStatusResponses[payload.from] = { items=items }
+            end
+        elseif payload.type == 'consolidate_all' then
+            if payload.from ~= mq.TLO.Me.CleanName() then
+                _pendingConsolidateAll = true
             end
         end
     end)
