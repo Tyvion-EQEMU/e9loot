@@ -72,6 +72,7 @@ Config.Defaults = {
     -- Vendor / Bank behaviour
     AutoConsolidateCoins = true,   -- consolidate CP/SP/GP→PP automatically after BankStuff deposit
     BankAutoDeposit      = false,  -- skip confirm window and deposit bank-list items immediately
+    SellAutoSell         = false,  -- skip confirm window and sell sell-list items immediately
 
     -- Debug / logging (per-character)
     LogLevel      = 3,        -- 1=Error 2=Warn 3=Info 4=Debug

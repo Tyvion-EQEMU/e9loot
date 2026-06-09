@@ -24,7 +24,27 @@ local function renderVendorSection()
     ImGui.TextColored(ImVec4(1.0, 0.80, 0.20, 1.0), 'Vendor')
     ImGui.Separator()
     ImGui.Spacing()
-    ImGui.TextDisabled('No vendor settings yet.')
+
+    if ImGui.BeginTable('##vendoropts', 2, 0) then
+        ImGui.TableSetupColumn('##vlbl', ImGuiTableColumnFlags.WidthFixed,  150)
+        ImGui.TableSetupColumn('##vctl', ImGuiTableColumnFlags.WidthStretch)
+
+        ImGui.TableNextRow()
+        ImGui.TableNextColumn()
+        ImGui.Text('Auto Sell')
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.PushTextWrapPos(280)
+            ImGui.TextWrapped('Skip the Sell Stuff confirmation window and sell items immediately when running /e9loot sellstuff.')
+            ImGui.PopTextWrapPos()
+            ImGui.EndTooltip()
+        end
+        ImGui.TableNextColumn()
+        local autoSell, sellChanged = Widgets.Toggle('##autosell', _config:Get('SellAutoSell'))
+        if sellChanged then _config:SetAndSave('SellAutoSell', autoSell) end
+
+        ImGui.EndTable()
+    end
 end
 
 local function renderBankSection()
@@ -70,13 +90,13 @@ local function renderBankSection()
     end
 end
 
-local VENDOR_H = 72
+local VENDOR_H = 100
 local BANK_H   = 100
 
 function BankSettings.Render()
     if not _open or not _config then return end
 
-    ImGui.SetNextWindowSize(ImVec2(238, 215), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(238, 245), ImGuiCond.FirstUseEver)
     local open, shouldDraw = ImGui.Begin('e9loot \xe2\x80\x94 Bank & Vendor', _open, ImGuiWindowFlags.None)
     _open = open
 

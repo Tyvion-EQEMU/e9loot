@@ -18,6 +18,7 @@ local Corpse  = require('e9loot.core.corpse')
 local Setup        = require('e9loot.ui.setup')
 local Editor       = require('e9loot.ui.editor')
 local BankConfirm  = require('e9loot.ui.bankconfirm')
+local SellConfirm  = require('e9loot.ui.sellconfirm')
 local BankSettings = require('e9loot.ui.banksettings')
 local Panel        = require('e9loot.ui.panel')
 
@@ -86,6 +87,7 @@ Panel.Init(Config, Loot, Setup, Editor, BankSettings, framework, FRAMEWORK_ADAPT
 
 -- Shared state accessed by both the bind handler and the main loop
 local _pendingAutoBank = nil
+local _pendingSell     = nil
 
 -- Register /e9loot slash command for manual triggers
 mq.bind('/e9loot', function(subcmd, ...)
@@ -108,6 +110,12 @@ mq.bind('/e9loot', function(subcmd, ...)
             _pendingAutoBank = Loot.ScanBankItems()
         else
             BankConfirm.Open(Loot)
+        end
+    elseif subcmd == 'sellstuff' then
+        if Config:Get('SellAutoSell') then
+            _pendingSell = Loot.ScanSellItems()
+        else
+            SellConfirm.Open(Loot)
         end
     elseif subcmd == 'reload' then
         Lists.LoadAll()
@@ -146,7 +154,7 @@ mq.bind('/e9loot', function(subcmd, ...)
         channel:Broadcast({ type='set_announcedone', value=newVal })
         printf('\age9loot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\aye9loot commands: loot | bankstuff | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\aye9loot commands: loot | bankstuff | sellstuff | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
@@ -161,6 +169,7 @@ end
 mq.imgui.init('e9loot', function()
     Panel.Render()
     BankConfirm.Render()
+    SellConfirm.Render()
     if Loot.IsCoinWarning() then
         local io   = ImGui.GetIO()
         local winW = 420
@@ -200,6 +209,13 @@ while true do
         Loot.BankStuff(bankItems)
     elseif BankConfirm.ConsumePendingConsolidate() then
         Loot.ConsolidateOnly()
+    end
+
+    -- SellStuff: executed from main loop so mq.delay is allowed
+    local sellItems = _pendingSell or SellConfirm.ConsumePending()
+    if sellItems then
+        _pendingSell = nil
+        Loot.SellStuff(sellItems)
     end
 
     -- Zone change: clear corpse done-set

@@ -428,8 +428,10 @@ local function consolidateCoins()
         mq.TLO.Me.Silver() or 0,   mq.TLO.Me.Copper() or 0)
 end
 
-local BANK_INTERACT_DIST = 10  -- max distance to right-click a banker
-local BANK_NAV_TIMEOUT   = 15  -- seconds before giving up on nav
+local BANK_INTERACT_DIST   = 10
+local BANK_NAV_TIMEOUT     = 15
+local VENDOR_INTERACT_DIST = 15
+local VENDOR_NAV_TIMEOUT   = 15
 
 -- Known banker NPC names to search when no target is set (display names, case-insensitive)
 local KNOWN_BANKERS = {
@@ -508,6 +510,152 @@ local function openBankWindow()
     end
 
     return true
+end
+
+-- Known vendor NPC names to search when no vendor is targeted.
+-- Costco is the preferred E9 Profusion custom vendor; generic names are fallbacks.
+local KNOWN_VENDORS = {
+    'Costco',
+    'a general goods merchant',
+    'a supply merchant',
+    'a merchant',
+    'a trader',
+    'a shopkeeper',
+}
+
+local function findAndTargetVendor()
+    for _, name in ipairs(KNOWN_VENDORS) do
+        local sp = mq.TLO.Spawn(('npc "%s"'):format(name))
+        if sp and sp.ID() and sp.ID() > 0 then
+            Logger.Info('openMerchantWindow: found vendor "%s" (id %d)', name, sp.ID())
+            mq.cmdf('/target id %d', sp.ID())
+            mq.delay(500, function() return mq.TLO.Target.ID() == sp.ID() end)
+            if mq.TLO.Target.ID() == sp.ID() then return true end
+        end
+    end
+    return false
+end
+
+local function openMerchantWindow()
+    if not mq.TLO.Target.ID() or mq.TLO.Target.ID() == 0 then
+        if not findAndTargetVendor() then
+            Logger.Warn('openMerchantWindow: no target and no known vendor found in zone')
+            printf('\are9loot: No target and no vendor found. Target a vendor and try again.')
+            return false
+        end
+    end
+
+    local tgt = mq.TLO.Target
+    if not tgt or not tgt.ID() or tgt.ID() == 0 then
+        printf('\are9loot: No target. Target a vendor and try again.')
+        return false
+    end
+
+    local dist = tgt.Distance() or 999
+    if dist > VENDOR_INTERACT_DIST then
+        if _config:Get('UseWarp') then
+            Logger.Info('openMerchantWindow: %.1f units away, warping to vendor', dist)
+            mq.cmd('/warp target')
+            mq.delay(500)
+        else
+            Logger.Info('openMerchantWindow: %.1f units away, navigating to vendor', dist)
+            mq.cmd('/nav target')
+            local deadline = os.clock() + VENDOR_NAV_TIMEOUT
+            while os.clock() < deadline do
+                mq.delay(250)
+                dist = mq.TLO.Target.Distance() or 999
+                if dist <= VENDOR_INTERACT_DIST then break end
+                if not mq.TLO.Navigation.Active() then break end
+            end
+            mq.cmd('/nav stop')
+        end
+
+        if (mq.TLO.Target.Distance() or 999) > VENDOR_INTERACT_DIST + 5 then
+            Logger.Warn('openMerchantWindow: could not reach vendor (%.1f units)', mq.TLO.Target.Distance() or 999)
+            printf('\are9loot: Could not get close enough to vendor.')
+            return false
+        end
+    end
+
+    mq.cmdf('/nomodkey /click right target')
+    mq.delay(2000, function() return mq.TLO.Window('MerchantWnd').Open() end)
+    mq.delay(500)  -- let item list populate
+
+    if not mq.TLO.Window('MerchantWnd').Open() then
+        Logger.Warn('openMerchantWindow: merchant window did not open')
+        printf('\are9loot: Merchant window did not open. Make sure a vendor is targeted.')
+        return false
+    end
+
+    return true
+end
+
+function Loot.ScanSellItems()
+    local results = {}
+    for bag = 1, 10 do
+        local bagSlot = mq.TLO.InvSlot('pack' .. bag).Item
+        if bagSlot and bagSlot.ID() and bagSlot.ID() > 0 then
+            local size = bagSlot.Container()
+            if size and size > 0 then
+                for slot = 1, size do
+                    local item = bagSlot.Item(slot)
+                    if item and item.ID() and item.ID() > 0 then
+                        local name = item.Name() or ''
+                        local id   = item.ID()
+                        if _lists.sell and _lists.sell:Has(name, id) then
+                            results[#results + 1] = {
+                                name  = name,
+                                id    = id,
+                                bag   = bag,
+                                slot  = slot,
+                                value = item.Value() or 0,  -- copper
+                            }
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return results
+end
+
+function Loot.SellStuff(items)
+    if not openMerchantWindow() then return end
+
+    local count = 0
+    for _, entry in ipairs(items) do
+        mq.cmdf('/itemnotify in pack%d %d leftmouseup', entry.bag, entry.slot)
+        mq.delay(1500, function()
+            return mq.TLO.Window('MerchantWnd/MW_Sell_Button').Enabled()
+               and (mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() or '') == entry.name
+        end)
+
+        local sellEnabled = mq.TLO.Window('MerchantWnd/MW_Sell_Button').Enabled()
+        local price       = mq.TLO.Window('MerchantWnd/MW_SelectedPriceLabel').Text() or '0c'
+
+        if sellEnabled and price ~= '0c' then
+            mq.cmdf('/nomodkey /shiftkey /notify merchantwnd MW_Sell_Button leftmouseup')
+            mq.delay(3000, function()
+                return (mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() or '') ~= entry.name
+            end)
+            count = count + 1
+            Logger.Info('SellStuff: sold %s', entry.name)
+        else
+            -- Item can't be sold — put it back
+            if mq.TLO.Cursor.ID() and mq.TLO.Cursor.ID() > 0 then
+                mq.cmd('/autoinventory')
+                mq.delay(200)
+            end
+            Logger.Warn('SellStuff: could not sell %s (price=%s, enabled=%s)', entry.name, price, tostring(sellEnabled))
+        end
+    end
+
+    if mq.TLO.Window('MerchantWnd').Open() then
+        mq.TLO.Window('MerchantWnd').DoClose()
+    end
+
+    printf('\age9loot: SellStuff complete \xe2\x80\x94 sold %d/%d item(s)', count, #items)
+    Logger.Info('SellStuff: sold %d/%d item(s)', count, #items)
 end
 
 function Loot.ConsolidateOnly()
