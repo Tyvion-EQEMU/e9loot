@@ -9,8 +9,10 @@ local _open         = false
 local _rows         = {}   -- {name, want, have, need} — refreshed on open/rescan
 local _loot         = nil
 local _restockList  = nil
-local _pendingItems     = nil  -- consumed by main loop to trigger RestockStuff
-local _pendingBroadcast = nil  -- consumed by main loop to broadcast one item to group
+local _pendingItems         = nil    -- consumed by main loop to trigger RestockStuff
+local _pendingBroadcast     = nil    -- consumed by main loop to broadcast one item to group
+local _pendingStatusRequest = false  -- consumed by main loop to open Status All window
+local _pendingRestockAll    = false  -- consumed by main loop to broadcast Restock All
 
 local _addName = ''
 local _addQty  = 1
@@ -36,6 +38,16 @@ function RestockConfirm.ConsumePendingBroadcast()
     local item = _pendingBroadcast
     _pendingBroadcast = nil
     return item
+end
+
+function RestockConfirm.ConsumePendingStatusRequest()
+    if _pendingStatusRequest then _pendingStatusRequest = false; return true end
+    return false
+end
+
+function RestockConfirm.ConsumePendingRestockAll()
+    if _pendingRestockAll then _pendingRestockAll = false; return true end
+    return false
 end
 
 -- Returns a sorted copy of _rows: need > 0 first (alpha), satisfied last (alpha)
@@ -254,6 +266,24 @@ function RestockConfirm.Render()
     ImGui.SameLine()
     if ImGui.Button('Close') then
         _open = false
+    end
+
+    ImGui.SameLine()
+    if ImGui.Button('Status All') then
+        _pendingStatusRequest = true
+    end
+
+    ImGui.SameLine()
+    if ImGui.Button('Restock All') then
+        _pendingRestockAll = true
+        _open = false
+    end
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text('Restock All')
+        ImGui.TextDisabled('Sends all group toons running e9loot to restock immediately.')
+        ImGui.TextDisabled('Ignores the Auto Restock setting \xe2\x80\x94 no review window shown.')
+        ImGui.EndTooltip()
     end
 
     ImGui.End()

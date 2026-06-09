@@ -22,6 +22,7 @@ local BankConfirm     = require('e9loot.ui.bankconfirm')
 local SellConfirm     = require('e9loot.ui.sellconfirm')
 local RestockConfirm  = require('e9loot.ui.restockconfirm')
 local BankSettings    = require('e9loot.ui.banksettings')
+local RestockStatus   = require('e9loot.ui.restockstatus')
 local Panel           = require('e9loot.ui.panel')
 
 -- Framework adapter map
@@ -183,6 +184,7 @@ end
 -----------------------------------------------------------------------
 mq.imgui.init('e9loot', function()
     Panel.Render()
+    RestockStatus.Render()
     BankConfirm.Render()
     SellConfirm.Render()
     RestockConfirm.Render()
@@ -246,6 +248,50 @@ while true do
     if bcast then
         channel:Broadcast({ type='restock_set', name=bcast.name, qty=bcast.qty, from=mq.TLO.Me.CleanName() })
         printf('\age9loot: broadcasting %s x%d to group', bcast.name, bcast.qty)
+    end
+
+    -- Status All: open window + scan self + broadcast request to other toons
+    local function doRestockStatusRefresh()
+        local myName = mq.TLO.Me.CleanName()
+        local all    = Loot.ScanRestockNeeds(Restock)
+        local myNeeds = {}
+        for _, r in ipairs(all) do
+            if r.need > 0 then myNeeds[#myNeeds+1] = r end
+        end
+        Loot.StoreRestockStatusResponse(myName, myNeeds)
+        channel:Broadcast({ type='restock_status_request', from=myName })
+    end
+
+    if RestockConfirm.ConsumePendingStatusRequest() then
+        RestockStatus.Open(Loot)
+        doRestockStatusRefresh()
+    end
+
+    if RestockStatus.ConsumePendingRefresh() then
+        Loot.ClearRestockStatusResponses()
+        doRestockStatusRefresh()
+    end
+
+    -- Restock All: broadcast to group + trigger self immediately
+    if RestockConfirm.ConsumePendingRestockAll() then
+        local myName = mq.TLO.Me.CleanName()
+        channel:Broadcast({ type='restock_all', from=myName })
+        local needs = Loot.ScanRestockNeeds(Restock)
+        local items = {}
+        for _, r in ipairs(needs) do
+            if r.need > 0 then items[#items+1] = r end
+        end
+        if #items > 0 then _pendingRestock = items end
+    end
+
+    -- Restock All received from another toon's broadcast
+    if Loot.ConsumePendingRestockAll() then
+        local needs = Loot.ScanRestockNeeds(Restock)
+        local items = {}
+        for _, r in ipairs(needs) do
+            if r.need > 0 then items[#items+1] = r end
+        end
+        if #items > 0 then _pendingRestock = items end
     end
 
     -- Zone change: clear corpse done-set

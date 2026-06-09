@@ -14,6 +14,8 @@ local _config
 local _lists
 local _framework
 local _channel
+local _restockStatusResponses = {}
+local _pendingRestockAll      = false
 local _logFile      = nil
 local _looting      = false  -- re-entrancy guard: prevents overlapping LootNearby calls via mq.delay yields
 local _inCombat     = false  -- true while combat suppresses looting; never affects LootEnabled
@@ -815,6 +817,16 @@ function Loot.BankStuff(items)
     Logger.Info('BankStuff: deposited %d/%d item(s)', count, #items)
 end
 
+function Loot.GetRestockStatusResponses()  return _restockStatusResponses end
+function Loot.ClearRestockStatusResponses() _restockStatusResponses = {} end
+function Loot.StoreRestockStatusResponse(name, needs)
+    _restockStatusResponses[name] = { needs = needs }
+end
+function Loot.ConsumePendingRestockAll()
+    if _pendingRestockAll then _pendingRestockAll = false; return true end
+    return false
+end
+
 function Loot.Init(cfg, lists, framework, channel, restock)
     _config    = cfg
     _lists     = lists
@@ -861,6 +873,28 @@ function Loot.Init(cfg, lists, framework, channel, restock)
                 end
                 groupAnnounce(('restock from %s \xe2\x80\x94 %s x%d (%s)'):format(
                     payload.from or '?', payload.name, payload.qty, status))
+            end
+        elseif payload.type == 'restock_status_request' then
+            -- Only respond if request came from another toon (requester handles self)
+            if restock and payload.from ~= mq.TLO.Me.CleanName() then
+                local all   = Loot.ScanRestockNeeds(restock)
+                local needs = {}
+                for _, r in ipairs(all) do
+                    if r.need > 0 then needs[#needs+1] = r end
+                end
+                _channel:Broadcast({
+                    type  = 'restock_status_response',
+                    from  = mq.TLO.Me.CleanName(),
+                    needs = needs,
+                })
+            end
+        elseif payload.type == 'restock_status_response' then
+            Loot.StoreRestockStatusResponse(payload.from, payload.needs or {})
+        elseif payload.type == 'restock_all' then
+            if restock and payload.from ~= mq.TLO.Me.CleanName() then
+                if mq.TLO.Me.CombatState() ~= 'COMBAT' then
+                    _pendingRestockAll = true
+                end
             end
         end
     end)
