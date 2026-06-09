@@ -86,7 +86,7 @@ function RestockConfirm.Render()
         ImGui.TableSetupScrollFreeze(0, 1)
         ImGui.TableSetupColumn('Item',  ImGuiTableColumnFlags.WidthStretch)
         ImGui.TableSetupColumn('Have',  ImGuiTableColumnFlags.WidthFixed, 42)
-        ImGui.TableSetupColumn('Want',  ImGuiTableColumnFlags.WidthFixed, 62)
+        ImGui.TableSetupColumn('Want',  ImGuiTableColumnFlags.WidthFixed, 80)
         ImGui.TableSetupColumn('Need',  ImGuiTableColumnFlags.WidthFixed, 42)
         ImGui.TableSetupColumn('',      ImGuiTableColumnFlags.WidthFixed, 18)
         ImGui.TableHeadersRow()
@@ -170,24 +170,42 @@ function RestockConfirm.Render()
     ImGui.EndChild()
 
     -- Add-item row
-    ImGui.SetNextItemWidth(220)
+    ImGui.SetNextItemWidth(180)
     local newName, _ = ImGui.InputText('##addname', _addName)
     _addName = newName
     ImGui.SameLine()
-    ImGui.SetNextItemWidth(60)
+    ImGui.SetNextItemWidth(90)
     local newQty, _ = ImGui.InputInt('##addqty', _addQty, 1, 10)
     _addQty = math.max(1, newQty)
     ImGui.SameLine()
     local canAdd = _addName ~= ''
-    if not canAdd then
-        ImGui.BeginDisabled()
-    end
+    if not canAdd then ImGui.BeginDisabled() end
     if ImGui.Button('Add') and canAdd then
         _restockList.Set(_addName, _addQty)
-        _rows  = _loot.ScanRestockNeeds(_restockList)
+        _rows    = _loot.ScanRestockNeeds(_restockList)
         _addName = ''
     end
     if not canAdd then ImGui.EndDisabled() end
+
+    ImGui.SameLine()
+    local cur       = mq.TLO.Cursor
+    local hasCursor = cur and cur.ID() and cur.ID() > 0
+    if not hasCursor then ImGui.BeginDisabled() end
+    if ImGui.Button('from Cursor') then
+        local cname = cur.Name() or ''
+        if cname ~= '' then
+            _restockList.Set(cname, _addQty)
+            _rows = _loot.ScanRestockNeeds(_restockList)
+            mq.cmd('/autoinventory')
+        end
+    end
+    if hasCursor and ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.Text(('Add: %s  x%d'):format(cur.Name() or '?', _addQty))
+        ImGui.TextDisabled('Uses qty set above. Item returned to inventory.')
+        ImGui.EndTooltip()
+    end
+    if not hasCursor then ImGui.EndDisabled() end
 
     ImGui.Separator()
 
