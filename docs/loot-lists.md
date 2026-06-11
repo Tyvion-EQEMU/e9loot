@@ -1,13 +1,13 @@
-# Loot Lists
+﻿# Loot Lists
 
-e9loot uses a set of named item lists to decide what to do with every item it finds on
+proloot uses a set of named item lists to decide what to do with every item it finds on
 a corpse. Lists are checked in a strict priority order — the first match wins.
 
 ---
 
 ## How Item Evaluation Works
 
-When e9loot opens a corpse it checks each item in this order:
+When proloot opens a corpse it checks each item in this order:
 
 1. **Skip list** — if the item is here, leave it on the corpse (no-loot override)
 2. **Destroy list** — if the item is here, pick it up and destroy it
@@ -32,7 +32,7 @@ never be looted regardless of its value or whether it appears on a keep list.
 | **Force Skip** | Never loot these items — leave them on every corpse |
 | **Force Destroy** | Always loot and immediately destroy these items |
 | **Keep** | Always loot and keep these items |
-| **Bank** | Always loot and keep for later banking via `/e9loot bankstuff` |
+| **Bank** | Always loot and keep for later banking via `/proloot bankstuff` |
 
 ### Named Category Lists
 
@@ -56,7 +56,7 @@ your weapon mode or upgrade settings.
 
 ## BankStuff and the Bank, Astrial, and Deva Lists
 
-`/e9loot bankstuff` scans your bags for items on the **Bank**, **Astrial**, and **Deva**
+`/proloot bankstuff` scans your bags for items on the **Bank**, **Astrial**, and **Deva**
 lists and deposits them all in one bank visit. You do not need to duplicate items across
 lists — anything in Astrial or Deva is automatically included in a BankStuff run.
 
@@ -68,7 +68,7 @@ single command.
 
 ## The Upgrade Check
 
-After list matching, items not on any list go through the upgrade evaluator. e9loot
+After list matching, items not on any list go through the upgrade evaluator. proloot
 compares the item's stats against what you currently have equipped in each slot:
 
 - **Weapon slots** (Primary, Secondary) — scored by damage/delay ratio
@@ -84,7 +84,7 @@ No-drop items that aren't upgrades are always skipped (they can't be picked up t
 
 ## The List Editor
 
-Click **List Editor** in the main panel (or `/e9loot editor`) to open the editor window.
+Click **List Editor** in the main panel (or `/proloot editor`) to open the editor window.
 Click again to close it — the button turns gold when the window is open.
 
 ### Adding an Item
@@ -115,7 +115,7 @@ Each list is stored as a plain text file under your MacroQuest config directory.
 Files are created automatically on first run if they don't exist.
 
 ```
-<MQ2 config dir>/e9loot/
+<MQ2 config dir>/proloot/
 ├── SharedSettings_<Server>.ini
 ├── CharSettings_<Server>_<CharName>.ini
 ├── LootList_<Server>_bank.txt
@@ -137,8 +137,8 @@ Each file contains one item per line in the format:
 Item Name|ItemID
 ```
 
-You can edit these files directly in a text editor — just restart e9loot or use
-`/e9loot reload` for changes to take effect.
+You can edit these files directly in a text editor — just restart proloot or use
+`/proloot reload` for changes to take effect.
 
 ---
 
@@ -152,5 +152,5 @@ You can edit these files directly in a text editor — just restart e9loot or us
   corpses clean faster than leaving them.
 - **Equipped custom gear** you never want replaced should go in Force Skip until the
   Slot Exclusion feature is built (see ROADMAP).
-- Use `/e9loot reload` after manually editing list files to pick up changes without
+- Use `/proloot reload` after manually editing list files to pick up changes without
   restarting the script.

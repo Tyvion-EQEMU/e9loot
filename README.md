@@ -1,6 +1,6 @@
-# e9loot
+﻿# proloot
 
-Automated loot management for EverQuest EMU servers running MacroQuest2. e9loot handles
+Automated loot management for EverQuest EMU servers running MacroQuest2. proloot handles
 corpse detection, item evaluation, gear upgrades, bank runs, and loot history — designed
 to run alongside bot frameworks like RGMercs, E3, and KissAssist.
 
@@ -9,12 +9,12 @@ to run alongside bot frameworks like RGMercs, E3, and KissAssist.
 ## Use Cases
 
 ### Solo or Casual Play
-Run e9loot in the background while you grind. It scans for corpses every 5 seconds,
+Run proloot in the background while you grind. It scans for corpses every 5 seconds,
 walks or warps to them, evaluates every item against your keep/sell/destroy lists and
 gear upgrade logic, and handles the loot window — all without you touching a thing.
 
 ### Multi-Toon Boxing with a Bot Framework
-e9loot integrates with RGMercs, E3, and KissAssist. When a loot sweep starts it pauses
+proloot integrates with RGMercs, E3, and KissAssist. When a loot sweep starts it pauses
 the framework so bots don't interfere with corpse movement, then resumes when done. A
 single **Shift+Click** on the pause button broadcasts pause or resume to your entire
 group at once. Loot history from all toons streams into each character's history window
@@ -22,18 +22,18 @@ via DanNet or EQBC.
 
 ### EMU Progression Gear Collection
 On Profusion EMU, the **Astrial** and **Deva** lists automatically collect every
-progression-tier item and book page as you kill. When you are ready, `/e9loot bankstuff`
+progression-tier item and book page as you kill. When you are ready, `/proloot bankstuff`
 walks you to a banker, shows you everything it found, and deposits it all in one step —
 no bag-sorting required.
 
 ### Bank Runs
-At the end of a session, run `/e9loot bankstuff` on each toon. e9loot auto-targets a
+At the end of a session, run `/proloot bankstuff` on each toon. proloot auto-targets a
 nearby banker (or navigates to one), shows a confirmation window with item details on
 hover, deposits everything tagged `bank`, `astrial`, or `deva`, then consolidates your
 coins from copper up to platinum automatically.
 
 ### Gear Upgrading
-Tell e9loot your weapon style (Dual Wield, Two-Handed, Sword and Board) and it scores
+Tell proloot your weapon style (Dual Wield, Two-Handed, Sword and Board) and it scores
 every piece of gear it finds against what you have equipped. Items that beat your current
 stats are kept; everything else is sold or left behind based on your Trash Price threshold.
 
@@ -52,16 +52,16 @@ stats are kept; everything else is sold or left behind based on your Trash Price
 ## Installation
 
 1. Download or clone this repository.
-2. Copy the `e9loot` folder into your MacroQuest `lua` directory:
+2. Copy the `proloot` folder into your MacroQuest `lua` directory:
    ```
-   <MQ2 install path>\lua\e9loot\
+   <MQ2 install path>\lua\proloot\
    ```
    The folder should contain `init.lua` directly inside it — not nested deeper.
 
 3. Verify the structure looks like this:
    ```
    lua/
-   └── e9loot/
+   └── proloot/
        ├── init.lua
        ├── config.lua
        ├── core/
@@ -77,17 +77,17 @@ stats are kept; everything else is sold or left behind based on your Trash Price
 In the EverQuest chat window, type:
 
 ```
-/lua run e9loot
+/lua run proloot
 ```
 
 On your very first run, a **Setup dialog** will appear asking you to choose your automation
 framework (RGMercs, E3, KissAssist, or None) and broadcast channel (DanNet, EQBC, or
 None). These can be changed later from the main panel.
 
-To start e9loot with a specific framework or channel without going through setup:
+To start proloot with a specific framework or channel without going through setup:
 
 ```
-/lua run e9loot framework=rgmercs channel=dannet
+/lua run proloot framework=rgmercs channel=dannet
 ```
 
 ---
@@ -107,7 +107,7 @@ Once running, a panel appears with:
 - **Console** *(collapsed)* — scrollable in-panel log output with Log Level, Log to File, and Show Timestamps controls
 - **Status** — shows nearby corpse count and current state: `Running`, `Paused`, or `Combat`
 
-The **minimize button** (top-right of the panel) collapses e9loot into a small overlay
+The **minimize button** (top-right of the panel) collapses proloot into a small overlay
 showing just the enable toggle and status. A red border on the mini window means your
 character is in combat and looting is temporarily suspended.
 
@@ -115,7 +115,7 @@ character is in combat and looting is temporarily suspended.
 
 ## How Looting Works
 
-Every 5 seconds e9loot scans for NPC corpses within your configured **Loot Range**.
+Every 5 seconds proloot scans for NPC corpses within your configured **Loot Range**.
 For each corpse it finds (closest first), it:
 
 1. Checks it is safe to loot (not dead, not casting, not moving)
@@ -132,9 +132,9 @@ manually stays paused until you resume manually.
 
 ## BankStuff
 
-Run `/e9loot bankstuff` to deposit your collected items at a banker.
+Run `/proloot bankstuff` to deposit your collected items at a banker.
 
-1. e9loot searches for a nearby banker and navigates to them (auto-targets known bankers
+1. proloot searches for a nearby banker and navigates to them (auto-targets known bankers
    such as Gordon Gekko in Nexus, Banker Ceridan in Plane of Knowledge, or a bank broker
    in the Guild Hall)
 2. A confirmation window lists everything it found in your bags tagged as `bank`, `astrial`,
@@ -176,10 +176,10 @@ Ranged Slot, Loot Enabled) are **per-character** so each toon can have its own v
 
 ## Config Files
 
-All e9loot files are kept in their own subfolder so they don't clutter the main config directory:
+All proloot files are kept in their own subfolder so they don't clutter the main config directory:
 
 ```
-<MQ2 config dir>/e9loot/
+<MQ2 config dir>/proloot/
 ├── SharedSettings_<Server>.ini
 ├── CharSettings_<Server>_<CharName>.ini
 ├── CharLogs_<Server>_<CharName>.log

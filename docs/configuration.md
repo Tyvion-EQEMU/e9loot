@@ -1,12 +1,12 @@
-# Configuration
+﻿# Configuration
 
-e9loot stores settings in two INI files in your MacroQuest config directory:
+proloot stores settings in two INI files in your MacroQuest config directory:
 
 - `SharedSettings_<Server>.ini` — group-wide settings; one file shared across all characters
 - `CharSettings_<Server>_<CharName>.ini` — per-character overrides
 
 You rarely need to edit these directly. All settings are accessible from the main panel
-or via the `/e9loot set` command.
+or via the `/proloot set` command.
 
 ---
 
@@ -17,11 +17,11 @@ or via the `/e9loot set` command.
 **Options:** `None` | `RG Mercs` | `E3` | `Kiss Assist`  
 **Location:** System Settings (collapsed section in the main panel)
 
-Which bot framework e9loot works alongside. When a loot sweep starts, e9loot pauses
+Which bot framework proloot works alongside. When a loot sweep starts, proloot pauses
 the framework so it doesn't interfere with movement to corpses, then resumes it when
 the sweep is done.
 
-Set to `None` if you are running e9loot standalone without a bot framework.
+Set to `None` if you are running proloot standalone without a bot framework.
 
 ---
 
@@ -86,7 +86,7 @@ Controls how items that fit the Ranged equipment slot are evaluated.
 **Range:** 50 – 600 units  
 **Default:** 200
 
-The radius around your character that e9loot scans for NPC corpses. Corpses beyond this
+The radius around your character that proloot scans for NPC corpses. Corpses beyond this
 distance are ignored until you move closer.
 
 Use **Ctrl+Click** on the slider in the panel to type an exact value.
@@ -99,7 +99,7 @@ Use **Ctrl+Click** on the slider in the panel to type an exact value.
 **Shared:** Yes  
 **Default:** `true`
 
-When enabled, e9loot uses `/warp target` (MQ2RWarp) to teleport directly to a corpse
+When enabled, proloot uses `/warp target` (MQ2RWarp) to teleport directly to a corpse
 or banker. When disabled, it uses `/nav` to walk there. Requires **MQ2RWarp.dll** to
 be loaded.
 
@@ -111,9 +111,9 @@ be loaded.
 **Shared:** Yes  
 **Default:** 100
 
-*UI control coming soon — currently set via `/e9loot set warpdist <value>`.*
+*UI control coming soon — currently set via `/proloot set warpdist <value>`.*
 
-Maximum distance at which e9loot will warp to a corpse. Corpses closer than this value
+Maximum distance at which proloot will warp to a corpse. Corpses closer than this value
 are walked to even when Use Warp is enabled. Set to `0` to always warp regardless of
 distance.
 
@@ -136,7 +136,7 @@ that clears all nearby corpses. Useful for coordinating when the group can move 
 **Shared:** Yes  
 **Default:** 0  
 
-*UI control coming soon — currently set via `/e9loot set trashprice <value>`.*
+*UI control coming soon — currently set via `/proloot set trashprice <value>`.*
 
 Minimum platinum value for an item to be automatically sold rather than skipped. Items
 worth less than this value that aren't on any keep list are left on the corpse. Set to
@@ -163,7 +163,7 @@ per-character so each toon can be individually paused.
 **Default:** `true`  
 **Location:** Bank & Vendor settings pane
 
-When enabled, e9loot automatically converts all carried coins to the highest denomination
+When enabled, proloot automatically converts all carried coins to the highest denomination
 (copper → silver → gold → platinum) after each BankStuff deposit. Requires the bank
 window to be open — this is why it runs as part of the bank visit rather than on demand.
 
@@ -179,7 +179,7 @@ regardless of this setting.
 **Default:** `false`  
 **Location:** Bank & Vendor settings pane
 
-When enabled, `/e9loot bankstuff` skips the confirmation window and immediately deposits
+When enabled, `/proloot bankstuff` skips the confirmation window and immediately deposits
 all `bank`, `astrial`, and `deva` items without prompting. Useful for characters on
 scheduled bank runs where you always want to deposit everything.
 
@@ -207,7 +207,7 @@ Controls how verbose the console output is. Debug shows every item evaluation de
 
 When enabled, all console output is also written to:
 ```
-<MQ2 config dir>/e9loot/ConsoleLogs_<Server>_<CharName>.log
+<MQ2 config dir>/proloot/ConsoleLogs_<Server>_<CharName>.log
 ```
 
 ### Show Timestamps
@@ -222,7 +222,7 @@ Prepends a `HH:MM:SS` timestamp to each line in the console output.
 
 ## Other Toggles (UI coming soon)
 
-These settings exist in the config engine and can be set via `/e9loot set <key> <value>`:
+These settings exist in the config engine and can be set via `/proloot set <key> <value>`:
 
 | Setting | Default | Description |
 |---------|---------|-------------|

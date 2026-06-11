@@ -1,6 +1,6 @@
-# Slash Command Reference
+﻿# Slash Command Reference
 
-All e9loot commands start with `/e9loot` followed by a subcommand.
+All proloot commands start with `/proloot` followed by a subcommand.
 
 ---
 
@@ -8,9 +8,9 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 
 | Command | Description |
 |---------|-------------|
-| `/lua run e9loot` | Start e9loot |
-| `/lua run e9loot framework=rgmercs channel=dannet` | Start with specific framework and channel |
-| `/lua stop e9loot` | Stop e9loot completely |
+| `/lua run proloot` | Start proloot |
+| `/lua run proloot framework=rgmercs channel=dannet` | Start with specific framework and channel |
+| `/lua stop proloot` | Stop proloot completely |
 
 ---
 
@@ -18,10 +18,10 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 
 | Command | Description |
 |---------|-------------|
-| `/e9loot loot` | Trigger an immediate loot sweep right now, regardless of the 5-second timer |
-| `/e9loot enable` | Resume looting (same as clicking the Running/Paused button in the panel) |
-| `/e9loot disable` | Pause looting (same as clicking the Running/Paused button in the panel) |
-| `/e9loot reload` | Reload all loot list files from disk without restarting the script |
+| `/proloot loot` | Trigger an immediate loot sweep right now, regardless of the 5-second timer |
+| `/proloot enable` | Resume looting (same as clicking the Running/Paused button in the panel) |
+| `/proloot disable` | Pause looting (same as clicking the Running/Paused button in the panel) |
+| `/proloot reload` | Reload all loot list files from disk without restarting the script |
 
 ---
 
@@ -29,7 +29,7 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 
 | Command | Description |
 |---------|-------------|
-| `/e9loot bankstuff` | Open the bank confirmation window (or deposit immediately if Auto Deposit is on). Navigates to a nearby banker, then deposits all `bank`, `astrial`, and `deva` items from your bags. After depositing, automatically consolidates coins CP→PP if Auto Consolidate Coins is enabled. |
+| `/proloot bankstuff` | Open the bank confirmation window (or deposit immediately if Auto Deposit is on). Navigates to a nearby banker, then deposits all `bank`, `astrial`, and `deva` items from your bags. After depositing, automatically consolidates coins CP→PP if Auto Consolidate Coins is enabled. |
 
 ---
 
@@ -37,12 +37,12 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 
 | Command | Description |
 |---------|-------------|
-| `/e9loot show` | Restore the main panel if it has been closed or minimized |
-| `/e9loot mini` | Toggle mini mode on/off |
-| `/e9loot mini on` | Force mini mode on for this character |
-| `/e9loot mini off` | Force mini mode off for this character |
-| `/e9loot editor` | Open the List Editor window |
-| `/e9loot setup` | Re-open the first-run setup dialog |
+| `/proloot show` | Restore the main panel if it has been closed or minimized |
+| `/proloot mini` | Toggle mini mode on/off |
+| `/proloot mini on` | Force mini mode on for this character |
+| `/proloot mini off` | Force mini mode off for this character |
+| `/proloot editor` | Open the List Editor window |
+| `/proloot setup` | Re-open the first-run setup dialog |
 
 ---
 
@@ -50,7 +50,7 @@ All e9loot commands start with `/e9loot` followed by a subcommand.
 
 | Command | Description |
 |---------|-------------|
-| `/e9loot toggledone` | Toggle the "Done Looting" group announce on or off for all characters in the group simultaneously (broadcasts via DanNet/EQBC) |
+| `/proloot toggledone` | Toggle the "Done Looting" group announce on or off for all characters in the group simultaneously (broadcasts via DanNet/EQBC) |
 
 The **Running/Paused** button in the panel also supports group control: **Shift+Click** broadcasts
 pause or resume to all group members at once (requires DanNet or EQBC).
@@ -60,7 +60,7 @@ pause or resume to all group members at once (requires DanNet or EQBC).
 ## Settings
 
 ```
-/e9loot set <setting> <value>
+/proloot set <setting> <value>
 ```
 
 Changes a config setting by name. Setting names are case-insensitive.
@@ -68,16 +68,16 @@ Changes a config setting by name. Setting names are case-insensitive.
 ### Examples
 
 ```
-/e9loot set lootrange 300
-/e9loot set usewarp false
-/e9loot set weaponmode 2H
-/e9loot set rangedmode bows
-/e9loot set trashprice 50
-/e9loot set warpdist 150
-/e9loot set lootpets true
-/e9loot set announcedone false
-/e9loot set autodeposit true
-/e9loot set autoconsolidatecoins false
+/proloot set lootrange 300
+/proloot set usewarp false
+/proloot set weaponmode 2H
+/proloot set rangedmode bows
+/proloot set trashprice 50
+/proloot set warpdist 150
+/proloot set lootpets true
+/proloot set announcedone false
+/proloot set autodeposit true
+/proloot set autoconsolidatecoins false
 ```
 
 ### All Settable Keys
@@ -109,7 +109,7 @@ Changes a config setting by name. Setting names are case-insensitive.
 ## Help
 
 ```
-/e9loot
+/proloot
 ```
 
-Running `/e9loot` with no subcommand prints a summary of available commands to chat.
+Running `/proloot` with no subcommand prints a summary of available commands to chat.

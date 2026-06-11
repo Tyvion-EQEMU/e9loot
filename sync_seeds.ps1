@@ -1,5 +1,5 @@
-# sync_seeds.ps1
-# Reads live e9loot_*.txt files from MQ config and regenerates the Lua seed files in the repo.
+﻿# sync_seeds.ps1
+# Reads live proloot_*.txt files from MQ config and regenerates the Lua seed files in the repo.
 # Run this from the repo root after editing lists in-game so fresh installs get current data.
 #
 # Usage:
@@ -8,7 +8,7 @@
 
 param(
     [string]$ConfigDir = 'C:\games\mq-rekka\config',
-    [string]$ListsDir  = "$PSScriptRoot\e9loot\lists"
+    [string]$ListsDir  = "$PSScriptRoot\proloot\lists"
 )
 
 $HEADERS = [ordered]@{
@@ -49,7 +49,7 @@ function Build-LuaContent([string]$name, [string]$header, $entries) {
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add("-- $header")
     $lines.Add("")
-    $lines.Add("local Base = require('loot_e9.lists._base')")
+    $lines.Add("local Base = require('proloot.lists._base')")
     $lines.Add("")
     $lines.Add("return Base.new('$name', {")
     foreach ($e in $entries) {
@@ -73,7 +73,7 @@ $changed = 0
 $skipped = 0
 
 foreach ($name in $HEADERS.Keys) {
-    $txtPath = Join-Path $ConfigDir "e9loot_$name.txt"
+    $txtPath = Join-Path $ConfigDir "proloot_$name.txt"
     $luaPath = Join-Path $ListsDir  "$name.lua"
 
     if (-not (Test-Path $txtPath)) {
@@ -103,7 +103,7 @@ foreach ($name in $HEADERS.Keys) {
 
 Write-Host ""
 if ($changed -gt 0) {
-    Write-Host "$changed file(s) updated. Review with: git diff loot_e9/lists/" -ForegroundColor Green
+    Write-Host "$changed file(s) updated. Review with: git diff proloot/lists/" -ForegroundColor Green
 } else {
     Write-Host "All seeds already match the live .txt files." -ForegroundColor DarkGray
 }
