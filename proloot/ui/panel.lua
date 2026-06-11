@@ -423,6 +423,9 @@ function Panel.Render()
         return
     end
 
+    -- Hidden: X was clicked; /proloot show restores
+    if not _panelOpen then return end
+
     ImGui.SetNextWindowSize(ImVec2(340, 520), ImGuiCond.FirstUseEver)
     local _lootEnabled = _config:Get('LootEnabled')
     local _inCombat    = _loot.IsInCombat()
