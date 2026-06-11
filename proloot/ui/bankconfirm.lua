@@ -192,7 +192,7 @@ local function renderSoloFooter()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.Text('Bank All')
-        ImGui.TextDisabled('Sends all group toons running proloot to deposit immediately.')
+        ImGui.TextDisabled('Sends all group toons running ProLoot to deposit immediately.')
         ImGui.EndTooltip()
     end
 
@@ -271,7 +271,7 @@ local function renderGroupFooter()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.Text('Bank All')
-        ImGui.TextDisabled('Sends all group toons running proloot to deposit immediately.')
+        ImGui.TextDisabled('Sends all group toons running ProLoot to deposit immediately.')
         ImGui.EndTooltip()
     end
     ImGui.SameLine()
@@ -289,7 +289,7 @@ local function renderGroupFooter()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.Text('Consolidate All')
-        ImGui.TextDisabled('Sends all group toons running proloot to consolidate coins.')
+        ImGui.TextDisabled('Sends all group toons running ProLoot to consolidate coins.')
         ImGui.EndTooltip()
     end
     -- Right: Solo
@@ -311,7 +311,7 @@ function BankConfirm.Render()
     if not _open then return end
 
     ImGui.SetNextWindowSize(ImVec2(480, 320), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot \xe2\x80\x94 Bank Stuff', _open, ImGuiWindowFlags.None)
+    local open, shouldDraw = ImGui.Begin('ProLoot \xe2\x80\x94 Bank Stuff', _open, ImGuiWindowFlags.None)
     _open = open
     if not shouldDraw then ImGui.End(); return end
 

@@ -87,7 +87,7 @@ local function restockAllButton()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.Text('Restock All')
-        ImGui.TextDisabled('Sends all group toons running proloot to restock immediately.')
+        ImGui.TextDisabled('Sends all group toons running ProLoot to restock immediately.')
         ImGui.TextDisabled('Ignores the Auto Restock setting \xe2\x80\x94 no review window shown.')
         ImGui.EndTooltip()
     end
@@ -192,7 +192,7 @@ local function renderSoloTable()
         if ImGui.IsItemHovered() then
             ImGui.BeginTooltip()
             ImGui.Text(('Share with group: %s x%d'):format(r.name, r.want))
-            ImGui.TextDisabled('Adds or updates this entry on all toons running proloot')
+            ImGui.TextDisabled('Adds or updates this entry on all toons running ProLoot')
             ImGui.EndTooltip()
         end
 
@@ -289,7 +289,7 @@ local function renderSoloFooter()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.Text('Restock All')
-        ImGui.TextDisabled('Sends all group toons running proloot to restock immediately.')
+        ImGui.TextDisabled('Sends all group toons running ProLoot to restock immediately.')
         ImGui.TextDisabled('Ignores the Auto Restock setting \xe2\x80\x94 no review window shown.')
         ImGui.EndTooltip()
     end
@@ -392,7 +392,7 @@ function RestockConfirm.Render()
     if not _open then return end
 
     ImGui.SetNextWindowSize(ImVec2(480, 400), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot \xe2\x80\x94 Restock', _open, ImGuiWindowFlags.None)
+    local open, shouldDraw = ImGui.Begin('ProLoot \xe2\x80\x94 Restock', _open, ImGuiWindowFlags.None)
     _open = open
     if not shouldDraw then ImGui.End(); return end
 

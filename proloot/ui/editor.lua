@@ -126,7 +126,7 @@ local function renderTab(listName)
                         if found and found.ID() and found.ID() > 0 then
                             found.Inspect()
                         else
-                            printf('\ayproloot: %s is not in your inventory', entry.name)
+                            printf('\ayProLoot: %s is not in your inventory', entry.name)
                         end
                     end
                 end
@@ -158,7 +158,7 @@ function Editor.Render()
     if not _open or not _lists then return end
 
     ImGui.SetNextWindowSize(ImVec2(520, 480), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot — List Editor', _open,
+    local open, shouldDraw = ImGui.Begin('ProLoot — List Editor', _open,
         ImGuiWindowFlags.None)
     _open = open
 

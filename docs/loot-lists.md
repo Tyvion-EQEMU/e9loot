@@ -1,13 +1,13 @@
 ﻿# Loot Lists
 
-proloot uses a set of named item lists to decide what to do with every item it finds on
+ProLoot uses a set of named item lists to decide what to do with every item it finds on
 a corpse. Lists are checked in a strict priority order — the first match wins.
 
 ---
 
 ## How Item Evaluation Works
 
-When proloot opens a corpse it checks each item in this order:
+When ProLoot opens a corpse it checks each item in this order:
 
 1. **Skip list** — if the item is here, leave it on the corpse (no-loot override)
 2. **Destroy list** — if the item is here, pick it up and destroy it
@@ -68,7 +68,7 @@ single command.
 
 ## The Upgrade Check
 
-After list matching, items not on any list go through the upgrade evaluator. proloot
+After list matching, items not on any list go through the upgrade evaluator. ProLoot
 compares the item's stats against what you currently have equipped in each slot:
 
 - **Weapon slots** (Primary, Secondary) — scored by damage/delay ratio
@@ -137,7 +137,7 @@ Each file contains one item per line in the format:
 Item Name|ItemID
 ```
 
-You can edit these files directly in a text editor — just restart proloot or use
+You can edit these files directly in a text editor — just restart ProLoot or use
 `/proloot reload` for changes to take effect.
 
 ---

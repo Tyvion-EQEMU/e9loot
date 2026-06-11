@@ -5,8 +5,8 @@ local imgui  = require('ImGui')
 
 -- Version block — single source of truth
 local Version = {
-    _AppName  = 'proloot',
-    _version  = '0.8.0',
+    _AppName  = 'ProLoot',
+    _version  = '0.9.0',
     _author   = 'Tyvion',
     _buildTag = 'Beta',   -- change to Stable / Dev / RC as needed per branch
 }
@@ -106,10 +106,10 @@ mq.bind('/proloot', function(subcmd, ...)
         Editor.Open(Lists.All())
     elseif subcmd == 'enable' then
         Loot.SetEnabled(true)
-        printf('\agproloot enabled')
+        printf('\agProLoot enabled')
     elseif subcmd == 'disable' then
         Loot.SetEnabled(false)
-        printf('\arproloot disabled')
+        printf('\arProLoot disabled')
     elseif subcmd == 'bankstuff' then
         if Config:Get('BankAutoDeposit') then
             _pendingAutoBank = Loot.ScanBankItems()
@@ -135,7 +135,7 @@ mq.bind('/proloot', function(subcmd, ...)
         end
     elseif subcmd == 'reload' then
         Lists.LoadAll()
-        printf('\agproloot: lists reloaded')
+        printf('\agProLoot: lists reloaded')
     elseif subcmd == 'set' then
         local rawKey = args[1]
         local value  = args[2]
@@ -146,12 +146,12 @@ mq.bind('/proloot', function(subcmd, ...)
             end
             if key then
                 Config:SetAndSave(key, value)
-                printf('\agproloot: %s = %s', key, tostring(Config:Get(key)))
+                printf('\agProLoot: %s = %s', key, tostring(Config:Get(key)))
             else
-                printf('\arproloot: unknown setting "%s"', rawKey)
+                printf('\arProLoot: unknown setting "%s"', rawKey)
             end
         else
-            printf('\ayproloot set <setting> <value>  (e.g. /proloot set usewarp false)')
+            printf('\ayProLoot set <setting> <value>  (e.g. /proloot set usewarp false)')
         end
     elseif subcmd == 'mini' then
         local miniArg = (args[1] or ''):lower()
@@ -168,9 +168,9 @@ mq.bind('/proloot', function(subcmd, ...)
         local newVal = not Config:Get('AnnounceDone')
         Config:SetAndSave('AnnounceDone', newVal)
         channel:Broadcast({ type='set_announcedone', value=newVal })
-        printf('\agproloot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
+        printf('\agProLoot: Done Looting announce %s (all toons)', newVal and 'ON' or 'OFF')
     else
-        printf('\ayproloot commands: loot | bankstuff | sellstuff | restock | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
+        printf('\ayProLoot commands: loot | bankstuff | sellstuff | restock | mini [on|off] | show | editor | enable | disable | reload | set <setting> <value> | toggledone')
     end
 end)
 
@@ -211,7 +211,7 @@ local LOOT_INTERVAL = 5000  -- ms between automatic loot sweeps
 local lastLootTime  = 0
 local lastZone      = mq.TLO.Zone.ID()
 
-printf('\agproloot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
+printf('\agProLoot v%s by %s — framework: %s  channel: %s', Version._version, Version._author, frameworkName, channelName)
 printf('\ayType /proloot for command help.')
 Logger.Info('v%s started - framework: %s  channel: %s', Version._version, frameworkName, channelName)
 
@@ -285,7 +285,7 @@ while true do
     local bcast = RestockConfirm.ConsumePendingBroadcast()
     if bcast then
         channel:Broadcast({ type='restock_set', name=bcast.name, qty=bcast.qty, from=mq.TLO.Me.CleanName() })
-        printf('\agproloot: broadcasting %s x%d to group', bcast.name, bcast.qty)
+        printf('\agProLoot: broadcasting %s x%d to group', bcast.name, bcast.qty)
     end
 
     -- Sell Status All: scan self + broadcast request so other toons respond

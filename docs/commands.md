@@ -1,6 +1,6 @@
 ﻿# Slash Command Reference
 
-All proloot commands start with `/proloot` followed by a subcommand.
+All ProLoot commands start with `/proloot` followed by a subcommand.
 
 ---
 
@@ -8,9 +8,9 @@ All proloot commands start with `/proloot` followed by a subcommand.
 
 | Command | Description |
 |---------|-------------|
-| `/lua run proloot` | Start proloot |
+| `/lua run proloot` | Start ProLoot |
 | `/lua run proloot framework=rgmercs channel=dannet` | Start with specific framework and channel |
-| `/lua stop proloot` | Stop proloot completely |
+| `/lua stop proloot` | Stop ProLoot completely |
 
 ---
 

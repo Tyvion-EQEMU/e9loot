@@ -86,11 +86,11 @@ end
 -----------------------------------------------------------------------
 local function announceLoot(decision, name, reason, toon)
     local tag = decision:upper()
-    local msg = string.format('proloot | %s: %s (%s)', tag, name, reason)
+    local msg = string.format('ProLoot | %s: %s (%s)', tag, name, reason)
     if mq.TLO.Me.Grouped() then
         mq.cmdf('/g %s', msg)
     else
-        printf('\agproloot\aw | \a-w[%s]\aw %-7s | %s \a-w(%s)\aw', toon, tag, name, reason)
+        printf('\agProLoot\aw | \a-w[%s]\aw %-7s | %s \a-w(%s)\aw', toon, tag, name, reason)
     end
 end
 
@@ -469,7 +469,7 @@ local function openBankWindow()
     if not mq.TLO.Target.ID() or mq.TLO.Target.ID() == 0 then
         if not findAndTargetBanker() then
             Logger.Warn('openBankWindow: no target and no known banker found in zone')
-            printf('\arproloot: No target and no banker found in zone. Target a banker and try again.')
+            printf('\arProLoot: No target and no banker found in zone. Target a banker and try again.')
             return false
         end
     end
@@ -477,7 +477,7 @@ local function openBankWindow()
     local tgt = mq.TLO.Target
     if not tgt or not tgt.ID() or tgt.ID() == 0 then
         Logger.Warn('openBankWindow: no target — target a banker first')
-        printf('\arproloot: No target. Target a banker and try again.')
+        printf('\arProLoot: No target. Target a banker and try again.')
         return false
     end
 
@@ -503,7 +503,7 @@ local function openBankWindow()
 
         if (mq.TLO.Target.Distance() or 999) > BANK_INTERACT_DIST + 5 then
             Logger.Warn('openBankWindow: could not reach banker (%.1f units)', mq.TLO.Target.Distance() or 999)
-            printf('\arproloot: Could not get close enough to banker.')
+            printf('\arProLoot: Could not get close enough to banker.')
             return false
         end
     end
@@ -513,7 +513,7 @@ local function openBankWindow()
 
     if not mq.TLO.Window('BigBankWnd').Open() then
         Logger.Warn('openBankWindow: bank window did not open')
-        printf('\arproloot: Bank window did not open. Make sure the banker is targeted.')
+        printf('\arProLoot: Bank window did not open. Make sure the banker is targeted.')
         return false
     end
 
@@ -550,14 +550,14 @@ local function openMerchantWindow()
     if not mq.TLO.Target.ID() or mq.TLO.Target.ID() == 0 then
         if not findAndTargetVendor() then
             Logger.Warn('openMerchantWindow: no target and no known vendor found in zone')
-            printf('\arproloot: No target and no vendor found. Target a vendor and try again.')
+            printf('\arProLoot: No target and no vendor found. Target a vendor and try again.')
             return false
         end
     end
 
     local tgt = mq.TLO.Target
     if not tgt or not tgt.ID() or tgt.ID() == 0 then
-        printf('\arproloot: No target. Target a vendor and try again.')
+        printf('\arProLoot: No target. Target a vendor and try again.')
         return false
     end
 
@@ -582,7 +582,7 @@ local function openMerchantWindow()
 
         if (mq.TLO.Target.Distance() or 999) > VENDOR_INTERACT_DIST + 5 then
             Logger.Warn('openMerchantWindow: could not reach vendor (%.1f units)', mq.TLO.Target.Distance() or 999)
-            printf('\arproloot: Could not get close enough to vendor.')
+            printf('\arProLoot: Could not get close enough to vendor.')
             return false
         end
     end
@@ -593,7 +593,7 @@ local function openMerchantWindow()
 
     if not mq.TLO.Window('MerchantWnd').Open() then
         Logger.Warn('openMerchantWindow: merchant window did not open')
-        printf('\arproloot: Merchant window did not open. Make sure a vendor is targeted.')
+        printf('\arProLoot: Merchant window did not open. Make sure a vendor is targeted.')
         return false
     end
 
@@ -621,8 +621,8 @@ local function formatCopperShort(cp)
 end
 
 local function groupAnnounce(msg)
-    printf('\agproloot | %s', msg)
-    if mq.TLO.Me.Grouped() then mq.cmdf('/g proloot | %s', msg) end
+    printf('\agProLoot | %s', msg)
+    if mq.TLO.Me.Grouped() then mq.cmdf('/g ProLoot | %s', msg) end
 end
 
 function Loot.ScanSellItems()
@@ -819,7 +819,7 @@ function Loot.BankStuff(items)
         mq.TLO.Window('BigBankWnd').DoClose()
     end
 
-    printf('\agproloot: BankStuff complete \xe2\x80\x94 deposited %d/%d item(s)', count, #items)
+    printf('\agProLoot: BankStuff complete \xe2\x80\x94 deposited %d/%d item(s)', count, #items)
     Logger.Info('BankStuff: deposited %d/%d item(s)', count, #items)
 end
 

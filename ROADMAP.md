@@ -1,4 +1,4 @@
-﻿# proloot Roadmap
+﻿# ProLoot Roadmap
 
 ## Completed
 
@@ -36,11 +36,11 @@ These settings are fully wired in config.lua and the loot engine but have no con
 - **Import Loot List** — Add an Import button to each list tab in the in-game List Editor. Clicking it would let the user paste or load a newline-separated list of item names, bulk-adding them to that list without having to enter items one at a time. Open questions: input method (multi-line text input popup vs. file path field pointing to a .txt on disk), duplicate handling (skip silently or warn), and whether imported entries should be validated against known item names or accepted as-is.
 
 - **Slot Exclusions / BIS Pinning** — Two related use cases:
-  1. *Ignore a slot entirely* — user marks a slot (e.g. Waist) as off-limits and proloot never evaluates or replaces whatever is equipped there. Useful for custom/server-specific items with abnormal stats that would otherwise get displaced by standard upgrade logic.
+  1. *Ignore a slot entirely* — user marks a slot (e.g. Waist) as off-limits and ProLoot never evaluates or replaces whatever is equipped there. Useful for custom/server-specific items with abnormal stats that would otherwise get displaced by standard upgrade logic.
   2. *Pin a target item per slot* — user specifies a "best in slot" item name for a given slot. If that exact item is already equipped, the slot is locked and ignored. If it is not yet equipped, normal upgrade logic runs until the pinned item is found and equipped.
   - Open questions: where does this live in the UI (new tab in editor? per-slot config table in the panel?), how are slots identified to the user (slot name vs slot number), and how does it interact with WeaponMode filtering.
 
-- **Deeper RGMercs Integration — Camp-Aware Looting** — Current framework pause stops pulls but does not stop RGMercs from running toons back to camp. With a small aggro radius and camphard off, this creates a loop: proloot warps a toon to a corpse → RGMercs immediately runs them back to camp → loot never completes → repeat. The fix likely requires proloot to do more than just pause before a loot sweep:
+- **Deeper RGMercs Integration — Camp-Aware Looting** — Current framework pause stops pulls but does not stop RGMercs from running toons back to camp. With a small aggro radius and camphard off, this creates a loop: ProLoot warps a toon to a corpse → RGMercs immediately runs them back to camp → loot never completes → repeat. The fix likely requires ProLoot to do more than just pause before a loot sweep:
   1. Record the current camp location (RGMercs command TBD — needs research into what RGMercs exposes)
   2. Fully stop the camp (not just pause pulls) so toons stay where they are during looting
   3. Complete the loot sweep

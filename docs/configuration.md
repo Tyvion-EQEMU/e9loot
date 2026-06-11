@@ -1,6 +1,6 @@
 ﻿# Configuration
 
-proloot stores settings in two INI files in your MacroQuest config directory:
+ProLoot stores settings in two INI files in your MacroQuest config directory:
 
 - `SharedSettings_<Server>.ini` — group-wide settings; one file shared across all characters
 - `CharSettings_<Server>_<CharName>.ini` — per-character overrides
@@ -17,11 +17,11 @@ or via the `/proloot set` command.
 **Options:** `None` | `RG Mercs` | `E3` | `Kiss Assist`  
 **Location:** System Settings (collapsed section in the main panel)
 
-Which bot framework proloot works alongside. When a loot sweep starts, proloot pauses
+Which bot framework ProLoot works alongside. When a loot sweep starts, ProLoot pauses
 the framework so it doesn't interfere with movement to corpses, then resumes it when
 the sweep is done.
 
-Set to `None` if you are running proloot standalone without a bot framework.
+Set to `None` if you are running ProLoot standalone without a bot framework.
 
 ---
 
@@ -86,7 +86,7 @@ Controls how items that fit the Ranged equipment slot are evaluated.
 **Range:** 50 – 600 units  
 **Default:** 200
 
-The radius around your character that proloot scans for NPC corpses. Corpses beyond this
+The radius around your character that ProLoot scans for NPC corpses. Corpses beyond this
 distance are ignored until you move closer.
 
 Use **Ctrl+Click** on the slider in the panel to type an exact value.
@@ -99,7 +99,7 @@ Use **Ctrl+Click** on the slider in the panel to type an exact value.
 **Shared:** Yes  
 **Default:** `true`
 
-When enabled, proloot uses `/warp target` (MQ2RWarp) to teleport directly to a corpse
+When enabled, ProLoot uses `/warp target` (MQ2RWarp) to teleport directly to a corpse
 or banker. When disabled, it uses `/nav` to walk there. Requires **MQ2RWarp.dll** to
 be loaded.
 
@@ -113,7 +113,7 @@ be loaded.
 
 *UI control coming soon — currently set via `/proloot set warpdist <value>`.*
 
-Maximum distance at which proloot will warp to a corpse. Corpses closer than this value
+Maximum distance at which ProLoot will warp to a corpse. Corpses closer than this value
 are walked to even when Use Warp is enabled. Set to `0` to always warp regardless of
 distance.
 
@@ -163,7 +163,7 @@ per-character so each toon can be individually paused.
 **Default:** `true`  
 **Location:** Bank & Vendor settings pane
 
-When enabled, proloot automatically converts all carried coins to the highest denomination
+When enabled, ProLoot automatically converts all carried coins to the highest denomination
 (copper → silver → gold → platinum) after each BankStuff deposit. Requires the bank
 window to be open — this is why it runs as part of the bank visit rather than on demand.
 

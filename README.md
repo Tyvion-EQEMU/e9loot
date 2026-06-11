@@ -1,6 +1,6 @@
-﻿# proloot
+﻿# ProLoot
 
-Automated loot management for EverQuest EMU servers running MacroQuest2. proloot handles
+Automated loot management for EverQuest EMU servers running MacroQuest2. ProLoot handles
 corpse detection, item evaluation, gear upgrades, bank runs, and loot history — designed
 to run alongside bot frameworks like RGMercs, E3, and KissAssist.
 
@@ -9,12 +9,12 @@ to run alongside bot frameworks like RGMercs, E3, and KissAssist.
 ## Use Cases
 
 ### Solo or Casual Play
-Run proloot in the background while you grind. It scans for corpses every 5 seconds,
+Run ProLoot in the background while you grind. It scans for corpses every 5 seconds,
 walks or warps to them, evaluates every item against your keep/sell/destroy lists and
 gear upgrade logic, and handles the loot window — all without you touching a thing.
 
 ### Multi-Toon Boxing with a Bot Framework
-proloot integrates with RGMercs, E3, and KissAssist. When a loot sweep starts it pauses
+ProLoot integrates with RGMercs, E3, and KissAssist. When a loot sweep starts it pauses
 the framework so bots don't interfere with corpse movement, then resumes when done. A
 single **Shift+Click** on the pause button broadcasts pause or resume to your entire
 group at once. Loot history from all toons streams into each character's history window
@@ -27,13 +27,13 @@ walks you to a banker, shows you everything it found, and deposits it all in one
 no bag-sorting required.
 
 ### Bank Runs
-At the end of a session, run `/proloot bankstuff` on each toon. proloot auto-targets a
+At the end of a session, run `/proloot bankstuff` on each toon. ProLoot auto-targets a
 nearby banker (or navigates to one), shows a confirmation window with item details on
 hover, deposits everything tagged `bank`, `astrial`, or `deva`, then consolidates your
 coins from copper up to platinum automatically.
 
 ### Gear Upgrading
-Tell proloot your weapon style (Dual Wield, Two-Handed, Sword and Board) and it scores
+Tell ProLoot your weapon style (Dual Wield, Two-Handed, Sword and Board) and it scores
 every piece of gear it finds against what you have equipped. Items that beat your current
 stats are kept; everything else is sold or left behind based on your Trash Price threshold.
 
@@ -84,7 +84,7 @@ On your very first run, a **Setup dialog** will appear asking you to choose your
 framework (RGMercs, E3, KissAssist, or None) and broadcast channel (DanNet, EQBC, or
 None). These can be changed later from the main panel.
 
-To start proloot with a specific framework or channel without going through setup:
+To start ProLoot with a specific framework or channel without going through setup:
 
 ```
 /lua run proloot framework=rgmercs channel=dannet
@@ -107,7 +107,7 @@ Once running, a panel appears with:
 - **Console** *(collapsed)* — scrollable in-panel log output with Log Level, Log to File, and Show Timestamps controls
 - **Status** — shows nearby corpse count and current state: `Running`, `Paused`, or `Combat`
 
-The **minimize button** (top-right of the panel) collapses proloot into a small overlay
+The **minimize button** (top-right of the panel) collapses ProLoot into a small overlay
 showing just the enable toggle and status. A red border on the mini window means your
 character is in combat and looting is temporarily suspended.
 
@@ -115,7 +115,7 @@ character is in combat and looting is temporarily suspended.
 
 ## How Looting Works
 
-Every 5 seconds proloot scans for NPC corpses within your configured **Loot Range**.
+Every 5 seconds ProLoot scans for NPC corpses within your configured **Loot Range**.
 For each corpse it finds (closest first), it:
 
 1. Checks it is safe to loot (not dead, not casting, not moving)
@@ -134,7 +134,7 @@ manually stays paused until you resume manually.
 
 Run `/proloot bankstuff` to deposit your collected items at a banker.
 
-1. proloot searches for a nearby banker and navigates to them (auto-targets known bankers
+1. ProLoot searches for a nearby banker and navigates to them (auto-targets known bankers
    such as Gordon Gekko in Nexus, Banker Ceridan in Plane of Knowledge, or a bank broker
    in the Guild Hall)
 2. A confirmation window lists everything it found in your bags tagged as `bank`, `astrial`,
@@ -176,7 +176,7 @@ Ranged Slot, Loot Enabled) are **per-character** so each toon can have its own v
 
 ## Config Files
 
-All proloot files are kept in their own subfolder so they don't clutter the main config directory:
+All ProLoot files are kept in their own subfolder so they don't clutter the main config directory:
 
 ```
 <MQ2 config dir>/proloot/

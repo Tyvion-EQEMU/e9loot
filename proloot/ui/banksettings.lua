@@ -111,7 +111,7 @@ function BankSettings.Render()
     if not _open or not _config then return end
 
     ImGui.SetNextWindowSize(ImVec2(238, 275), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot \xe2\x80\x94 Bank & Vendor', _open, ImGuiWindowFlags.None)
+    local open, shouldDraw = ImGui.Begin('ProLoot \xe2\x80\x94 Bank & Vendor', _open, ImGuiWindowFlags.None)
     _open = open
 
     if shouldDraw then

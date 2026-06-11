@@ -74,6 +74,11 @@ local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 -- bullet entries starting with "  • ". Prepend a new block for each release
 -- (older blocks stay for history) or trim if it gets too long.
 local BUILD_NOTES = [[
+v0.9.0 Beta  —  2026-06-10
+
+  • Rebranded as ProLoot — renamed from e9loot; /lua run proloot; all /proloot commands
+  • ProLoot display name throughout UI, chat output, and window titles
+
 v0.8.0 Beta  —  2026-06-09
 
   • Sell Stuff: confirm window with solo/group views, Status All, Sell All broadcast
@@ -86,7 +91,7 @@ v0.8.0 Beta  —  2026-06-09
   • All confirm windows: primary action left, Cancel right
 ]]
 
-local REPO_URL = 'https://github.com/Tyvion-EQEMU/proloot'
+local REPO_URL = 'https://github.com/Tyvion-EQEMU/proLoot'
 
 -- 64x64 square button: silver face, black text, rounded corners, snake border on hover.
 local function squareActionButton(label, size)
@@ -180,7 +185,7 @@ local function renderHistory()
     if not _histOpen then return end
 
     ImGui.SetNextWindowSize(ImVec2(820, 400), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot — Loot History', _histOpen,
+    local open, shouldDraw = ImGui.Begin('ProLoot — Loot History', _histOpen,
         ImGuiWindowFlags.None)
     _histOpen = open
 
@@ -284,7 +289,7 @@ local function renderHistory()
                                 if found and found.ID() and found.ID() > 0 then
                                     found.Inspect()
                                 else
-                                    printf('\ayproloot: %s is not in your inventory', entry.name)
+                                    printf('\ayProLoot: %s is not in your inventory', entry.name)
                                 end
                             end
                         end
@@ -313,7 +318,7 @@ local function renderHistory()
                                 if found and found.ID() and found.ID() > 0 then
                                     found.Inspect()
                                 else
-                                    printf('\ayproloot: %s is not in your inventory', rn)
+                                    printf('\ayProLoot: %s is not in your inventory', rn)
                                 end
                             end
                         end
@@ -338,7 +343,7 @@ local function renderDevInfo()
     if not _devInfoOpen then return end
 
     ImGui.SetNextWindowSize(ImVec2(430, 360), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot Dev Info', _devInfoOpen, ImGuiWindowFlags.None)
+    local open, shouldDraw = ImGui.Begin('ProLoot Dev Info', _devInfoOpen, ImGuiWindowFlags.None)
     _devInfoOpen = open
 
     if shouldDraw then
@@ -425,7 +430,7 @@ function Panel.Render()
         ImGui.PushStyleColor(ImGuiCol.TitleBg,       0.40, 0.10, 0.08, 1.0)
         ImGui.PushStyleColor(ImGuiCol.TitleBgActive, 0.55, 0.12, 0.08, 1.0)
     end
-    local open, shouldDraw = ImGui.Begin('proloot', _panelOpen)
+    local open, shouldDraw = ImGui.Begin('ProLoot', _panelOpen)
     if not _lootEnabled then ImGui.PopStyleColor(2) end
     _panelOpen = open
     if not open then mq.exit() end
@@ -692,7 +697,7 @@ function Panel.Render()
         end
 
         if ImGui.BeginPopupModal('##e9restart', nil, ImGuiWindowFlags.AlwaysAutoResize) then
-            ImGui.Text('Restart required — restart proloot now?')
+            ImGui.Text('Restart required — restart ProLoot now?')
             ImGui.Spacing()
             if ImGui.Button('Confirm', 80, 0) then
                 mq.cmd('/multiline ; /lua stop proloot ; /timed 50 /lua run proloot')
@@ -747,7 +752,7 @@ function Panel.Render()
                 if ImGui.IsItemHovered() then
                     ImGui.BeginTooltip()
                     ImGui.PushTextWrapPos(280)
-                    ImGui.TextWrapped('Which bot framework proloot works alongside.')
+                    ImGui.TextWrapped('Which bot framework ProLoot works alongside.')
                     ImGui.PopTextWrapPos()
                     ImGui.EndTooltip()
                 end
@@ -846,7 +851,7 @@ function Panel.Render()
             end
 
             ImGui.Spacing()
-            if ImGui.CollapsingHeader('proloot Output', ImGuiTreeNodeFlags.DefaultOpen) then
+            if ImGui.CollapsingHeader('ProLoot Output', ImGuiTreeNodeFlags.DefaultOpen) then
                 local conW = select(1, ImGui.GetContentRegionAvail())
                 Logger.GetConsole():Render(ImVec2(conW, 180))
             end

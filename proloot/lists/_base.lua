@@ -78,7 +78,7 @@ function Base:Save()
     local path = filePath(self._name)
     local f    = io.open(path, 'w')
     if not f then
-        printf('\arproloot: failed to write %s', path)
+        printf('\arProLoot: failed to write %s', path)
         return
     end
     for _, entry in ipairs(self._ordered) do

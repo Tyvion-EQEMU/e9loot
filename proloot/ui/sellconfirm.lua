@@ -192,7 +192,7 @@ local function renderSoloFooter()
         if ImGui.IsItemHovered() then
             ImGui.BeginTooltip()
             ImGui.Text('Sell All')
-            ImGui.TextDisabled('Sends all group toons running proloot to sell immediately.')
+            ImGui.TextDisabled('Sends all group toons running ProLoot to sell immediately.')
             ImGui.EndTooltip()
         end
     else
@@ -216,7 +216,7 @@ local function renderSoloFooter()
         if ImGui.IsItemHovered() then
             ImGui.BeginTooltip()
             ImGui.Text('Sell All')
-            ImGui.TextDisabled('Sends all group toons running proloot to sell immediately.')
+            ImGui.TextDisabled('Sends all group toons running ProLoot to sell immediately.')
             ImGui.EndTooltip()
         end
     end
@@ -294,7 +294,7 @@ local function renderGroupFooter()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.Text('Sell All')
-        ImGui.TextDisabled('Sends all group toons running proloot to sell immediately.')
+        ImGui.TextDisabled('Sends all group toons running ProLoot to sell immediately.')
         ImGui.EndTooltip()
     end
     ImGui.SameLine()
@@ -323,7 +323,7 @@ function SellConfirm.Render()
     if not _open then return end
 
     ImGui.SetNextWindowSize(ImVec2(480, 320), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot \xe2\x80\x94 Sell Stuff', _open, ImGuiWindowFlags.None)
+    local open, shouldDraw = ImGui.Begin('ProLoot \xe2\x80\x94 Sell Stuff', _open, ImGuiWindowFlags.None)
     _open = open
     if not shouldDraw then ImGui.End(); return end
 

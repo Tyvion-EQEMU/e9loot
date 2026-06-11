@@ -76,12 +76,12 @@ function Setup.Render()
     if not _open then return end
 
     ImGui.SetNextWindowSize(ImVec2(440, 340), ImGuiCond.FirstUseEver)
-    local open, shouldDraw = ImGui.Begin('proloot — First Time Setup', _open,
+    local open, shouldDraw = ImGui.Begin('ProLoot — First Time Setup', _open,
         ImGuiWindowFlags.NoResize)
     _open = open
 
     if shouldDraw then
-        ImGui.TextWrapped('Welcome to proloot! Choose your combat framework, weapon mode, and communication channel.')
+        ImGui.TextWrapped('Welcome to ProLoot! Choose your combat framework, weapon mode, and communication channel.')
         ImGui.Separator()
         ImGui.Spacing()
 
