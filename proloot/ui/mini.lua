@@ -52,7 +52,7 @@ function Mini.Render(onClose)
 
     ImGui.SameLine()
     ImGui.BeginGroup()
-        ImGui.Text('E9 Loot')
+        ImGui.Text('ProLoot')
 
         local enabled  = _config:Get('LootEnabled')
         local inCombat = _loot.IsInCombat()

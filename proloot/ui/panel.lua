@@ -433,7 +433,7 @@ function Panel.Render()
     local open, shouldDraw = ImGui.Begin('ProLoot', _panelOpen)
     if not _lootEnabled then ImGui.PopStyleColor(2) end
     _panelOpen = open
-    if not open then mq.exit() end
+    if not shouldDraw then ImGui.End(); return end
 
     if shouldDraw then
         local footerH = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y * 2 + 2
