@@ -91,7 +91,7 @@ v0.8.0 Beta  —  2026-06-09
   • All confirm windows: primary action left, Cancel right
 ]]
 
-local REPO_URL = 'https://github.com/Tyvion-EQEMU/proLoot'
+local REPO_URL = 'https://github.com/Tyvion-EQEMU/ProLoot'
 
 -- 64x64 square button: silver face, black text, rounded corners, snake border on hover.
 local function squareActionButton(label, size)
