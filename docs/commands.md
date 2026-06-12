@@ -86,7 +86,7 @@ Changes a config setting by name. Setting names are case-insensitive.
 |-----|------|----------------|
 | `Framework` | string | `none`, `rgmercs`, `e3`, `kissassist` |
 | `Channel` | string | `none`, `dannet`, `eqbc` |
-| `WeaponMode` | string | `DW`, `2H`, `SNB`, `ANY` |
+| `WeaponMode` | string | `DW`, `2H`, `SNB`, `ANY`, `always` |
 | `RangedMode` | string | `any`, `bows` |
 | `LootRange` | number | `200` |
 | `WarpDist` | number | `100` |
@@ -100,6 +100,8 @@ Changes a config setting by name. Setting names are case-insensitive.
 | `AnnounceDone` | boolean | `true`, `false` |
 | `AutoConsolidateCoins` | boolean | `true`, `false` |
 | `BankAutoDeposit` | boolean | `true`, `false` |
+| `AutoEquipUpgrades` | boolean | `true`, `false` |
+| `ExcludedSlots` | string | `13,20` (comma-sep slot IDs) |
 | `LogLevel` | number | `1` (Error), `2` (Warn), `3` (Info), `4` (Debug) |
 | `LogToFile` | boolean | `true`, `false` |
 | `LogTimestamps` | boolean | `true`, `false` |

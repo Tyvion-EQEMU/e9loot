@@ -45,20 +45,23 @@ Requires the corresponding MQ2 plugin to be loaded (MQ2DanNet or MQ2EQBC).
 
 **Setting:** `WeaponMode`  
 **Shared:** No (per-character)  
-**Options:** `Dual Wield` | `Two-Handed` | `Sword and Board` | `Any / No Restriction`
+**Options:** `Dual Wield` | `Two-Handed` | `Sword and Board` | `Any / No Restriction` | `Always Keep`
 
 Controls which weapon types are considered when evaluating gear upgrades for the
 Primary and Secondary slots. Items that don't match the mode are not kept as upgrades
-even if the stats are better.
+even if the stats are better. Hover over each option in the dropdown for a tooltip
+describing it.
 
-| Mode | Primary slot | Secondary slot |
-|------|-------------|----------------|
-| Dual Wield | 1H weapons only | 1H weapons only |
-| Two-Handed | 2H weapons only | N/A (2H occupies both) |
-| Sword and Board | 1H weapons only | Shields only |
-| Any / No Restriction | Any weapon | Any weapon |
+| Mode | Primary slot | Secondary slot | Notes |
+|------|-------------|----------------|-------|
+| Dual Wield | 1H weapons only | 1H weapons only | |
+| Two-Handed | 2H weapons only | N/A (2H occupies both) | |
+| Sword and Board | 1H weapons only | Shields only | |
+| Any / No Restriction | Any weapon | Any weapon | |
+| Always Keep | Keep all wearable items | Keep all wearable items | Ignores stat comparison entirely |
 
-Armor slots (head, chest, legs, etc.) are always evaluated regardless of weapon mode.
+Armor slots (head, chest, legs, etc.) are always evaluated regardless of weapon mode,
+except in **Always Keep** mode which keeps everything regardless of stats.
 
 ---
 
@@ -116,6 +119,47 @@ be loaded.
 Maximum distance at which ProLoot will warp to a corpse. Corpses closer than this value
 are walked to even when Use Warp is enabled. Set to `0` to always warp regardless of
 distance.
+
+---
+
+## Auto Equip
+
+**Setting:** `AutoEquipUpgrades`  
+**Shared:** No (per-character)  
+**Default:** `true`  
+**Location:** Inline with Use Warp in the main panel
+
+When enabled, items evaluated as gear upgrades are equipped immediately during looting —
+the new item swaps into the worn slot and the displaced item goes to your bags. This is
+the default behavior.
+
+When disabled, upgrade items are picked up and placed in bags via `/autoinventory` without
+equipping. The loot history entry shows reason `upgrade-bagged` so you can find and review
+them later. Useful when you want to inspect an item before committing to equipping it.
+
+---
+
+## Slot Exclusions
+
+**Setting:** `ExcludedSlots`  
+**Shared:** No (per-character)  
+**Default:** *(empty — no slots excluded)*  
+**Location:** Main panel settings table
+
+A multi-select dropdown listing all gear slots. Any slot you check here is skipped
+entirely during upgrade evaluation — ProLoot will never consider replacing whatever is
+currently equipped in that slot.
+
+Useful for:
+- Custom or server-specific items with unusual stats that score incorrectly against
+  standard AC/HP/Mana/damage-ratio logic
+- Slots where you have a hand-picked item you never want displaced
+
+Stored as a comma-separated list of internal slot IDs in the per-character INI
+(e.g. `ExcludedSlots=13,20` for Primary and Waist). Can also be set via:
+```
+/proloot set ExcludedSlots 13,20
+```
 
 ---
 

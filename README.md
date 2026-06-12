@@ -33,9 +33,17 @@ hover, deposits everything tagged `bank`, `astrial`, or `deva`, then consolidate
 coins from copper up to platinum automatically.
 
 ### Gear Upgrading
-Tell ProLoot your weapon style (Dual Wield, Two-Handed, Sword and Board) and it scores
-every piece of gear it finds against what you have equipped. Items that beat your current
-stats are kept; everything else is sold or left behind based on your Trash Price threshold.
+Tell ProLoot your weapon style (Dual Wield, Two-Handed, Sword and Board, or Always Keep)
+and it scores every piece of gear it finds against what you have equipped. Items that beat
+your current stats are kept; everything else is sold or left behind based on your Trash
+Price threshold.
+
+Use **Slot Exclusions** to protect specific gear slots from being replaced — useful for
+custom or server-specific items that wouldn't score correctly against standard stat logic.
+
+Toggle **Auto Equip** off if you'd rather review upgrades before committing. When off,
+upgrade items land in your bags with a reason of `upgrade-bagged` in the loot history so
+you can inspect and equip them manually.
 
 ---
 
@@ -99,10 +107,10 @@ Once running, a panel appears with:
 - **Running / Paused button** — single wide toggle. Click to pause or resume looting for
   this character. **Shift+Click** broadcasts pause/resume to your whole group (requires
   DanNet or EQBC). The button is green when running and red when paused.
-- **Settings** — Weapon Mode, Ranged Slot, Loot Range, Use Warp, Done Looting
+- **Settings** — Weapon Mode, Ranged Slot, Loot Range, Min. Sell Value, Use Warp / Auto Equip (inline), Share Done Looting, Slot Exclusions
 - **History** — opens the loot history window showing every item decision this session
 - **List Editor** — opens the item list manager to add/remove items from all loot categories
-- **Bank & Vendor** — opens the Bank & Vendor settings pane (Auto Consolidate Coins, Auto Deposit)
+- **Vendor Settings** — opens the vendor/bank settings pane (Auto Consolidate Coins, Auto Deposit, Auto Sell, Auto Restock)
 - **System Settings** *(collapsed)* — Integration (framework) and Broadcast (channel); rarely changed after setup
 - **Console** *(collapsed)* — scrollable in-panel log output with Log Level, Log to File, and Show Timestamps controls
 - **Status** — shows nearby corpse count and current state: `Running`, `Paused`, or `Combat`
@@ -170,7 +178,8 @@ Full command reference in [Commands](docs/commands.md).
 
 Some settings (Framework, Channel, Loot Range, Use Warp, etc.) are **shared** — changing
 them on one character updates all characters on the next restart. Others (Weapon Mode,
-Ranged Slot, Loot Enabled) are **per-character** so each toon can have its own values.
+Ranged Slot, Loot Enabled, Auto Equip, Slot Exclusions) are **per-character** so each
+toon can have its own values.
 
 ---
 
