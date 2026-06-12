@@ -94,6 +94,14 @@ local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 -- bullet entries starting with "  • ". Prepend a new block for each release
 -- (older blocks stay for history) or trim if it gets too long.
 local BUILD_NOTES = [[
+v0.9.2 Beta  —  2026-06-12
+
+  • Weapon mode dropdown now shows per-item tooltips explaining each mode
+  • Auto Equip toggle moved inline with Use Warp to reduce panel height
+  • Action button row (History / List Editor / Vendor Settings) now reflows
+    correctly when a scrollbar is present — no more overlap on the right edge
+  • Default panel size increased to better fit all settings without scrolling
+
 v0.9.1 Beta  —  2026-06-11
 
   • Auto Equip toggle — upgrade items go to bags instead of equipping immediately (per-character)
