@@ -41,6 +41,13 @@ local WEAPONMODE_LABELS = {
     ANY     = 'Any / No Restriction',
     always  = 'Always Keep',
 }
+local WEAPONMODE_TOOLTIPS = {
+    DW     = 'Evaluates 1H weapons only. Shields and 2H weapons are ignored. Best for classes that dual wield (Rogue, Monk, Ranger, etc.).',
+    ['2H'] = 'Evaluates 2H weapons only. 1H weapons and shields are ignored. Best for classes that use two-handed weapons.',
+    SNB    = 'Evaluates 1H weapons and shields only. 2H weapons are ignored. Best for tanks using a weapon and shield.',
+    ANY    = 'Evaluates all weapon types — 1H, 2H, and shields. Use when you have no preference or want all options considered.',
+    always = 'Keeps every wearable item regardless of stat comparison. Useful for fresh characters that need to fill all gear slots quickly.',
+}
 local _wmIdx = 1
 
 local function wmIndexOf(val)
@@ -591,14 +598,24 @@ function Panel.Render()
             end
             ImGui.TableNextColumn()
             ImGui.SetNextItemWidth(-1)
-            local wmLabels = {}
-            for _, key in ipairs(WEAPONMODES) do
-                table.insert(wmLabels, WEAPONMODE_LABELS[key])
-            end
-            local newWmIdx, wmChanged = ImGui.Combo('##wm', _wmIdx, wmLabels, #wmLabels)
-            if wmChanged then
-                _wmIdx = newWmIdx
-                _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
+            local wmCurrent = WEAPONMODE_LABELS[WEAPONMODES[_wmIdx]] or WEAPONMODES[_wmIdx]
+            if ImGui.BeginCombo('##wm', wmCurrent) then
+                for i, key in ipairs(WEAPONMODES) do
+                    local selected = (i == _wmIdx)
+                    if ImGui.Selectable(WEAPONMODE_LABELS[key], selected) then
+                        _wmIdx = i
+                        _config:SetAndSave('WeaponMode', WEAPONMODES[_wmIdx])
+                    end
+                    if selected then ImGui.SetItemDefaultFocus() end
+                    if ImGui.IsItemHovered() and WEAPONMODE_TOOLTIPS[key] then
+                        ImGui.BeginTooltip()
+                        ImGui.PushTextWrapPos(280)
+                        ImGui.TextWrapped(WEAPONMODE_TOOLTIPS[key])
+                        ImGui.PopTextWrapPos()
+                        ImGui.EndTooltip()
+                    end
+                end
+                ImGui.EndCombo()
             end
 
             -- Ranged Slot
@@ -799,11 +816,11 @@ function Panel.Render()
             if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
         end
 
-        ImGui.Spacing()
-        local evalOpen = _upgradeEval and _upgradeEval.IsOpen()
-        if actionButton('Upgrade Eval', 115, evalOpen) then
-            if evalOpen then _upgradeEval.Close() else _upgradeEval.Open(_config) end
-        end
+        -- TODO: Upgrade Eval button hidden pending further UX work
+        -- local evalOpen = _upgradeEval and _upgradeEval.IsOpen()
+        -- if actionButton('Upgrade Eval', 115, evalOpen) then
+        --     if evalOpen then _upgradeEval.Close() else _upgradeEval.Open(_config) end
+        -- end
 
         ImGui.Spacing()
         if ImGui.CollapsingHeader('System Settings') then
