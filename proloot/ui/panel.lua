@@ -456,7 +456,7 @@ function Panel.Render()
     -- Hidden: X was clicked; /proloot show restores
     if not _panelOpen then return end
 
-    ImGui.SetNextWindowSize(ImVec2(340, 520), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(360, 570), ImGuiCond.FirstUseEver)
     local _lootEnabled = _config:Get('LootEnabled')
     local _inCombat    = _loot.IsInCombat()
     if not _lootEnabled then
@@ -713,10 +713,7 @@ function Panel.Render()
                 ImGui.Text('MQ2RWarp.dll required')
                 ImGui.EndTooltip()
             end
-
-            -- Auto Equip
-            ImGui.TableNextRow()
-            ImGui.TableNextColumn()
+            ImGui.SameLine(0, 14)
             ImGui.Text('Auto Equip')
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
@@ -725,7 +722,7 @@ function Panel.Render()
                 ImGui.PopTextWrapPos()
                 ImGui.EndTooltip()
             end
-            ImGui.TableNextColumn()
+            ImGui.SameLine(0, 6)
             local autoEquip = _config:Get('AutoEquipUpgrades')
             local newAutoEquip, autoEquipChanged = Widgets.Toggle('##autoequip', autoEquip)
             if autoEquipChanged then _config:SetAndSave('AutoEquipUpgrades', newAutoEquip) end
