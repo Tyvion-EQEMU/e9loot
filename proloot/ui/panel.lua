@@ -456,7 +456,7 @@ function Panel.Render()
     -- Hidden: X was clicked; /proloot show restores
     if not _panelOpen then return end
 
-    ImGui.SetNextWindowSize(ImVec2(360, 570), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(ImVec2(360, 605), ImGuiCond.FirstUseEver)
     local _lootEnabled = _config:Get('LootEnabled')
     local _inCombat    = _loot.IsInCombat()
     if not _lootEnabled then
@@ -793,24 +793,31 @@ function Panel.Render()
         ImGui.Separator()
         ImGui.Spacing()
 
-        -- Action buttons
-        if actionButton('History', 95, _histOpen) then
-            _histOpen = not _histOpen
-            _config:SetAndSave('HistoryOpen', _histOpen)
-        end
+        -- Action buttons — widths computed from available region so the row
+        -- stays flush when a scrollbar is present
+        do
+            local avail   = select(1, ImGui.GetContentRegionAvail())
+            local spacing = ImGui.GetStyle().ItemSpacing.x
+            local bw      = math.floor((avail - spacing * 2) / 3)
 
-        ImGui.SameLine()
+            if actionButton('History', bw, _histOpen) then
+                _histOpen = not _histOpen
+                _config:SetAndSave('HistoryOpen', _histOpen)
+            end
 
-        local editorOpen = _editor.IsOpen()
-        if actionButton('List Editor', 95, editorOpen) then
-            if editorOpen then _editor.Close() else _editor.Open(_config._lists, _channel) end
-        end
+            ImGui.SameLine()
 
-        ImGui.SameLine()
+            local editorOpen = _editor.IsOpen()
+            if actionButton('List Editor', bw, editorOpen) then
+                if editorOpen then _editor.Close() else _editor.Open(_config._lists, _channel) end
+            end
 
-        local bankOpen = _bankSettings.IsOpen()
-        if actionButton('Vendor Settings', 115, bankOpen) then
-            if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
+            ImGui.SameLine()
+
+            local bankOpen = _bankSettings.IsOpen()
+            if actionButton('Vendor Settings', bw, bankOpen) then
+                if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
+            end
         end
 
         -- TODO: Upgrade Eval button hidden pending further UX work
