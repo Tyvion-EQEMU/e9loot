@@ -96,18 +96,21 @@ local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 local BUILD_NOTES = [[
 v0.9.2 Beta  —  2026-06-12
 
+  New Features:
+  • Auto Equip toggle — when off, upgrades go to bags instead of equipping
+    immediately; great for reviewing gear before committing (per-character)
+  • Slot Exclusions — exclude specific gear slots from upgrade evaluation so
+    those slots are never replaced during looting (per-character)
+  • Weapon Mode: Always Keep — keep every wearable item regardless of stat
+    comparison; ideal for fresh characters filling all gear slots
+  • Upgrade Evaluator — scan bags for equippable gear and see upgrade verdicts
+    at a glance with green/gray color coding (button coming soon)
+
+  UI Fixes:
   • Weapon mode dropdown now shows per-item tooltips explaining each mode
-  • Auto Equip toggle moved inline with Use Warp to reduce panel height
-  • Action button row (History / List Editor / Vendor Settings) now reflows
-    correctly when a scrollbar is present — no more overlap on the right edge
+  • Auto Equip toggle sits inline with Use Warp to keep the panel compact
+  • Action button row reflows correctly when a scrollbar is present
   • Default panel size increased to better fit all settings without scrolling
-
-v0.9.1 Beta  —  2026-06-11
-
-  • Auto Equip toggle — upgrade items go to bags instead of equipping immediately (per-character)
-  • Slot Exclusions — exclude specific gear slots from upgrade evaluation (per-character)
-  • Weapon Mode: 'Always Keep' added — keep all wearable gear regardless of stat comparison
-  • Upgrade Evaluator — scan bags for equippable gear and see upgrade verdicts at a glance
 
 v0.9.0 Beta  —  2026-06-10
 
