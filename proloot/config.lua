@@ -62,12 +62,14 @@ Config.Defaults = {
     TrashPrice   = 0,         -- sell anything >= this value (pp); 0 = sell nothing
 
     -- Feature toggles
-    LootEnabled   = true,
-    LootCorpses   = true,
-    LootPets      = false,
-    LootGroup     = false,    -- loot group members' nearby corpses
-    AnnounceGroup = false,    -- broadcast loot events to group channel
-    AnnounceDone  = true,     -- send /g Done Looting after a sweep clears all corpses
+    LootEnabled        = true,
+    LootCorpses        = true,
+    LootPets           = false,
+    LootGroup          = false,   -- loot group members' nearby corpses
+    AnnounceGroup      = false,   -- broadcast loot events to group channel
+    AnnounceDone       = true,    -- send /g Done Looting after a sweep clears all corpses
+    AutoEquipUpgrades  = true,    -- equip upgrade immediately; false = bag it for manual equip
+    ExcludedSlots      = '',      -- comma-sep slot IDs excluded from upgrade eval (per-char)
 
     -- Vendor / Bank behaviour
     AutoConsolidateCoins = true,   -- consolidate CP/SP/GP→PP automatically after BankStuff deposit

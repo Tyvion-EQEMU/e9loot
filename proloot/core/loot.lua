@@ -122,11 +122,12 @@ local function evaluateItem(item)
     if _lists.tiered:Has(name, id)    then return DECISION.KEEP, 'tiered'    end
     if _lists.beasts:Has(name, id)    then return DECISION.KEEP, 'beast'     end
 
-    local weaponMode  = _config:Get('WeaponMode')
-    local rangedMode  = _config:Get('RangedMode')
-    local trashPrice  = _config:Get('TrashPrice')
-    local val         = item.Value() or 0
-    local isNoDrop    = item.NoDrop() == true
+    local weaponMode    = _config:Get('WeaponMode')
+    local rangedMode    = _config:Get('RangedMode')
+    local trashPrice    = _config:Get('TrashPrice')
+    local excludedSlots = Upgrade.ParseExcludedSlots(_config:Get('ExcludedSlots'))
+    local val           = item.Value() or 0
+    local isNoDrop      = item.NoDrop() == true
 
     if item.Stackable() or item.Tradeskills() then
         if trashPrice > 0 and val >= trashPrice * 1000 then return DECISION.SELL, 'trash-sell' end
@@ -134,7 +135,7 @@ local function evaluateItem(item)
         return DECISION.SKIP, 'worthless-stack'
     end
 
-    local upgradeSlot = Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode)
+    local upgradeSlot = Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode, excludedSlots)
     if upgradeSlot ~= nil then
         return DECISION.KEEP, 'upgrade', upgradeSlot
     end
@@ -204,7 +205,7 @@ local function lootSlot(slotIndex)
     if not cursor or not cursor.ID() or cursor.ID() == 0 then return end
 
     if decision == DECISION.KEEP then
-        if equipSlot then
+        if equipSlot and _config:Get('AutoEquipUpgrades') then
             -- Capture what's currently equipped before the swap
             local cur = mq.TLO.Me.Inventory(equipSlot)
             if cur and cur.ID() and cur.ID() > 0 then
@@ -227,6 +228,7 @@ local function lootSlot(slotIndex)
         else
             mq.cmd('/autoinventory')
             mq.delay(200)
+            if equipSlot then reason = 'upgrade-bagged' end
         end
         announceLoot(decision, name, reason, myToon)
     elseif decision == DECISION.BANK then

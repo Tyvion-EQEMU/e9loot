@@ -91,9 +91,43 @@ local function allowedByMode(item, weaponMode)
     return true  -- ANY
 end
 
+-- Public slot name map (slot ID → display name) used by UI widgets and the Upgrade Evaluator.
+Upgrade.SLOT_NAMES = {
+    [1]  = 'Left Ear',   [2]  = 'Head',       [3]  = 'Face',
+    [4]  = 'Right Ear',  [5]  = 'Neck',        [6]  = 'Shoulders',
+    [7]  = 'Arms',       [8]  = 'Back',         [9]  = 'Left Wrist',
+    [10] = 'Right Wrist',[11] = 'Range',        [12] = 'Hands',
+    [13] = 'Primary',    [14] = 'Secondary',    [15] = 'Left Ring',
+    [16] = 'Right Ring', [17] = 'Chest',        [18] = 'Legs',
+    [19] = 'Feet',       [20] = 'Waist',
+}
+
+-- Ordered list of slot IDs for UI iteration (excludes Charm/Powersource/Ammo)
+Upgrade.SLOT_ORDER = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 }
+
+-- Parse a comma-separated slot ID string into a set: { [slotId]=true, ... }
+function Upgrade.ParseExcludedSlots(str)
+    local set = {}
+    for id in tostring(str or ''):gmatch('%d+') do
+        set[tonumber(id)] = true
+    end
+    return set
+end
+
+-- Serialize a slot set back to a sorted comma-separated string for INI storage
+function Upgrade.SerializeExcludedSlots(set)
+    local ids = {}
+    for id in pairs(set) do ids[#ids+1] = id end
+    table.sort(ids)
+    local parts = {}
+    for _, id in ipairs(ids) do parts[#parts+1] = tostring(id) end
+    return table.concat(parts, ',')
+end
+
 -- Returns the first worn slotId where item beats what is currently equipped, or nil.
--- Respects weapon mode and ranged mode filtering. Returns nil for 'always'/'never' modes.
-function Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode)
+-- Respects weapon mode, ranged mode, and per-character slot exclusions.
+-- Returns nil for 'always'/'never' modes.
+function Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode, excludedSlots)
     if not item or not item.ID() or item.ID() == 0 then return nil end
     weaponMode = weaponMode or 'DW'
     rangedMode = rangedMode or 'any'
@@ -107,7 +141,8 @@ function Upgrade.FindUpgradeSlot(item, weaponMode, rangedMode)
     local t = itemType(item)
     for i = 1, wornCount do
         local slotId = tonumber(item.WornSlot(i)()) or -1
-        if slotId >= 0 and not SKIP_SLOTS[slotId] then
+        if slotId >= 0 and not SKIP_SLOTS[slotId]
+                       and not (excludedSlots and excludedSlots[slotId]) then
             if slotId == RANGED_SLOT and rangedMode == 'bows' and not isBow(t) then
                 -- skip: non-bow item cannot displace a bow in 'bows' mode
             elseif isUpgrade(item, slotId, rangedMode) then

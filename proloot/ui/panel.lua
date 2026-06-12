@@ -1,8 +1,9 @@
 ﻿-- Main ImGui panel: header, pause/resume, two-column settings, history, mini-mode
 
-local mq     = require('mq')
+local mq      = require('mq')
 local Icons   = require('mq.ICONS')
 local Corpse  = require('proloot.core.corpse')
+local Upgrade = require('proloot.core.upgrade')
 local Mini    = require('proloot.ui.mini')
 local Logger  = require('proloot.utils.logger')
 local Widgets = require('proloot.ui.widgets')
@@ -15,18 +16,30 @@ local _loot         = nil
 local _setup        = nil
 local _editor       = nil
 local _bankSettings = nil
+local _upgradeEval  = nil
 local _framework    = nil
 local _adapters     = nil
 local _channel      = nil
 local _version      = nil
 
+-- Slot exclusions: set kept in sync with config, built at Panel.Init
+local _excludedSlotsSet = {}
+local _slotItems = (function()
+    local t = {}
+    for _, id in ipairs(Upgrade.SLOT_ORDER) do
+        t[#t+1] = { id=id, name=Upgrade.SLOT_NAMES[id] }
+    end
+    return t
+end)()
+
 -- Weapon mode
-local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY' }
+local WEAPONMODES       = { 'DW', '2H', 'SNB', 'ANY', 'always' }
 local WEAPONMODE_LABELS = {
     DW      = 'Dual Wield',
     ['2H']  = 'Two-Handed',
     SNB     = 'Sword and Board',
     ANY     = 'Any / No Restriction',
+    always  = 'Always Keep',
 }
 local _wmIdx = 1
 
@@ -74,6 +87,13 @@ local BUTTON_GOLD = ImVec4(1.0, 0.72, 0.20, 1.0)
 -- bullet entries starting with "  • ". Prepend a new block for each release
 -- (older blocks stay for history) or trim if it gets too long.
 local BUILD_NOTES = [[
+v0.9.1 Beta  —  2026-06-11
+
+  • Auto Equip toggle — upgrade items go to bags instead of equipping immediately (per-character)
+  • Slot Exclusions — exclude specific gear slots from upgrade evaluation (per-character)
+  • Weapon Mode: 'Always Keep' added — keep all wearable gear regardless of stat comparison
+  • Upgrade Evaluator — scan bags for equippable gear and see upgrade verdicts at a glance
+
 v0.9.0 Beta  —  2026-06-10
 
   • Rebranded as ProLoot — renamed from e9loot; /lua run proloot; all /proloot commands
@@ -378,18 +398,20 @@ end
 -----------------------------------------------------------------------
 -- Panel API
 -----------------------------------------------------------------------
-function Panel.Init(config, loot, setup, editor, bankSettings, framework, adapters, channel, version)
+function Panel.Init(config, loot, setup, editor, bankSettings, framework, adapters, channel, version, upgradeEval)
     _config       = config
     _loot         = loot
     _setup        = setup
     _editor       = editor
     _bankSettings = bankSettings
+    _upgradeEval  = upgradeEval
     _framework    = framework
     _adapters     = adapters
     _channel      = channel
     _version      = version
-    _histOpen  = config:Get('HistoryOpen')
-    _wmIdx     = wmIndexOf(config:Get('WeaponMode'))
+    _histOpen     = config:Get('HistoryOpen')
+    _wmIdx        = wmIndexOf(config:Get('WeaponMode'))
+    _excludedSlotsSet = Upgrade.ParseExcludedSlots(config:Get('ExcludedSlots'))
 
     _logoTex = mq.CreateTexture(mq.TLO.Lua.Dir() .. '/proloot/profusion_logo_64x64.png')
 
@@ -420,6 +442,7 @@ function Panel.Render()
         _editor.Render()
         _setup.Render()
         _bankSettings.Render()
+        if _upgradeEval then _upgradeEval.Render() end
         return
     end
 
@@ -674,6 +697,22 @@ function Panel.Render()
                 ImGui.EndTooltip()
             end
 
+            -- Auto Equip
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Auto Equip')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped('When on, upgrade items are equipped immediately on loot. When off, upgrades go into bags for you to equip manually.')
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
+            ImGui.TableNextColumn()
+            local autoEquip = _config:Get('AutoEquipUpgrades')
+            local newAutoEquip, autoEquipChanged = Widgets.Toggle('##autoequip', autoEquip)
+            if autoEquipChanged then _config:SetAndSave('AutoEquipUpgrades', newAutoEquip) end
+
             -- Done Looting
             ImGui.TableNextRow()
             ImGui.TableNextColumn()
@@ -689,6 +728,24 @@ function Panel.Render()
             local announceDone = _config:Get('AnnounceDone')
             local newAnnounceDone, doneChanged = Widgets.Toggle('##announcedone', announceDone)
             if doneChanged then _config:SetAndSave('AnnounceDone', newAnnounceDone) end
+
+            -- Slot Exclusions
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text('Slot Exclusions')
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                ImGui.PushTextWrapPos(280)
+                ImGui.TextWrapped('Exclude specific gear slots from upgrade evaluation. Items in excluded slots will not be replaced during looting.')
+                ImGui.PopTextWrapPos()
+                ImGui.EndTooltip()
+            end
+            ImGui.TableNextColumn()
+            ImGui.SetNextItemWidth(-1)
+            local _, exChanged = Widgets.MultiSelectCombo('##excludedslots', _slotItems, _excludedSlotsSet, 'No exclusions')
+            if exChanged then
+                _config:SetAndSave('ExcludedSlots', Upgrade.SerializeExcludedSlots(_excludedSlotsSet))
+            end
 
             ImGui.EndTable()
         end
@@ -740,6 +797,12 @@ function Panel.Render()
         local bankOpen = _bankSettings.IsOpen()
         if actionButton('Vendor Settings', 115, bankOpen) then
             if bankOpen then _bankSettings.Close() else _bankSettings.Open(_config) end
+        end
+
+        ImGui.Spacing()
+        local evalOpen = _upgradeEval and _upgradeEval.IsOpen()
+        if actionButton('Upgrade Eval', 115, evalOpen) then
+            if evalOpen then _upgradeEval.Close() else _upgradeEval.Open(_config) end
         end
 
         ImGui.Spacing()
@@ -1000,6 +1063,7 @@ function Panel.Render()
     _editor.Render()
     _setup.Render()
     _bankSettings.Render()
+    if _upgradeEval then _upgradeEval.Render() end
 end
 
 return Panel

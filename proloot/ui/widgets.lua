@@ -53,4 +53,33 @@ function Widgets.Toggle(id, value)
     return value, changed
 end
 
+-- Multi-select combo. Opens a dropdown with checkboxes for each item.
+-- items:    array of { id=<any>, name=<string> }
+-- selected: set { [id]=true, ... } — mutated in place
+-- preview:  label shown on the button when nothing is selected
+-- Returns: selected (same table), changed (bool)
+function Widgets.MultiSelectCombo(label, items, selected, preview)
+    local parts = {}
+    for _, it in ipairs(items) do
+        if selected[it.id] then parts[#parts+1] = it.name end
+    end
+    local displayStr = #parts > 0 and table.concat(parts, ', ') or (preview or 'None')
+
+    local changed = false
+    if ImGui.BeginCombo(label, displayStr) then
+        for _, it in ipairs(items) do
+            local wasChecked = selected[it.id] == true
+            local nowChecked = ImGui.Checkbox('##msc' .. tostring(it.id), wasChecked)
+            if nowChecked ~= wasChecked then
+                selected[it.id] = nowChecked or nil
+                changed = true
+            end
+            ImGui.SameLine()
+            ImGui.Text(it.name)
+        end
+        ImGui.EndCombo()
+    end
+    return selected, changed
+end
+
 return Widgets

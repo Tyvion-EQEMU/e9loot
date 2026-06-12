@@ -6,7 +6,7 @@ local imgui  = require('ImGui')
 -- Version block — single source of truth
 local Version = {
     _AppName  = 'ProLoot',
-    _version  = '0.9.0',
+    _version  = '0.9.1',
     _author   = 'Tyvion',
     _buildTag = 'Beta',   -- change to Stable / Dev / RC as needed per branch
 }
@@ -23,6 +23,7 @@ local BankConfirm     = require('proloot.ui.bankconfirm')
 local SellConfirm     = require('proloot.ui.sellconfirm')
 local RestockConfirm  = require('proloot.ui.restockconfirm')
 local BankSettings    = require('proloot.ui.banksettings')
+local UpgradeEval     = require('proloot.ui.upgradeeval')
 local Panel           = require('proloot.ui.panel')
 
 -- Framework adapter map
@@ -87,7 +88,7 @@ Loot.Init(Config, Lists, framework, channel, Restock)
 -- Wire panel (pass lists ref into config for editor access)
 Config._lists = Lists.All()
 
-Panel.Init(Config, Loot, Setup, Editor, BankSettings, framework, FRAMEWORK_ADAPTERS, channel, Version)
+Panel.Init(Config, Loot, Setup, Editor, BankSettings, framework, FRAMEWORK_ADAPTERS, channel, Version, UpgradeEval)
 
 -- Shared state accessed by both the bind handler and the main loop
 local _pendingAutoBank = nil
