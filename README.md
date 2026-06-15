@@ -4,6 +4,8 @@ Automated loot management for EQ EMU servers running MacroQuest. ProLoot handles
 corpse detection, item evaluation, gear upgrades, bank runs, selling vendor trash and provides a filterable group loot history — designed
 to run alongside frameworks like RGMercs, E3, and KissAssist.
 
+<img width="340" height="545" alt="image" src="https://github.com/user-attachments/assets/b002f0fe-5f92-4b8f-ac0b-a533bdfa930d" />
+
 ---
 
 ## Use Cases
