@@ -38,7 +38,6 @@ everything tagged, then consolidates your coins from copper up to platinum autom
 
 **Warning** -- When banking, the script will CONTROL  your mouse, interfering could cause something to fail.
 
-#### Bank Stuff
 <p align="center"><img width="350" alt="BankStuff_Button" src="https://github.com/user-attachments/assets/6c732b3f-db82-4bb2-b573-669387157478" /></p>
 
 #### Bank Stuff (Solo)
@@ -58,6 +57,8 @@ custom or server-specific items that wouldn't score correctly against standard s
 Toggle **Auto Equip** off if you'd rather review upgrades before equiping. When off,
 upgrade items land in your bags with a reason of `upgrade-bagged` in the loot history so
 you can inspect and equip them manually.
+
+<p align="center"><img width="350" alt="Main_Settings" src="https://github.com/user-attachments/assets/edd8c933-0ddd-4462-b64b-892a84fab505" /></p>
 
 ---
 
@@ -91,6 +92,7 @@ you can inspect and equip them manually.
        ├── lists/
        └── adapters/
    ```
+<p align="center".<img width="450" alt="ProLoot_Directory_Structure_Example" src="https://github.com/user-attachments/assets/0f623606-4123-43a0-aecf-314815882dd9" /></p>
 
 ---
 
