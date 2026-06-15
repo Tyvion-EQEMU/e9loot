@@ -1,8 +1,8 @@
 ﻿# ProLoot
 
-Automated loot management for EverQuest EMU servers running MacroQuest2. ProLoot handles
-corpse detection, item evaluation, gear upgrades, bank runs, and loot history — designed
-to run alongside bot frameworks like RGMercs, E3, and KissAssist.
+Automated loot management for EQ EMU servers running MacroQuest. ProLoot handles
+corpse detection, item evaluation, gear upgrades, bank runs, selling vendor trash and provides a filterable group loot history — designed
+to run alongside frameworks like RGMercs, E3, and KissAssist.
 
 ---
 
@@ -13,35 +13,36 @@ Run ProLoot in the background while you grind. It scans for corpses every 5 seco
 walks or warps to them, evaluates every item against your keep/sell/destroy lists and
 gear upgrade logic, and handles the loot window — all without you touching a thing.
 
-### Multi-Toon Boxing with a Bot Framework
-ProLoot integrates with RGMercs, E3, and KissAssist. When a loot sweep starts it pauses
-the framework so bots don't interfere with corpse movement, then resumes when done. A
-single **Shift+Click** on the pause button broadcasts pause or resume to your entire
+### [FUTURE] Multi-Toon Boxing with a Bot Framework
+ProLoot will _soon_ integrate with RGMercs, E3, and KissAssist. When a loot sweep starts it pauses
+the framework so automation doesn't interfere with looting, then resumes when done. 
+
+### Global Command & Control
+A single **Shift+Click** on the pause button broadcasts pause or resume to your entire
 group at once. Loot history from all toons streams into each character's history window
 via DanNet or EQBC.
 
-### EMU Progression Gear Collection
-On Profusion EMU, the **Astrial** and **Deva** lists automatically collect every
-progression-tier item and book page as you kill. When you are ready, `/proloot bankstuff`
+### Profusion Specific Progression
+Collects every progression-tier item and book page for you. When you are ready, `/proloot bankstuff`
 walks you to a banker, shows you everything it found, and deposits it all in one step —
 no bag-sorting required.
 
 ### Bank Runs
 At the end of a session, run `/proloot bankstuff` on each toon. ProLoot auto-targets a
-nearby banker (or navigates to one), shows a confirmation window with item details on
-hover, deposits everything tagged `bank`, `astrial`, or `deva`, then consolidates your
-coins from copper up to platinum automatically.
+nearby banker (or navigates to one), shows a confirmation window with item details and deposits 
+everything tagged, then consolidates your coins from copper up to platinum automatically.
 
-### Gear Upgrading
+**Warning** -- When banking, the script will CONTROL  your mouse, interfering could cause something to fail.
+
+### Gear Upgrades
 Tell ProLoot your weapon style (Dual Wield, Two-Handed, Sword and Board, or Always Keep)
 and it scores every piece of gear it finds against what you have equipped. Items that beat
-your current stats are kept; everything else is sold or left behind based on your Trash
-Price threshold.
+your current stats are kept; everything else is sold or left behind.
 
 Use **Slot Exclusions** to protect specific gear slots from being replaced — useful for
 custom or server-specific items that wouldn't score correctly against standard stat logic.
 
-Toggle **Auto Equip** off if you'd rather review upgrades before committing. When off,
+Toggle **Auto Equip** off if you'd rather review upgrades before equiping. When off,
 upgrade items land in your bags with a reason of `upgrade-bagged` in the loot history so
 you can inspect and equip them manually.
 
@@ -59,8 +60,8 @@ you can inspect and equip them manually.
 
 ## Installation
 
-1. Download or clone this repository.
-2. Copy the `proloot` folder into your MacroQuest `lua` directory:
+1. Download the latest version at https://github.com/Tyvion-EQEMU/ProLoot/releases/latest
+2. Extract & Copy the `proloot` folder into your MacroQuest `lua` directory:
    ```
    <MQ2 install path>\lua\proloot\
    ```
@@ -145,8 +146,7 @@ Run `/proloot bankstuff` to deposit your collected items at a banker.
 1. ProLoot searches for a nearby banker and navigates to them (auto-targets known bankers
    such as Gordon Gekko in Nexus, Banker Ceridan in Plane of Knowledge, or a bank broker
    in the Guild Hall)
-2. A confirmation window lists everything it found in your bags tagged as `bank`, `astrial`,
-   or `deva` — hover any item name for a full tooltip with icon, lore, stats, and value
+2. A confirmation window lists everything it found in your bags tagged — hover any item name for a full tooltip with icon, lore, stats, and value
 3. Click **Bank All** to deposit, **Consolidate Coins** to convert CP/SP/GP → PP only,
    or **Rescan** to refresh the list
 4. After depositing, coins are automatically consolidated (configurable in Bank & Vendor settings)
