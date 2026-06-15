@@ -38,10 +38,11 @@ everything tagged, then consolidates your coins from copper up to platinum autom
 
 **Warning** -- When banking, the script will CONTROL  your mouse, interfering could cause something to fail.
 
+#### Bank Stuff
 <p align="center"><img width="350" alt="BankStuff_Button" src="https://github.com/user-attachments/assets/6c732b3f-db82-4bb2-b573-669387157478" /></p>
-
+#### Bank Stuff (Solo)
 <p align="center"><img width="350" alt="Solo_Bank_Review" src="https://github.com/user-attachments/assets/e247e179-8fff-4a94-85e2-2bca294ee195" /></p>
-
+#### Bank Stuff (Group Review)
 <p align="center"><img width="350" alt="Group_Bank_Review" src="https://github.com/user-attachments/assets/c3f6ad02-3230-4945-982f-1096a800f9db" /></p>
 
 ### Gear Upgrades
