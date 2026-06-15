@@ -4,7 +4,7 @@ Automated loot management for EQ EMU servers running MacroQuest. ProLoot handles
 corpse detection, item evaluation, gear upgrades, bank runs, selling vendor trash and provides a filterable group loot history — designed
 to run alongside frameworks like RGMercs, E3, and KissAssist.
 
-<img width="340" height="545" alt="image" src="https://github.com/user-attachments/assets/b002f0fe-5f92-4b8f-ac0b-a533bdfa930d" />
+<p align="center"><img width="80%" alt="image" src="https://github.com/user-attachments/assets/b002f0fe-5f92-4b8f-ac0b-a533bdfa930d" /></p>
 
 ---
 
@@ -24,7 +24,7 @@ A single **Shift+Click** on the pause button broadcasts pause or resume to your 
 group at once. Loot history from all toons streams into each character's history window
 via DanNet or EQBC.
 
-<p align="center"><img width="316" alt="ProLoot Main Screen" src="https://github.com/user-attachments/assets/ee4d9551-ff46-457b-879d-43687708d484" /></p>
+<p align="center"><img width="316" alt="Pause/Unpause" src="https://github.com/user-attachments/assets/ee4d9551-ff46-457b-879d-43687708d484" /></p>
 
 ### Profusion Specific Progression
 Collects every progression-tier item and book page for you. When you are ready, `/proloot bankstuff`
