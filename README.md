@@ -24,6 +24,8 @@ A single **Shift+Click** on the pause button broadcasts pause or resume to your 
 group at once. Loot history from all toons streams into each character's history window
 via DanNet or EQBC.
 
+<p align="center"><img width="316" alt="ProLoot Main Screen" src="https://github.com/user-attachments/assets/ee4d9551-ff46-457b-879d-43687708d484" /></p>
+
 ### Profusion Specific Progression
 Collects every progression-tier item and book page for you. When you are ready, `/proloot bankstuff`
 walks you to a banker, shows you everything it found, and deposits it all in one step —
